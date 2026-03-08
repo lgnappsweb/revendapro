@@ -199,41 +199,43 @@ export default function CategoriesPage() {
             <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pb-10 w-full">
               {filteredCategories.map((category) => (
                 <Card key={category.id} className="group overflow-hidden rounded-3xl border-primary/20 bg-white w-full shadow-sm hover:border-primary transition-all">
-                  <CardContent className="p-6 flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-4 min-w-0">
-                      <div className="p-3 bg-primary/5 rounded-2xl text-primary">
+                  <CardContent className="p-6 flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-4 min-w-0 flex-1">
+                      <div className="p-3 bg-primary/5 rounded-2xl text-primary shrink-0">
                         <Tag className="h-6 w-6" />
                       </div>
-                      <h3 className="font-bold text-lg leading-tight truncate text-foreground">{category.name}</h3>
+                      <h3 className="font-bold text-lg leading-tight text-foreground break-words pt-1">{category.name}</h3>
                     </div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="rounded-full h-10 w-10">
-                          <MoreVertical className="h-5 w-5" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="rounded-xl w-48">
-                        <DropdownMenuItem 
-                          className="font-bold gap-2 cursor-pointer" 
-                          onSelect={(e) => {
-                            e.preventDefault();
-                            handleEditCategory(category);
-                          }}
-                        >
-                          <Pencil className="h-4 w-4 text-blue-500" /> Editar
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          className="font-bold gap-2 text-rose-600 cursor-pointer" 
-                          onSelect={(e) => {
-                            e.preventDefault();
-                            // Atraso para evitar conflito de foco no fechamento do menu
-                            setTimeout(() => setCategoryToDelete(category), 150);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" /> Excluir
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div className="shrink-0 pt-1">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="rounded-full h-10 w-10">
+                            <MoreVertical className="h-5 w-5" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="rounded-xl w-48">
+                          <DropdownMenuItem 
+                            className="font-bold gap-2 cursor-pointer" 
+                            onSelect={(e) => {
+                              e.preventDefault();
+                              handleEditCategory(category);
+                            }}
+                          >
+                            <Pencil className="h-4 w-4 text-blue-500" /> Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            className="font-bold gap-2 text-rose-600 cursor-pointer" 
+                            onSelect={(e) => {
+                              e.preventDefault();
+                              // Atraso para evitar conflito de foco no fechamento do menu
+                              setTimeout(() => setCategoryToDelete(category), 150);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" /> Excluir
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -285,14 +287,14 @@ export default function CategoriesPage() {
                           key={cat}
                           variant="outline"
                           size="sm"
-                          className="rounded-xl border-primary/20 hover:border-primary hover:bg-primary/5 text-xs font-bold h-10 px-2 justify-start overflow-hidden text-ellipsis whitespace-nowrap"
+                          className="rounded-xl border-primary/20 hover:border-primary hover:bg-primary/5 text-xs font-bold h-10 px-2 justify-start"
                           onClick={() => {
                             setFormData({ ...formData, name: cat });
                             setAccordionValue(undefined); // Fecha o menu ao clicar
                           }}
                         >
                           <Plus className="h-3 w-3 mr-1 shrink-0" />
-                          {cat}
+                          <span className="text-left break-words line-clamp-2">{cat}</span>
                         </Button>
                       ))}
                     </div>
