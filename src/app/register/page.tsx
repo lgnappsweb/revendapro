@@ -68,11 +68,11 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-[#F6F0F2]">
       <div className="w-full max-w-md space-y-8">
-        <div className="text-center space-y-2">
-          <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl primary-gradient text-white shadow-lg mb-4">
-            <Sparkles className="h-9 w-9" />
+        <div className="text-center space-y-2 flex flex-col items-center">
+          <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl primary-gradient text-white shadow-lg mb-4">
+            <Sparkles className="h-10 w-10" />
           </div>
-          <h1 className="text-4xl font-black tracking-tighter text-primary">RevendaPro</h1>
+          <h1 className="text-5xl font-black tracking-tighter text-primary">RevendaPro</h1>
           <p className="text-muted-foreground font-medium">Sua jornada de sucesso começa aqui.</p>
         </div>
 
@@ -131,7 +131,7 @@ export default function RegisterPage() {
             </form>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4 pb-8 border-t bg-muted/10 pt-6">
-            <p className="text-sm font-medium text-muted-foreground">
+            <p className="text-sm font-medium text-muted-foreground text-center">
               Já possui uma conta?{" "}
               <Link href="/login" className="text-primary font-bold hover:underline">
                 Fazer Login
