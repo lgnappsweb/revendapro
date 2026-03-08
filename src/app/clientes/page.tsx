@@ -517,7 +517,7 @@ export default function ClientsPage() {
                       </AvatarFallback>
                     </Avatar>
                   </div>
-                  <DialogTitle className="text-3xl md:text-4xl font-black text-center text-primary leading-tight whitespace-nowrap overflow-hidden text-ellipsis">
+                  <DialogTitle className="text-3xl md:text-4xl font-black text-center text-primary leading-tight">
                     {selectedClientForDetails.name}
                   </DialogTitle>
                   <div className="flex items-center justify-center gap-3">
@@ -544,7 +544,7 @@ export default function ClientsPage() {
                       <MapPin className="h-4 w-4" />
                       <span className="text-[10px] font-black uppercase tracking-wider">Localização</span>
                     </div>
-                    <span className="text-lg font-bold text-foreground truncate">
+                    <span className="text-lg font-bold text-foreground">
                       {selectedClientForDetails.neighborhood || 'S/ Bairro'}
                     </span>
                     <span className="text-xs text-muted-foreground font-medium">

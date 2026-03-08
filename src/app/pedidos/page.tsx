@@ -222,7 +222,7 @@ export default function OrdersPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-white p-5 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-1">
                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Cliente</span>
-                    <span className="text-lg font-bold text-foreground truncate">{selectedOrder.clientName}</span>
+                    <span className="text-lg font-bold text-foreground break-words">{selectedOrder.clientName}</span>
                   </div>
                   <div className="bg-white p-5 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-1">
                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Pagamento</span>
