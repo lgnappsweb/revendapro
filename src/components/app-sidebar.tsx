@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -16,7 +15,8 @@ import {
   BarChart3,
   LogOut,
   Sparkles,
-  PlusCircle
+  PlusCircle,
+  Settings
 } from "lucide-react"
 
 import {
@@ -38,6 +38,7 @@ const mainNav = [
   { title: "Pedidos", href: "/pedidos", icon: ShoppingCart },
   { title: "Financeiro", href: "/financeiro", icon: Receipt },
   { title: "Relatórios", href: "/relatorios", icon: BarChart3 },
+  { title: "Configurações", href: "/configuracoes", icon: Settings },
 ]
 
 export function AppSidebar() {
@@ -107,7 +108,7 @@ export function AppSidebar() {
                 }`}
               >
                 <Link href={item.href}>
-                  <item.icon className="h-5 w-5" />
+                  <item.icon className={cn("h-5 w-5", pathname === item.href ? "text-primary" : "text-primary/70")} />
                   <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
                 </Link>
               </SidebarMenuButton>
@@ -138,7 +139,7 @@ export function AppSidebar() {
               onClick={handleLogout}
               className="rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
             >
-              <LogOut className="h-5 w-5" />
+              <LogOut className="h-5 w-5 text-destructive" />
               <span className="group-data-[collapsible=icon]:hidden font-medium">Sair</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
