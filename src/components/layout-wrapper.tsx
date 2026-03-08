@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useEffect, useState } from "react"
@@ -57,11 +56,6 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
 
   const isPublicPage = pathname === "/login" || pathname === "/register"
 
-  const userDocRef = useMemoFirebase(() => {
-    if (!user) return null
-    return doc(db, "users", user.uid)
-  }, [user, db])
-
   const adminDocRef = useMemoFirebase(() => {
     if (!user) return null
     return doc(db, "admins", user.uid)
@@ -69,7 +63,6 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
 
   const settingsRef = useMemoFirebase(() => doc(db, "settings", "global"), [db])
   const { data: settings } = useDoc(settingsRef)
-
   const { data: adminRecord, isLoading: isAdminLoading } = useDoc(adminDocRef)
 
   useEffect(() => {
@@ -93,11 +86,9 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     }
   }, [user, isUserLoading, isAdminLoading, adminRecord, isPublicPage, router, db, isRepairing])
 
-  // Apply Theme and Dark Mode
   useEffect(() => {
     const root = document.documentElement;
     if (settings) {
-      // Apply primary color
       let primaryColorValue = COLOR_THEMES.default;
       const themeId = settings.themeId || "default";
 
@@ -109,19 +100,16 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       
       root.style.setProperty('--primary', primaryColorValue);
 
-      // Apply background color if not in dark mode
-      if (settings.customBgColor && !settings.darkMode) {
-        root.style.setProperty('--background', hexToHsl(settings.customBgColor));
-      } else if (!settings.darkMode) {
-        root.style.setProperty('--background', "340 20% 95%"); // Default HSL background
-      }
-      
-      // Apply dark mode
       if (settings.darkMode) {
         root.classList.add('dark');
-        root.style.setProperty('--background', "222.2 84% 4.9%"); // Shadcn dark background
+        root.style.removeProperty('--background');
       } else {
         root.classList.remove('dark');
+        if (settings.customBgColor) {
+          root.style.setProperty('--background', hexToHsl(settings.customBgColor));
+        } else {
+          root.style.setProperty('--background', "340 20% 95%");
+        }
       }
     }
   }, [settings])
@@ -130,14 +118,12 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     return (
       <div className="flex h-screen w-screen flex-col items-center justify-center bg-background gap-4">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
-        <p className="font-bold text-muted-foreground animate-pulse">Verificando credenciais...</p>
+        <p className="font-black text-muted-foreground animate-pulse uppercase tracking-widest text-xs">RevendaPro</p>
       </div>
     )
   }
 
-  if (!user && !isPublicPage) {
-    return null
-  }
+  if (!user && !isPublicPage) return null
 
   if (isPublicPage) {
     return (
@@ -156,14 +142,14 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       </div>
       <SidebarInset className="bg-transparent flex-1 w-full overflow-x-hidden">
         <main className="p-2 sm:p-4 md:p-6 lg:p-8 flex justify-center pb-24 md:pb-8 w-full">
-          <div className="w-full max-w-[95vw] md:max-w-[1600px] relative border-2 border-primary rounded-[2rem] sm:rounded-[3rem] bg-white dark:bg-slate-900 shadow-sm p-3 sm:p-6 md:p-10 min-h-[calc(100vh-4rem)] flex flex-col gap-6 overflow-hidden">
+          <div className="w-full max-w-[1600px] relative border-2 border-primary/20 dark:border-primary/40 rounded-[2rem] sm:rounded-[3rem] bg-card dark:bg-card shadow-sm p-3 sm:p-6 md:p-10 min-h-[calc(100vh-4rem)] flex flex-col gap-6 overflow-hidden">
             {pathname !== "/" && (
               <div className="flex items-start shrink-0">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => router.push("/")}
-                  className="rounded-xl border-primary text-primary bg-white dark:bg-slate-800 hover:bg-primary/5 font-bold h-10 px-4 shadow-sm transition-all active:scale-95"
+                  className="rounded-xl border-primary text-primary bg-card hover:bg-primary/5 font-bold h-10 px-4 shadow-sm transition-all active:scale-95"
                 >
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Voltar
