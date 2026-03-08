@@ -34,7 +34,10 @@ import {
   Minus,
   Percent,
   TrendingUp,
-  ChevronRight
+  ChevronRight,
+  UserCheck,
+  PackageCheck,
+  Wallet
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
@@ -60,7 +63,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { cn } from "@/lib/utils"
 
 interface CartItem {
   id: string
@@ -314,18 +318,55 @@ export default function NewSalePage() {
             </Card>
 
             <Card className="shadow-sm rounded-[2.5rem] overflow-hidden border-primary/20 bg-primary/5 border-dashed">
-              <CardContent className="p-8 flex items-center gap-6">
-                <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <CheckCircle2 className="h-8 w-8 text-primary" />
+              <CardHeader className="px-8 pt-8 pb-2">
+                <CardTitle className="text-lg font-black text-primary uppercase tracking-tight flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5" /> Check-in do Pedido
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-8 pt-4 space-y-4">
+                <div className="flex items-center gap-4">
+                  <div className={cn(
+                    "h-10 w-10 rounded-2xl flex items-center justify-center shrink-0 transition-all duration-500",
+                    selectedClientId ? "bg-emerald-500 text-white shadow-lg shadow-emerald-200" : "bg-primary/10 text-primary"
+                  )}>
+                    {selectedClientId ? <UserCheck className="h-6 w-6" /> : <div className="font-black">1</div>}
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Cliente</span>
+                    <span className={cn("text-base font-bold truncate", selectedClientId ? "text-foreground" : "text-muted-foreground italic")}>
+                      {selectedClientId ? selectedClientName : "Aguardando seleção..."}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex flex-col">
-                  <h3 className="text-lg font-black text-primary uppercase tracking-tight">Check-in do Pedido</h3>
-                  <p className="text-sm text-muted-foreground font-medium">
-                    {items.length === 0 
-                      ? "Aguardando adição de produtos para confirmar os dados da venda." 
-                      : `Você está registrando um pedido de ${totalItemsCount} ${totalItemsCount === 1 ? 'item' : 'itens'} para ${selectedClientId ? selectedClientName : 'o cliente selecionado'}.`
-                    }
-                  </p>
+                
+                <div className="flex items-center gap-4">
+                  <div className={cn(
+                    "h-10 w-10 rounded-2xl flex items-center justify-center shrink-0 transition-all duration-500",
+                    items.length > 0 ? "bg-emerald-500 text-white shadow-lg shadow-emerald-200" : "bg-primary/10 text-primary"
+                  )}>
+                    {items.length > 0 ? <PackageCheck className="h-6 w-6" /> : <div className="font-black">2</div>}
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Produtos</span>
+                    <span className={cn("text-base font-bold truncate", items.length > 0 ? "text-foreground" : "text-muted-foreground italic")}>
+                      {items.length > 0 ? `${totalItemsCount} ${totalItemsCount === 1 ? 'item' : 'itens'} no carrinho` : "Aguardando produtos..."}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className={cn(
+                    "h-10 w-10 rounded-2xl flex items-center justify-center shrink-0 transition-all duration-500",
+                    paymentMethod ? "bg-emerald-500 text-white shadow-lg shadow-emerald-200" : "bg-primary/10 text-primary"
+                  )}>
+                    {paymentMethod ? <Wallet className="h-6 w-6" /> : <div className="font-black">3</div>}
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Forma de Pagamento</span>
+                    <span className={cn("text-base font-bold truncate uppercase", paymentMethod ? "text-foreground" : "text-muted-foreground italic")}>
+                      {paymentMethod ? paymentMethod : "Aguardando definição..."}
+                    </span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
