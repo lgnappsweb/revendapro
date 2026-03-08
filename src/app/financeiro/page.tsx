@@ -20,7 +20,7 @@ import {
   ChevronDown
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
+import { useFirestore, useCollection, useMemoFirebase, useUser } from "@/firebase"
 import { collection, query, orderBy } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { format, isSameDay, isSameMonth, isSameYear, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns"
@@ -51,6 +51,7 @@ import jsPDF from "jspdf"
 import "jspdf-autotable"
 
 export default function FinancePage() {
+  const { user } = useUser()
   const [selectedPeriod, setSelectedPeriod] = useState("hoje")
   const [currentDate, setCurrentDate] = useState<Date | null>(null)
   const [isExporting, setIsExporting] = useState(false)
@@ -61,7 +62,10 @@ export default function FinancePage() {
     setCurrentDate(new Date())
   }, [])
 
-  const ordersRef = useMemoFirebase(() => query(collection(db, "orders"), orderBy("createdAt", "desc")), [db])
+  const ordersRef = useMemoFirebase(() => {
+    if (!user) return null
+    return query(collection(db, "orders"), orderBy("createdAt", "desc"))
+  }, [db, user])
   const { data: orders, isLoading } = useCollection(ordersRef)
 
   const todayLabel = useMemo(() => {

@@ -30,22 +30,29 @@ import {
 } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
-import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
+import { useFirestore, useCollection, useMemoFirebase, useUser } from "@/firebase"
 import { collection, query, orderBy, limit } from "firebase/firestore"
 
 export default function Dashboard() {
+  const { user } = useUser()
   const db = useFirestore()
 
-  const ordersRef = useMemoFirebase(() => collection(db, "orders"), [db])
+  const ordersRef = useMemoFirebase(() => {
+    if (!user) return null
+    return collection(db, "orders")
+  }, [db, user])
   const { data: allOrders } = useCollection(ordersRef)
 
-  const recentOrdersRef = useMemoFirebase(() => 
-    query(collection(db, "orders"), orderBy("createdAt", "desc"), limit(5)), 
-    [db]
-  )
+  const recentOrdersRef = useMemoFirebase(() => {
+    if (!user) return null
+    return query(collection(db, "orders"), orderBy("createdAt", "desc"), limit(5))
+  }, [db, user])
   const { data: recentOrders, isLoading: loadingOrders } = useCollection(recentOrdersRef)
 
-  const clientsRef = useMemoFirebase(() => collection(db, "clients"), [db])
+  const clientsRef = useMemoFirebase(() => {
+    if (!user) return null
+    return collection(db, "clients")
+  }, [db, user])
   const { data: clients } = useCollection(clientsRef)
 
   const totalSales = allOrders?.reduce((acc, o) => acc + (o.finalTotal || 0), 0) || 0

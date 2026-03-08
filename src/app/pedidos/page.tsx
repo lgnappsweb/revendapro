@@ -38,7 +38,7 @@ import {
   Save,
   DollarSign
 } from "lucide-react"
-import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
+import { useFirestore, useCollection, useMemoFirebase, useUser } from "@/firebase"
 import { collection, query, orderBy, doc, deleteDoc, updateDoc, serverTimestamp } from "firebase/firestore"
 import { 
   Dialog, 
@@ -76,6 +76,7 @@ import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 
 export default function OrdersPage() {
+  const { user } = useUser()
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedOrder, setSelectedOrder] = useState<any>(null)
   const [orderToDelete, setOrderToDelete] = useState<any>(null)
@@ -86,10 +87,10 @@ export default function OrdersPage() {
   const db = useFirestore()
   const { toast } = useToast()
 
-  const ordersRef = useMemoFirebase(() => 
-    query(collection(db, "orders"), orderBy("createdAt", "desc")), 
-    [db]
-  )
+  const ordersRef = useMemoFirebase(() => {
+    if (!user) return null
+    return query(collection(db, "orders"), orderBy("createdAt", "desc"))
+  }, [db, user])
   const { data: orders, isLoading } = useCollection(ordersRef)
 
   const [editFormData, setEditFormData] = useState({
@@ -139,7 +140,6 @@ export default function OrdersPage() {
       updateData.createdAt = new Date(editFormData.date)
     }
 
-    // Mutação não-bloqueante (sem await)
     updateDoc(docRef, updateData)
       .then(() => {
         toast({ title: "Pedido atualizado!" })
@@ -162,7 +162,6 @@ export default function OrdersPage() {
     setIsDeleting(true)
     
     const docRef = doc(db, "orders", orderToDelete.id)
-    // Mutação não-bloqueante (sem await)
     deleteDoc(docRef)
       .then(() => {
         toast({ title: "Pedido removido com sucesso" })
