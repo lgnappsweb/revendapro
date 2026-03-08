@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -56,17 +57,11 @@ import {
   SelectValue 
 } from "@/components/ui/select"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
-import { collection, serverTimestamp, addDoc, doc, updateDoc, deleteDoc } from "firebase/firestore"
+import { collection, serverTimestamp, addDoc, doc, updateDoc, deleteDoc, query, orderBy } from "firebase/firestore"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 import { useToast } from "@/hooks/use-toast"
 import { Separator } from "@/components/ui/separator"
-
-const PRODUCT_CATEGORIES = [
-  "Perfumaria", "Maquiagem", "Rosto", "Corpo", "Cabelos", "Cuidados Diários",
-  "Desodorantes", "Sabonetes", "Infantil", "Masculino", "Moda e Casa",
-  "Promoções", "Kits e Presentes"
-]
 
 export default function ProductsPage() {
   const [activeTab, setActiveTab] = useState("todos")
@@ -81,7 +76,10 @@ export default function ProductsPage() {
   const { toast } = useToast()
 
   const productsRef = useMemoFirebase(() => collection(db, "products"), [db])
-  const { data: products, isLoading } = useCollection(productsRef)
+  const { data: products, isLoading: isLoadingProducts } = useCollection(productsRef)
+
+  const categoriesRef = useMemoFirebase(() => query(collection(db, "categories"), orderBy("name", "asc")), [db])
+  const { data: categories, isLoading: isLoadingCategories } = useCollection(categoriesRef)
 
   const [formData, setFormData] = useState({
     name: "", brand: "Natura", category: "", price: "", cost: "", code: "", description: ""
@@ -132,12 +130,17 @@ export default function ProductsPage() {
 
   const handleSaveProduct = () => {
     if (!formData.name || !formData.price || !formData.category) {
-      toast({ title: "Campos obrigatórios", variant: "destructive" })
+      toast({ title: "Campos obrigatórios (Nome, Preço e Categoria)", variant: "destructive" })
       return
     }
     setIsSaving(true)
     const parseCurrencyToNumber = (val: string) => val ? parseFloat(val.replace(/\./g, '').replace(',', '.')) : 0;
-    const productData = { ...formData, price: parseCurrencyToNumber(formData.price), cost: formData.cost ? parseCurrencyToNumber(formData.cost) : 0, updatedAt: serverTimestamp() }
+    const productData = { 
+      ...formData, 
+      price: parseCurrencyToNumber(formData.price), 
+      cost: formData.cost ? parseCurrencyToNumber(formData.cost) : 0, 
+      updatedAt: serverTimestamp() 
+    }
 
     if (editingProductId) {
       const docRef = doc(db, "products", editingProductId)
@@ -188,7 +191,7 @@ export default function ProductsPage() {
         </div>
 
         <div className="w-full overflow-x-hidden px-1">
-          {isLoading ? (
+          {isLoadingProducts ? (
             <div className="flex flex-col items-center justify-center py-20"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>
           ) : filteredProducts.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-white rounded-3xl border border-dashed border-primary/30">
@@ -223,7 +226,6 @@ export default function ProductsPage() {
         </div>
       </div>
       
-      {/* Product Details Dialog */}
       <Dialog open={!!selectedProduct} onOpenChange={(open) => !open && setSelectedProduct(null)}>
         <DialogContent className="sm:max-w-[500px] w-[95vw] rounded-3xl border-primary overflow-hidden p-0 flex flex-col max-h-[90vh]">
           {selectedProduct && (
@@ -311,7 +313,6 @@ export default function ProductsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* New/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[500px] w-[95vw] rounded-3xl border-primary max-h-[90vh] flex flex-col p-0 overflow-hidden">
           <div className="p-8 border-b bg-white">
@@ -350,12 +351,15 @@ export default function ProductsPage() {
                   <Label className="font-bold text-muted-foreground">Categoria</Label>
                   <Select value={formData.category} onValueChange={v => setFormData({...formData, category: v})}>
                     <SelectTrigger className="rounded-xl border-primary/30 h-11 bg-white">
-                      <SelectValue placeholder="Selecione..." />
+                      <SelectValue placeholder={isLoadingCategories ? "Carregando..." : "Selecione..."} />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl">
-                      {PRODUCT_CATEGORIES.map(cat => (
-                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      {categories?.map(cat => (
+                        <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
                       ))}
+                      {(!categories || categories.length === 0) && (
+                        <SelectItem value="none" disabled>Nenhuma categoria cadastrada</SelectItem>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>

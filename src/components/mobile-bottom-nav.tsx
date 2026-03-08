@@ -12,7 +12,8 @@ import {
   Receipt,
   PlusCircle,
   Plus,
-  Settings
+  Settings,
+  Layers
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
@@ -29,6 +30,7 @@ const mainItems = [
 ]
 
 const moreItems = [
+  { title: "Categorias", href: "/categorias", icon: Layers },
   { title: "Produtos", href: "/produtos", icon: Package },
   { title: "Pedidos", href: "/pedidos", icon: ShoppingCart },
   { title: "Financeiro", href: "/financeiro", icon: Receipt },

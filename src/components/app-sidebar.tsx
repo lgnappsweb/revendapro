@@ -16,7 +16,8 @@ import {
   LogOut,
   Sparkles,
   PlusCircle,
-  Settings
+  Settings,
+  Layers
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -35,6 +36,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 const mainNav = [
   { title: "Início", href: "/", icon: LayoutDashboard },
   { title: "Clientes", href: "/clientes", icon: Users },
+  { title: "Categorias", href: "/categorias", icon: Layers },
   { title: "Produtos", href: "/produtos", icon: Package },
   { title: "Pedidos", href: "/pedidos", icon: ShoppingCart },
   { title: "Financeiro", href: "/financeiro", icon: Receipt },

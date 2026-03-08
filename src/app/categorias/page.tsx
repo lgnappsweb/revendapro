@@ -1,0 +1,228 @@
+
+"use client"
+
+import { useState } from "react"
+import { LayoutWrapper } from "@/components/layout-wrapper"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { 
+  Plus, 
+  Search, 
+  Layers, 
+  MoreVertical,
+  Loader2,
+  Trash2,
+  Pencil,
+  Tag
+} from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle 
+} from "@/components/ui/dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { Label } from "@/components/ui/label"
+import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
+import { collection, serverTimestamp, addDoc, doc, updateDoc, deleteDoc, query, orderBy } from "firebase/firestore"
+import { errorEmitter } from "@/firebase/error-emitter"
+import { FirestorePermissionError } from "@/firebase/errors"
+import { useToast } from "@/hooks/use-toast"
+
+export default function CategoriesPage() {
+  const [searchTerm, setSearchTerm] = useState("")
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [categoryToDelete, setCategoryToDelete] = useState<any>(null)
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)
+  
+  const db = useFirestore()
+  const { toast } = useToast()
+
+  const categoriesRef = useMemoFirebase(() => query(collection(db, "categories"), orderBy("name", "asc")), [db])
+  const { data: categories, isLoading } = useCollection(categoriesRef)
+
+  const [formData, setFormData] = useState({ name: "" })
+
+  const handleOpenNewCategory = () => {
+    setEditingCategoryId(null)
+    setFormData({ name: "" })
+    setIsDialogOpen(true)
+  }
+
+  const handleEditCategory = (category: any) => {
+    setEditingCategoryId(category.id)
+    setFormData({ name: category.name || "" })
+    setIsDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = () => {
+    if (!categoryToDelete) return
+    const docRef = doc(db, "categories", categoryToDelete.id)
+    deleteDoc(docRef)
+      .then(() => toast({ title: "Categoria removida" }))
+      .catch(async () => errorEmitter.emit('permission-error', new FirestorePermissionError({ path: docRef.path, operation: 'delete' })))
+    setCategoryToDelete(null)
+  }
+
+  const handleSaveCategory = () => {
+    if (!formData.name) {
+      toast({ title: "Nome da categoria é obrigatório", variant: "destructive" })
+      return
+    }
+    setIsSaving(true)
+    const categoryData = { name: formData.name, updatedAt: serverTimestamp() }
+
+    if (editingCategoryId) {
+      const docRef = doc(db, "categories", editingCategoryId)
+      updateDoc(docRef, categoryData)
+        .then(() => { 
+          toast({ title: "Categoria atualizada!" }); 
+          setIsDialogOpen(false); 
+        })
+        .finally(() => setIsSaving(false))
+    } else {
+      addDoc(collection(db, "categories"), { ...categoryData, createdAt: serverTimestamp() })
+        .then(() => { 
+          toast({ title: "Categoria salva!" }); 
+          setIsDialogOpen(false); 
+        })
+        .finally(() => setIsSaving(false))
+    }
+  }
+
+  const filteredCategories = categories?.filter(c => 
+    (c.name || "").toLowerCase().includes(searchTerm.toLowerCase())
+  ) || []
+
+  return (
+    <LayoutWrapper>
+      <div className="flex flex-col gap-10 pt-12 w-full max-w-full overflow-x-hidden">
+        <div className="flex flex-col gap-8 items-center text-center">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-primary text-center break-words w-full px-2 uppercase">
+              Categorias
+            </h1>
+            <p className="text-muted-foreground font-medium text-lg text-center">Organize seus produtos por categorias personalizadas.</p>
+          </div>
+          <Button onClick={handleOpenNewCategory} className="w-full max-w-md rounded-2xl font-bold bg-primary hover:bg-primary/90 shadow-lg h-14 text-lg">
+            <Plus className="mr-2 h-6 w-6" /> Nova Categoria
+          </Button>
+        </div>
+
+        <div className="relative w-full px-1">
+          <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+          <Input 
+            placeholder="Buscar categoria..." 
+            className="h-14 pl-12 rounded-2xl border border-primary/30 shadow-sm bg-white text-base focus-visible:ring-primary/20"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+        <div className="w-full overflow-x-hidden px-1">
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-20"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>
+          ) : filteredCategories.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-white rounded-3xl border border-dashed border-primary/30">
+              <Layers className="h-16 w-16 text-primary/20 mb-4" />
+              <p className="text-muted-foreground font-medium">Nenhuma categoria encontrada.</p>
+            </div>
+          ) : (
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pb-10 w-full">
+              {filteredCategories.map((category) => (
+                <Card key={category.id} className="group overflow-hidden rounded-3xl border-primary/20 bg-white w-full shadow-sm hover:border-primary transition-all">
+                  <CardContent className="p-6 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4 min-w-0">
+                      <div className="p-3 bg-primary/5 rounded-2xl text-primary">
+                        <Tag className="h-6 w-6" />
+                      </div>
+                      <h3 className="font-bold text-lg leading-tight truncate text-foreground">{category.name}</h3>
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="rounded-full h-10 w-10">
+                          <MoreVertical className="h-5 w-5" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="rounded-xl w-48">
+                        <DropdownMenuItem className="font-bold gap-2" onSelect={() => handleEditCategory(category)}>
+                          <Pencil className="h-4 w-4 text-blue-500" /> Editar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="font-bold gap-2 text-rose-600" onSelect={() => setCategoryToDelete(category)}>
+                          <Trash2 className="h-4 w-4" /> Excluir
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[450px] w-[95vw] rounded-3xl border-primary max-h-[90vh] flex flex-col p-0 overflow-hidden">
+          <div className="p-8 border-b bg-white">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-black text-primary text-center uppercase tracking-tight">
+                {editingCategoryId ? "Editar Categoria" : "Nova Categoria"}
+              </DialogTitle>
+            </DialogHeader>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto px-6 py-8 bg-[#FDFBFB]">
+            <div className="grid gap-6">
+              <div className="grid gap-2">
+                <Label className="font-bold text-muted-foreground ml-1">Nome da Categoria</Label>
+                <Input 
+                  value={formData.name}
+                  onChange={e => setFormData({...formData, name: e.target.value})}
+                  placeholder="Ex: Perfumaria, Maquiagem..." 
+                  className="rounded-xl border-primary/30 h-12 bg-white text-lg font-medium" 
+                />
+              </div>
+              <Button onClick={handleSaveCategory} disabled={isSaving} className="w-full rounded-xl font-bold h-14 text-lg primary-gradient shadow-lg mt-4">
+                {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : "Salvar Categoria"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={!!categoryToDelete} onOpenChange={o => !o && setCategoryToDelete(null)}>
+        <AlertDialogContent className="rounded-3xl border-primary">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-2xl font-black text-primary">Excluir Categoria?</AlertDialogTitle>
+            <AlertDialogDescription className="font-medium text-lg text-muted-foreground">
+              Tem certeza que deseja remover <b className="text-foreground">{categoryToDelete?.name}</b>?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl font-bold">Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="rounded-xl font-bold bg-rose-600 hover:bg-rose-700">
+              Confirmar Exclusão
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </LayoutWrapper>
+  )
+}

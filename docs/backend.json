@@ -30,6 +30,17 @@
       },
       "required": ["id", "name", "phone", "createdAt"]
     },
+    "Category": {
+      "title": "Category",
+      "description": "Categorias de produtos para organização do catálogo.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "createdAt"]
+    },
     "Product": {
       "title": "Product",
       "description": "Catálogo de produtos (Avon, Natura, etc).",
@@ -98,6 +109,10 @@
     "/clients/{clientId}": {
       "schema": "Client",
       "description": "Registro de clientes."
+    },
+    "/categories/{categoryId}": {
+      "schema": "Category",
+      "description": "Coleção de categorias de produtos."
     },
     "/products/{productId}": {
       "schema": "Product",
