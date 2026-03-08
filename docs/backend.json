@@ -1,0 +1,374 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents an administrator user account with authentication details and access roles. Passwords are not stored here, relying on an external authentication system like Firebase Authentication.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the User entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The full name of the user."
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the user, used for login.",
+          "format": "email"
+        },
+        "role": {
+          "type": "string",
+          "description": "The role of the user, determining their access level.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the user account was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "email",
+        "role",
+        "createdAt"
+      ]
+    },
+    "Client": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Client",
+      "type": "object",
+      "description": "Represents a customer of the reseller, including contact and address details, along with creation metadata.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Client entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The full name of the client."
+        },
+        "phone": {
+          "type": "string",
+          "description": "The client's phone number, typically for WhatsApp contact."
+        },
+        "address": {
+          "type": "string",
+          "description": "The street address of the client."
+        },
+        "neighborhood": {
+          "type": "string",
+          "description": "The neighborhood where the client resides."
+        },
+        "city": {
+          "type": "string",
+          "description": "The city where the client resides."
+        },
+        "observations": {
+          "type": "string",
+          "description": "Any additional notes or observations about the client."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the client record was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "phone",
+        "createdAt"
+      ]
+    },
+    "Product": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Product",
+      "type": "object",
+      "description": "Represents a product sold by the reseller, including details like brand, category, pricing, and image URL.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Product entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the product."
+        },
+        "brand": {
+          "type": "string",
+          "description": "The brand of the product (e.g., Avon, Natura, Outro).",
+          "items": {
+            "type": "string"
+          }
+        },
+        "category": {
+          "type": "string",
+          "description": "The category the product belongs to (e.g., perfume, makeup, cream)."
+        },
+        "sellingPrice": {
+          "type": "number",
+          "description": "The price at which the product is sold."
+        },
+        "costPrice": {
+          "type": "number",
+          "description": "The cost price of the product to the reseller (optional)."
+        },
+        "productCode": {
+          "type": "string",
+          "description": "An optional unique code for the product."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the product (optional)."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL to the product's image stored in Firebase Storage (optional).",
+          "format": "uri"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the product record was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "brand",
+        "category",
+        "sellingPrice",
+        "createdAt"
+      ]
+    },
+    "Order": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Order",
+      "type": "object",
+      "description": "Represents a single sales transaction, detailing the client, payment, and overall financial aspects.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Order entity."
+        },
+        "clientId": {
+          "type": "string",
+          "description": "Reference to the Client who made the purchase. (Relationship: Client 1:N Order)"
+        },
+        "clientName": {
+          "type": "string",
+          "description": "Denormalized client name for quick display without needing a join."
+        },
+        "orderItemIds": {
+          "type": "array",
+          "description": "References to the OrderItem entities associated with this order. (Relationship: Order 1:N OrderItem)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "totalAmount": {
+          "type": "number",
+          "description": "The sum of all product subtotals in the order before any discounts or additional fees."
+        },
+        "discount": {
+          "type": "number",
+          "description": "The total discount applied to the order."
+        },
+        "additionalFee": {
+          "type": "number",
+          "description": "Any additional fees added to the order (e.g., delivery fee)."
+        },
+        "finalAmount": {
+          "type": "number",
+          "description": "The final amount the client needs to pay after applying discounts and additional fees."
+        },
+        "paymentMethod": {
+          "type": "string",
+          "description": "The method used for payment (e.g., Dinheiro, Pix, Cartão, Transferência, Fiado / Prazo).",
+          "items": {
+            "type": "string"
+          }
+        },
+        "paymentStatus": {
+          "type": "string",
+          "description": "The current status of the payment (e.g., Pago, Pendente, Atrasado).",
+          "items": {
+            "type": "string"
+          }
+        },
+        "dueDate": {
+          "type": "string",
+          "description": "The due date for payment, applicable if the payment method is 'Fiado / Prazo'.",
+          "format": "date-time"
+        },
+        "observations": {
+          "type": "string",
+          "description": "Any additional notes or observations regarding the order (optional)."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the order was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "clientId",
+        "clientName",
+        "orderItemIds",
+        "totalAmount",
+        "finalAmount",
+        "paymentMethod",
+        "paymentStatus",
+        "createdAt"
+      ]
+    },
+    "OrderItem": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "OrderItem",
+      "type": "object",
+      "description": "Represents a specific product and its details as part of an order. Each item in an order is an OrderItem.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the OrderItem entity."
+        },
+        "orderId": {
+          "type": "string",
+          "description": "Reference to the Order this item belongs to. (Relationship: Order 1:N OrderItem)"
+        },
+        "productId": {
+          "type": "string",
+          "description": "Reference to the Product being sold. (Relationship: Product 1:N OrderItem)"
+        },
+        "productName": {
+          "type": "string",
+          "description": "Denormalized product name for quick display without needing a join."
+        },
+        "quantity": {
+          "type": "number",
+          "description": "The quantity of the product in this order item."
+        },
+        "unitPrice": {
+          "type": "number",
+          "description": "The selling price of a single unit of the product at the time of sale."
+        },
+        "subtotal": {
+          "type": "number",
+          "description": "The calculated subtotal for this order item (quantity * unitPrice)."
+        }
+      },
+      "required": [
+        "id",
+        "orderId",
+        "productId",
+        "productName",
+        "quantity",
+        "unitPrice",
+        "subtotal"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profile information, primarily for the administrator. The 'role' field within this document is for application logic/display, not for direct Firestore security rule enforcement."
+        }
+      },
+      {
+        "path": "/admins/{adminId}",
+        "definition": {
+          "entityName": "AdminRole",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Crucial for authorization independence. The existence of a document in this collection signifies that the corresponding 'adminId' (which matches 'request.auth.uid') holds the 'admin' role. This allows for atomic and efficient role checks in security rules without 'get()' operations. Includes denormalized 'createdAt' (optional)."
+        }
+      },
+      {
+        "path": "/clients/{clientId}",
+        "definition": {
+          "entityName": "Client",
+          "schema": {
+            "$ref": "#/backend/entities/Client"
+          },
+          "description": "Stores all client records for the reseller. Access is restricted to authenticated administrators only.",
+          "params": [
+            {
+              "name": "clientId",
+              "description": "The unique identifier for a client."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/products/{productId}",
+        "definition": {
+          "entityName": "Product",
+          "schema": {
+            "$ref": "#/backend/entities/Product"
+          },
+          "description": "Stores all product details managed by the reseller. Access is restricted to authenticated administrators only.",
+          "params": [
+            {
+              "name": "productId",
+              "description": "The unique identifier for a product."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/orders/{orderId}",
+        "definition": {
+          "entityName": "Order",
+          "schema": {
+            "$ref": "#/backend/entities/Order"
+          },
+          "description": "Stores high-level order information. Includes denormalized 'clientName' for display and 'orderItemIds' to reference associated order items. Access is restricted to authenticated administrators only.",
+          "params": [
+            {
+              "name": "orderId",
+              "description": "The unique identifier for an order."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/order_items/{orderItemId}",
+        "definition": {
+          "entityName": "OrderItem",
+          "schema": {
+            "$ref": "#/backend/entities/OrderItem"
+          },
+          "description": "Stores individual product items within an order. Each document contains an 'orderId' to link back to its parent order and denormalized 'productName'. Access is restricted to authenticated administrators only.",
+          "params": [
+            {
+              "name": "orderItemId",
+              "description": "The unique identifier for an order item."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The recommended Firestore structure is designed to strictly adhere to the CORE DESIGN PRINCIPLES, especially Authorization Independence, Clarity of Intent, DBAC, and QAPs, tailored for a single-admin application.\n\n**Authorization Independence via Denormalization and Structural Segregation:**\n\n1.  **Dedicated Admin Role Collection:** The most critical aspect is the `admins` collection (`/admins/{adminId}`). This collection holds documents whose existence alone signifies that the `adminId` (which maps directly to `request.auth.uid`) is an administrator. This completely eliminates the need for `get()` calls in security rules to check a user's role from their `users` profile document. Instead, rules can use an efficient `exists(/databases/$(database)/documents/admins/$(request.auth.uid))` check, ensuring all operations (including atomic transactions and batched writes) remain independent of a document read for authorization.\n2.  **Homogeneous Security Posture:** All primary data collections (`clients`, `products`, `orders`, `order_items`) share the exact same security requirement: only an authenticated and authorized administrator can perform read and write operations. This segregation prevents mixing data with different access needs, simplifying security rules to a single, consistent `allow read, write: if isAuthenticated() && isAdmin();` pattern.\n\n**Support for QAPs (Queries as Permissions):**\n\n1.  **Admin-Only Access:** Given that the application is explicitly designed for a single administrator (or a small, homogeneous group of administrators with identical full access), the concept of different users having different permissions on the *same data* does not apply. All data is accessible to the administrator if they are authenticated and authorized.\n2.  **No Server-Side Filtering by Rules:** Because the security rules only check the user's identity and global role, they do not introduce any implicit server-side filtering based on document content (e.g., `allow read: if resource.data.ownerId == request.auth.uid`). Any `list` query issued by an authorized administrator will return all documents matching the query's filters, fully satisfying QAPs. The database does not act as an authorization filter for different users, as there is only one user persona with full access.\n\n**Structural Design Details:**\n\n*   **User Profiles (`/users/{userId}`):** Stores the administrator's profile information (name, email, creation date). The `role` field within this document is for application display purposes, not for rule enforcement.\n*   **Client Data (`/clients/{clientId}`):** Stores client records. `createdAt` ensures invariants.\n*   **Product Catalog (`/products/{productId}`):** Stores product details. `createdAt` ensures invariants. Image URLs are handled via Firebase Storage with corresponding admin-only rules.\n*   **Orders (`/orders/{orderId}`):** Stores core order information, including denormalized `clientName` and `orderItemIds` for efficient display and data integrity. `createdAt`, `paymentStatus`, and `dueDate` are critical for financial tracking.\n*   **Order Items (`/order_items/{orderItemId}`):** Stored as a top-level collection as explicitly requested, with `orderId` linking back to the parent order. This structure, combined with denormalized `productName`, simplifies retrieval of item details.\n\nThis structure prioritizes security and maintainability, ensuring that rules are easy to write, understand, and debug, while supporting the application's core requirement of exclusive administrator access."
+  }
+}
