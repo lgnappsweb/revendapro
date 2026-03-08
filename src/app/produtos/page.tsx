@@ -158,7 +158,7 @@ export default function ProductsPage() {
       <div className="flex flex-col gap-10">
         <div className="flex flex-col items-center text-center gap-6 py-4">
           <div className="space-y-2 w-full text-center flex flex-col items-center">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-primary text-center lg:whitespace-nowrap">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter text-primary text-center whitespace-nowrap overflow-hidden">
               Catálogo de Produtos
             </h1>
             <p className="text-muted-foreground font-medium text-lg">Controle seu estoque e preços de venda.</p>
@@ -173,8 +173,10 @@ export default function ProductsPage() {
             <DialogContent className="sm:max-w-[500px] w-[95vw] rounded-2xl border-primary max-h-[90vh] flex flex-col p-0 overflow-hidden">
               <div className="p-8 pb-4 border-b">
                 <DialogHeader>
-                  <DialogTitle className="text-3xl font-bold text-primary text-center">Cadastrar Produto</DialogTitle>
-                  <DialogDescription className="font-semibold text-muted-foreground text-center text-base">Adicione um novo item ao seu catálogo de revenda.</DialogDescription>
+                  <DialogTitle className="text-3xl font-black text-primary text-center">Cadastrar Produto</DialogTitle>
+                  <DialogDescription className="font-bold text-muted-foreground text-center text-lg mt-1">
+                    Adicione um novo item ao seu catálogo de revenda.
+                  </DialogDescription>
                 </DialogHeader>
               </div>
               
@@ -261,7 +263,7 @@ export default function ProductsPage() {
                     />
                   </div>
                   
-                  <div className="pt-4 pb-10">
+                  <div className="pt-2 pb-8">
                     <Button onClick={handleSaveProduct} className="w-full rounded-xl font-bold h-14 text-lg primary-gradient shadow-lg">
                       Salvar Produto
                     </Button>
