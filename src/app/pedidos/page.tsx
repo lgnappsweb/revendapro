@@ -35,7 +35,8 @@ import {
   Trash2,
   Eye,
   Pencil,
-  Save
+  Save,
+  DollarSign
 } from "lucide-react"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
 import { collection, query, orderBy, doc, deleteDoc, updateDoc, serverTimestamp } from "firebase/firestore"
@@ -94,7 +95,9 @@ export default function OrdersPage() {
   const [editFormData, setEditFormData] = useState({
     paymentStatus: "",
     paymentMethod: "",
-    notes: ""
+    notes: "",
+    discount: 0,
+    date: ""
   })
 
   const filteredOrders = orders?.filter(order => 
@@ -107,7 +110,11 @@ export default function OrdersPage() {
     setEditFormData({
       paymentStatus: order.paymentStatus || "Pendente",
       paymentMethod: order.paymentMethod || "pix",
-      notes: order.notes || ""
+      notes: order.notes || "",
+      discount: order.discount || 0,
+      date: order.createdAt?.seconds 
+        ? new Date(order.createdAt.seconds * 1000).toISOString().split('T')[0] 
+        : new Date().toISOString().split('T')[0]
     })
   }
 
@@ -116,8 +123,18 @@ export default function OrdersPage() {
     setIsSaving(true)
     
     const docRef = doc(db, "orders", editingOrder.id)
+    
+    // Recalcula o total final baseado no novo desconto
+    const subtotal = editingOrder.total || 0
+    const newFinalTotal = Math.max(0, subtotal - Number(editFormData.discount))
+
     const updateData = {
-      ...editFormData,
+      paymentStatus: editFormData.paymentStatus,
+      paymentMethod: editFormData.paymentMethod,
+      notes: editFormData.notes,
+      discount: Number(editFormData.discount),
+      finalTotal: newFinalTotal,
+      createdAt: new Date(editFormData.date),
       updatedAt: serverTimestamp()
     }
 
@@ -434,38 +451,72 @@ export default function OrdersPage() {
                 </DialogHeader>
               </div>
               <div className="flex-1 overflow-y-auto bg-background p-6 space-y-6">
-                <div className="grid gap-2">
-                  <Label className="font-bold text-muted-foreground ml-1">Status do Pagamento</Label>
-                  <Select 
-                    value={editFormData.paymentStatus} 
-                    onValueChange={(v) => setEditFormData({...editFormData, paymentStatus: v})}
-                  >
-                    <SelectTrigger className="rounded-xl h-12 bg-card border-primary/30 font-bold">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl">
-                      <SelectItem value="Pago" className="font-bold text-emerald-600">PAGO</SelectItem>
-                      <SelectItem value="Pendente" className="font-bold text-amber-600">PENDENTE</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="bg-muted/10 p-4 rounded-2xl border border-primary/5 mb-2">
+                   <div className="flex items-center gap-2 text-primary mb-1">
+                      <User className="h-4 w-4" />
+                      <span className="text-[10px] font-black uppercase tracking-widest">Cliente</span>
+                   </div>
+                   <p className="font-bold text-lg">{editingOrder.clientName}</p>
                 </div>
 
-                <div className="grid gap-2">
-                  <Label className="font-bold text-muted-foreground ml-1">Método de Pagamento</Label>
-                  <Select 
-                    value={editFormData.paymentMethod} 
-                    onValueChange={(v) => setEditFormData({...editFormData, paymentMethod: v})}
-                  >
-                    <SelectTrigger className="rounded-xl h-12 bg-card border-primary/30 font-bold uppercase">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl">
-                      <SelectItem value="pix">PIX</SelectItem>
-                      <SelectItem value="dinheiro">DINHEIRO</SelectItem>
-                      <SelectItem value="cartao">CARTÃO</SelectItem>
-                      <SelectItem value="fiado">FIADO / OUTRO</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label className="font-bold text-muted-foreground ml-1">Data da Venda</Label>
+                    <Input 
+                      type="date"
+                      value={editFormData.date}
+                      onChange={(e) => setEditFormData({...editFormData, date: e.target.value})}
+                      className="rounded-xl h-12 bg-card border-primary/30 font-bold"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label className="font-bold text-muted-foreground ml-1">Desconto (R$)</Label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-primary font-black text-sm">R$</span>
+                      <Input 
+                        type="number"
+                        value={editFormData.discount}
+                        onChange={(e) => setEditFormData({...editFormData, discount: Number(e.target.value)})}
+                        className="rounded-xl h-12 bg-card border-primary/30 pl-10 font-bold"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label className="font-bold text-muted-foreground ml-1">Status do Pagamento</Label>
+                    <Select 
+                      value={editFormData.paymentStatus} 
+                      onValueChange={(v) => setEditFormData({...editFormData, paymentStatus: v})}
+                    >
+                      <SelectTrigger className="rounded-xl h-12 bg-card border-primary/30 font-bold">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl">
+                        <SelectItem value="Pago" className="font-bold text-emerald-600">PAGO</SelectItem>
+                        <SelectItem value="Pendente" className="font-bold text-amber-600">PENDENTE</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label className="font-bold text-muted-foreground ml-1">Método de Pagamento</Label>
+                    <Select 
+                      value={editFormData.paymentMethod} 
+                      onValueChange={(v) => setEditFormData({...editFormData, paymentMethod: v})}
+                    >
+                      <SelectTrigger className="rounded-xl h-12 bg-card border-primary/30 font-bold uppercase">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl">
+                        <SelectItem value="pix">PIX</SelectItem>
+                        <SelectItem value="dinheiro">DINHEIRO</SelectItem>
+                        <SelectItem value="cartao">CARTÃO</SelectItem>
+                        <SelectItem value="fiado">FIADO / OUTRO</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 <div className="grid gap-2">
@@ -474,8 +525,18 @@ export default function OrdersPage() {
                     value={editFormData.notes}
                     onChange={(e) => setEditFormData({...editFormData, notes: e.target.value})}
                     placeholder="Alguma nota sobre este pedido..."
-                    className="rounded-xl border-primary/30 min-h-[120px] bg-card"
+                    className="rounded-xl border-primary/30 min-h-[100px] bg-card"
                   />
+                </div>
+
+                <div className="bg-primary/5 p-4 rounded-2xl border border-primary/20 flex items-center justify-between">
+                   <div className="flex items-center gap-2 text-primary">
+                      <DollarSign className="h-5 w-5" />
+                      <span className="text-[10px] font-black uppercase tracking-widest">Novo Total Final</span>
+                   </div>
+                   <span className="text-xl font-black text-primary">
+                     R$ {(editingOrder.total - editFormData.discount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                   </span>
                 </div>
               </div>
               <div className="p-6 bg-card border-t">
