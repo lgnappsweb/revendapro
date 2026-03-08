@@ -122,7 +122,7 @@ export default function Dashboard() {
               <Sparkles className="h-12 w-12" />
             </div>
             <div className="flex flex-col gap-2">
-              <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-primary">RevendaPro</h1>
+              <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tighter text-primary">RevendaPro</h1>
               <p className="text-muted-foreground font-bold text-lg">Resumo da sua revenda hoje.</p>
             </div>
           </div>
