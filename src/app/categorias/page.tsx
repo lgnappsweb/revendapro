@@ -16,7 +16,7 @@ import {
   Tag,
   Sparkles
 } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { 
   Dialog, 
   DialogContent, 
@@ -119,7 +119,6 @@ export default function CategoriesPage() {
     setEditingCategoryId(category.id)
     setFormData({ name: category.name || "" })
     setAccordionValue("")
-    // Pequeno atraso para garantir que o menu fechou antes de abrir o dialog
     setTimeout(() => setIsDialogOpen(true), 150)
   }
 
@@ -164,7 +163,7 @@ export default function CategoriesPage() {
 
   return (
     <LayoutWrapper>
-      <div className="flex flex-col gap-10 pt-12 w-full max-w-full overflow-x-hidden">
+      <div className="flex flex-col gap-10 pt-16 w-full max-w-full overflow-x-hidden">
         <div className="flex flex-col gap-8 items-center text-center">
           <div className="flex flex-col gap-2">
             <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-primary text-center break-words w-full px-2 uppercase">
@@ -190,55 +189,67 @@ export default function CategoriesPage() {
         <div className="w-full overflow-x-hidden px-1">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>
-          ) : filteredCategories.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-card rounded-3xl border border-dashed border-primary/30">
-              <Layers className="h-16 w-16 text-primary/20 mb-4" />
-              <p className="text-muted-foreground font-medium">Nenhuma categoria encontrada.</p>
-            </div>
           ) : (
-            <div className="grid gap-4 grid-cols-1 pb-10 w-full">
-              {filteredCategories.map((category) => (
-                <Card key={category.id} className="group overflow-hidden rounded-3xl border-primary/20 w-full shadow-sm hover:border-primary transition-all">
-                  <CardContent className="p-6 flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-4 min-w-0 flex-1">
-                      <div className="p-3 bg-primary/5 rounded-2xl text-primary shrink-0">
-                        <Tag className="h-6 w-6" />
-                      </div>
-                      <h3 className="font-bold text-lg leading-tight text-foreground break-words pt-1">{category.name}</h3>
-                    </div>
-                    <div className="shrink-0 pt-1">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="rounded-full h-10 w-10">
-                            <MoreVertical className="h-5 w-5" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="rounded-xl w-48">
-                          <DropdownMenuItem 
-                            className="font-bold gap-2 cursor-pointer" 
-                            onSelect={(e) => {
-                              e.preventDefault();
-                              handleEditCategory(category);
-                            }}
-                          >
-                            <Pencil className="h-4 w-4 text-blue-500" /> Editar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            className="font-bold gap-2 text-rose-600 cursor-pointer" 
-                            onSelect={(e) => {
-                              e.preventDefault();
-                              setTimeout(() => setCategoryToDelete(category), 150);
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4" /> Excluir
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <Card className="rounded-[2.5rem] border-primary/20 overflow-hidden shadow-sm">
+              <CardHeader className="bg-primary/5 border-b px-8 py-6">
+                <CardTitle className="text-xl font-black text-primary flex items-center gap-2 uppercase tracking-tight">
+                  <Layers className="h-6 w-6" /> Suas Categorias
+                </CardTitle>
+                <CardDescription className="font-medium">Gerencie as categorias para organizar seu estoque.</CardDescription>
+              </CardHeader>
+              <CardContent className="p-6">
+                {filteredCategories.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
+                    <Layers className="h-16 w-16 text-primary/20 mb-4" />
+                    <p className="text-muted-foreground font-medium">Nenhuma categoria encontrada.</p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4 grid-cols-1 pb-10 w-full">
+                    {filteredCategories.map((category) => (
+                      <Card key={category.id} className="group overflow-hidden rounded-3xl border-primary/20 w-full shadow-sm hover:border-primary transition-all">
+                        <CardContent className="p-6 flex items-start justify-between gap-4">
+                          <div className="flex items-start gap-4 min-w-0 flex-1">
+                            <div className="p-3 bg-primary/5 rounded-2xl text-primary shrink-0">
+                              <Tag className="h-6 w-6" />
+                            </div>
+                            <h3 className="font-bold text-lg leading-tight text-foreground break-words pt-1">{category.name}</h3>
+                          </div>
+                          <div className="shrink-0 pt-1">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="rounded-full h-10 w-10">
+                                  <MoreVertical className="h-5 w-5" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="rounded-xl w-48">
+                                <DropdownMenuItem 
+                                  className="font-bold gap-2 cursor-pointer" 
+                                  onSelect={(e) => {
+                                    e.preventDefault();
+                                    handleEditCategory(category);
+                                  }}
+                                >
+                                  <Pencil className="h-4 w-4 text-blue-500" /> Editar
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  className="font-bold gap-2 text-rose-600 cursor-pointer" 
+                                  onSelect={(e) => {
+                                    e.preventDefault();
+                                    setTimeout(() => setCategoryToDelete(category), 150);
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4" /> Excluir
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           )}
         </div>
       </div>

@@ -143,7 +143,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
         <AppSidebar />
       </div>
       <SidebarInset className="relative flex-1 w-full flex flex-col h-svh max-h-svh overflow-hidden bg-transparent max-w-full">
-        {/* Botão Fixo e Flutuante */}
+        {/* Botão Fixo e Flutuante - SEMPRE FORA DA ROLAGEM */}
         {pathname !== "/" && (
           <div className="absolute top-4 left-4 sm:top-6 sm:left-6 z-[100] pointer-events-none">
             <Button
@@ -161,9 +161,8 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
         {/* Área de Conteúdo com Rolagem Independente */}
         <div className="flex-1 overflow-y-auto w-full pb-24 md:pb-0 scroll-smooth max-w-full overflow-x-hidden min-h-0">
           <div className="w-full relative border-l-2 border-primary/20 dark:border-primary/40 bg-card dark:bg-card min-h-full max-w-full overflow-x-hidden">
-            <div className={cn("w-full p-4 sm:p-8 md:p-12 max-w-full overflow-x-hidden", pathname === "/" ? "pt-12" : "pt-0")}>
-              {/* Espaçador apenas para não cobrir o botão se necessário, mas o corpo sobe ao topo */}
-              {pathname !== "/" && <div className="h-20 md:h-24 w-full" />}
+            <div className={cn("w-full p-4 sm:p-8 md:p-12 max-w-full overflow-x-hidden pt-0")}>
+               {/* O conteúdo sobe ao topo, passando por baixo do botão fixo */}
               {children}
             </div>
           </div>
