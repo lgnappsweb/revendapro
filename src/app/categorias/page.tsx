@@ -98,7 +98,7 @@ export default function CategoriesPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [categoryToDelete, setCategoryToDelete] = useState<any>(null)
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)
-  const [accordionValue, setAccordionValue] = useState<string | undefined>(undefined)
+  const [accordionValue, setAccordionValue] = useState<string>("")
   
   const db = useFirestore()
   const { toast } = useToast()
@@ -111,14 +111,15 @@ export default function CategoriesPage() {
   const handleOpenNewCategory = () => {
     setEditingCategoryId(null)
     setFormData({ name: "" })
-    setAccordionValue(undefined)
+    setAccordionValue("")
     setIsDialogOpen(true)
   }
 
   const handleEditCategory = (category: any) => {
     setEditingCategoryId(category.id)
     setFormData({ name: category.name || "" })
-    setAccordionValue(undefined)
+    setAccordionValue("")
+    // Pequeno atraso para garantir que o menu fechou antes de abrir o dialog
     setTimeout(() => setIsDialogOpen(true), 150)
   }
 
@@ -289,7 +290,7 @@ export default function CategoriesPage() {
                           className="rounded-xl border-primary/20 hover:border-primary hover:bg-primary/5 text-xs font-bold h-10 px-2 justify-start"
                           onClick={() => {
                             setFormData({ ...formData, name: cat });
-                            setAccordionValue(undefined); 
+                            setAccordionValue(""); 
                           }}
                         >
                           <Plus className="h-3 w-3 mr-1 shrink-0" />
