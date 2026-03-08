@@ -258,13 +258,13 @@ export default function ProductsPage() {
 
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogContent className="sm:max-w-[500px] w-[95vw] rounded-2xl border-primary max-h-[90vh] flex flex-col p-0 overflow-hidden">
-              <div className="p-8 pb-4 border-b bg-white">
+              <div className="p-6 md:p-8 pb-4 border-b bg-white">
                 <DialogHeader>
-                  <DialogTitle className="text-3xl font-black text-primary text-center uppercase tracking-tight">
+                  <DialogTitle className="text-2xl sm:text-3xl font-black text-primary text-center uppercase tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">
                     {editingProductId ? "Editar Produto" : "Cadastrar Produto"}
                   </DialogTitle>
-                  <DialogDescription className="font-bold text-muted-foreground text-center text-lg mt-1">
-                    {editingProductId ? "Atualize as informações do item selecionado." : "Adicione um novo item ao seu catálogo de revenda."}
+                  <DialogDescription className="font-bold text-muted-foreground text-center text-base sm:text-lg mt-1">
+                    {editingProductId ? "Atualize as informações do item." : "Adicione um item ao seu catálogo."}
                   </DialogDescription>
                 </DialogHeader>
               </div>
