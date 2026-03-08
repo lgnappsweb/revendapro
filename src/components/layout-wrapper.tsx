@@ -142,23 +142,28 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       <div className="hidden md:block shrink-0 h-full">
         <AppSidebar />
       </div>
-      <SidebarInset className="bg-transparent flex-1 w-full overflow-hidden flex flex-col h-svh max-h-svh relative max-w-full">
+      <SidebarInset className="relative flex-1 w-full flex flex-col h-svh max-h-svh overflow-hidden bg-transparent max-w-full">
+        {/* Botão Fixo e Flutuante */}
         {pathname !== "/" && (
-          <div className="absolute top-4 left-4 sm:top-6 sm:left-6 z-[100]">
+          <div className="absolute top-4 left-4 sm:top-6 sm:left-6 z-[100] pointer-events-none">
             <Button
               variant="outline"
               size="sm"
               onClick={() => router.push("/")}
-              className="rounded-xl border-primary text-primary bg-card/80 backdrop-blur-md hover:bg-primary/5 font-bold h-12 px-6 shadow-xl transition-all active:scale-95 shrink-0 text-base border-2"
+              className="rounded-xl border-primary text-primary bg-card/80 backdrop-blur-md hover:bg-primary/5 font-bold h-12 px-6 shadow-xl transition-all active:scale-95 shrink-0 text-base border-2 pointer-events-auto"
             >
               <ArrowLeft className="mr-2 h-5 w-5" />
               Voltar ao Início
             </Button>
           </div>
         )}
+
+        {/* Área de Conteúdo com Rolagem Independente */}
         <div className="flex-1 overflow-y-auto w-full pb-24 md:pb-0 scroll-smooth max-w-full overflow-x-hidden min-h-0">
           <div className="w-full relative border-l-2 border-primary/20 dark:border-primary/40 bg-card dark:bg-card min-h-full max-w-full overflow-x-hidden">
-            <div className={cn("w-full p-4 sm:p-8 md:p-12 max-w-full overflow-x-hidden", pathname === "/" ? "pt-12" : "pt-24")}>
+            <div className={cn("w-full p-4 sm:p-8 md:p-12 max-w-full overflow-x-hidden", pathname === "/" ? "pt-12" : "pt-0")}>
+              {/* Espaçador apenas para não cobrir o botão se necessário, mas o corpo sobe ao topo */}
+              {pathname !== "/" && <div className="h-20 md:h-24 w-full" />}
               {children}
             </div>
           </div>
