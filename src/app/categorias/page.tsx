@@ -54,18 +54,43 @@ import { FirestorePermissionError } from "@/firebase/errors"
 import { useToast } from "@/hooks/use-toast"
 
 const SUGGESTED_CATEGORIES = [
-  "Perfumaria",
-  "Maquiagem",
+  "Perfumaria Feminina",
+  "Perfumaria Masculina",
+  "Perfumaria Infantil",
+  "Maquiagem (Rosto)",
+  "Maquiagem (Olhos)",
+  "Maquiagem (Boca)",
+  "Esmaltes e Unhas",
   "Cuidados com o Rosto",
+  "Hidratação Facial",
+  "Antisinais (Chronos/Renew)",
   "Cuidados com o Corpo",
+  "Hidratação Corporal",
+  "Óleos Corporais",
   "Banho e Sabonetes",
-  "Cabelos",
-  "Infantil / Bebê",
-  "Masculino",
-  "Presentes e Kits",
-  "Proteção Solar",
+  "Sabonetes em Barra",
+  "Sabonetes Líquidos",
+  "Cabelos (Shampoo/Cond)",
+  "Cabelos (Tratamento)",
   "Desodorantes",
-  "Acessórios"
+  "Proteção Solar",
+  "Infantil (Mamãe e Bebê)",
+  "Linha Masculina / Barba",
+  "Presentes e Kits",
+  "Acessórios e Pincéis",
+  "Necessaires e Bolsas",
+  "Crer para Ver (Papelaria)",
+  "Casa e Estilo",
+  "Suplementos e Bem-estar",
+  "Linha Ekos",
+  "Linha Tododia",
+  "Linha Una",
+  "Linha Faces",
+  "Linha Renew",
+  "Linha Color Trend",
+  "Linha Avon Care",
+  "Cremes para Mãos",
+  "Cuidados para os Pés"
 ]
 
 export default function CategoriesPage() {
@@ -74,6 +99,7 @@ export default function CategoriesPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [categoryToDelete, setCategoryToDelete] = useState<any>(null)
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)
+  const [accordionValue, setAccordionValue] = useState<string | undefined>(undefined)
   
   const db = useFirestore()
   const { toast } = useToast()
@@ -86,12 +112,14 @@ export default function CategoriesPage() {
   const handleOpenNewCategory = () => {
     setEditingCategoryId(null)
     setFormData({ name: "" })
+    setAccordionValue(undefined)
     setIsDialogOpen(true)
   }
 
   const handleEditCategory = (category: any) => {
     setEditingCategoryId(category.id)
     setFormData({ name: category.name || "" })
+    setAccordionValue(undefined)
     // Pequeno atraso para evitar conflito de foco com o DropdownMenu
     setTimeout(() => setIsDialogOpen(true), 100)
   }
@@ -236,7 +264,13 @@ export default function CategoriesPage() {
                 />
               </div>
 
-              <Accordion type="single" collapsible className="w-full">
+              <Accordion 
+                type="single" 
+                collapsible 
+                value={accordionValue} 
+                onValueChange={setAccordionValue} 
+                className="w-full"
+              >
                 <AccordionItem value="suggestions" className="border-none">
                   <AccordionTrigger className="hover:no-underline py-2 px-1 rounded-xl hover:bg-primary/5 transition-all group">
                     <div className="flex items-center gap-2 text-primary font-bold">
@@ -245,14 +279,17 @@ export default function CategoriesPage() {
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="pt-2">
-                    <div className="grid grid-cols-2 gap-2 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
+                    <div className="grid grid-cols-2 gap-2 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
                       {SUGGESTED_CATEGORIES.map(cat => (
                         <Button 
                           key={cat}
                           variant="outline"
                           size="sm"
                           className="rounded-xl border-primary/20 hover:border-primary hover:bg-primary/5 text-xs font-bold h-10 px-2 justify-start overflow-hidden text-ellipsis whitespace-nowrap"
-                          onClick={() => setFormData({ ...formData, name: cat })}
+                          onClick={() => {
+                            setFormData({ ...formData, name: cat });
+                            setAccordionValue(""); // Fecha o menu ao clicar
+                          }}
                         >
                           <Plus className="h-3 w-3 mr-1 shrink-0" />
                           {cat}
