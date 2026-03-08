@@ -11,7 +11,8 @@ import {
   MoreHorizontal,
   CheckCircle2,
   AlertCircle,
-  Search
+  Search,
+  Sparkles
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -102,11 +103,16 @@ const recentOrders = [
 export default function Dashboard() {
   return (
     <LayoutWrapper>
-      <div className="flex flex-col gap-10 pt-4">
+      <div className="flex flex-col gap-10 pt-12">
         <div className="flex flex-col gap-8 items-center text-center">
-          <div className="flex flex-col gap-2">
-            <h1 className="text-5xl md:text-6xl font-black tracking-tighter text-primary">RevendaPro</h1>
-            <p className="text-muted-foreground font-medium text-lg">Aqui está o resumo da sua revenda hoje.</p>
+          <div className="flex flex-col items-center gap-4">
+            <div className="inline-flex h-20 w-20 items-center justify-center rounded-3xl primary-gradient text-white shadow-xl">
+              <Sparkles className="h-12 w-12" />
+            </div>
+            <div className="flex flex-col gap-2">
+              <h1 className="text-5xl md:text-6xl font-black tracking-tighter text-primary">RevendaPro</h1>
+              <p className="text-muted-foreground font-medium text-lg">Aqui está o resumo da sua revenda hoje.</p>
+            </div>
           </div>
           
           <div className="relative w-full max-w-2xl">
