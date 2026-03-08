@@ -15,9 +15,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import { 
   Search, 
-  ShoppingCart, 
   MoreVertical, 
   Loader2, 
   PackageSearch,
@@ -26,18 +27,18 @@ import {
   Banknote,
   Smartphone,
   AlertTriangle,
-  Sparkles,
   Receipt,
   Package,
   Calendar,
-  Clock,
   User,
   Info,
   Trash2,
-  Eye
+  Eye,
+  Pencil,
+  Save
 } from "lucide-react"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
-import { collection, query, orderBy, doc, deleteDoc } from "firebase/firestore"
+import { collection, query, orderBy, doc, deleteDoc, updateDoc, serverTimestamp } from "firebase/firestore"
 import { 
   Dialog, 
   DialogContent, 
@@ -60,6 +61,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useToast } from "@/hooks/use-toast"
@@ -70,7 +78,9 @@ export default function OrdersPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedOrder, setSelectedOrder] = useState<any>(null)
   const [orderToDelete, setOrderToDelete] = useState<any>(null)
+  const [editingOrder, setEditingOrder] = useState<any>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   
   const db = useFirestore()
   const { toast } = useToast()
@@ -81,10 +91,50 @@ export default function OrdersPage() {
   )
   const { data: orders, isLoading } = useCollection(ordersRef)
 
+  const [editFormData, setEditFormData] = useState({
+    paymentStatus: "",
+    paymentMethod: "",
+    notes: ""
+  })
+
   const filteredOrders = orders?.filter(order => 
     order.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     order.id.toLowerCase().includes(searchTerm.toLowerCase())
   ) || []
+
+  const handleOpenEdit = (order: any) => {
+    setEditingOrder(order)
+    setEditFormData({
+      paymentStatus: order.paymentStatus || "Pendente",
+      paymentMethod: order.paymentMethod || "pix",
+      notes: order.notes || ""
+    })
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editingOrder) return
+    setIsSaving(true)
+    
+    const docRef = doc(db, "orders", editingOrder.id)
+    const updateData = {
+      ...editFormData,
+      updatedAt: serverTimestamp()
+    }
+
+    try {
+      await updateDoc(docRef, updateData)
+      toast({ title: "Pedido atualizado!" })
+      setEditingOrder(null)
+    } catch (error: any) {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: docRef.path,
+        operation: 'update',
+        requestResourceData: updateData
+      }))
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   const handleDeleteOrder = async () => {
     if (!orderToDelete) return
@@ -183,6 +233,9 @@ export default function OrdersPage() {
                                 <DropdownMenuItem className="font-bold gap-2" onSelect={() => setSelectedOrder(order)}>
                                   <Eye className="h-4 w-4 text-blue-500" /> Detalhes
                                 </DropdownMenuItem>
+                                <DropdownMenuItem className="font-bold gap-2" onSelect={() => handleOpenEdit(order)}>
+                                  <Pencil className="h-4 w-4 text-amber-500" /> Editar
+                                </DropdownMenuItem>
                                 <DropdownMenuItem className="font-bold gap-2 text-rose-600" onSelect={() => setOrderToDelete(order)}>
                                   <Trash2 className="h-4 w-4" /> Excluir
                                 </DropdownMenuItem>
@@ -247,6 +300,9 @@ export default function OrdersPage() {
                                 <DropdownMenuContent align="end" className="rounded-xl">
                                   <DropdownMenuItem className="font-bold gap-2" onSelect={() => setSelectedOrder(order)}>
                                     <Eye className="h-4 w-4 text-blue-500" /> Visualizar
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="font-bold gap-2" onSelect={() => handleOpenEdit(order)}>
+                                    <Pencil className="h-4 w-4 text-amber-500" /> Editar
                                   </DropdownMenuItem>
                                   <DropdownMenuItem className="font-bold gap-2 text-rose-600" onSelect={() => setOrderToDelete(order)}>
                                     <Trash2 className="h-4 w-4" /> Excluir
@@ -361,6 +417,75 @@ export default function OrdersPage() {
               <div className="p-6 bg-card border-t">
                 <Button onClick={() => setSelectedOrder(null)} className="w-full h-16 rounded-2xl font-black text-xl primary-gradient shadow-xl active:scale-95 transition-all">
                   FECHAR DETALHES
+                </Button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!editingOrder} onOpenChange={(open) => !open && setEditingOrder(null)}>
+        <DialogContent className="sm:max-w-[500px] w-[95vw] rounded-3xl border-primary overflow-hidden p-0 flex flex-col max-h-[90vh]">
+          {editingOrder && (
+            <>
+              <div className="p-8 border-b bg-card">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-black text-center text-primary uppercase">Editar Pedido</DialogTitle>
+                </DialogHeader>
+              </div>
+              <div className="flex-1 overflow-y-auto bg-background p-6 space-y-6">
+                <div className="grid gap-2">
+                  <Label className="font-bold text-muted-foreground ml-1">Status do Pagamento</Label>
+                  <Select 
+                    value={editFormData.paymentStatus} 
+                    onValueChange={(v) => setEditFormData({...editFormData, paymentStatus: v})}
+                  >
+                    <SelectTrigger className="rounded-xl h-12 bg-card border-primary/30 font-bold">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl">
+                      <SelectItem value="Pago" className="font-bold text-emerald-600">PAGO</SelectItem>
+                      <SelectItem value="Pendente" className="font-bold text-amber-600">PENDENTE</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label className="font-bold text-muted-foreground ml-1">Método de Pagamento</Label>
+                  <Select 
+                    value={editFormData.paymentMethod} 
+                    onValueChange={(v) => setEditFormData({...editFormData, paymentMethod: v})}
+                  >
+                    <SelectTrigger className="rounded-xl h-12 bg-card border-primary/30 font-bold uppercase">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl">
+                      <SelectItem value="pix">PIX</SelectItem>
+                      <SelectItem value="dinheiro">DINHEIRO</SelectItem>
+                      <SelectItem value="cartao">CARTÃO</SelectItem>
+                      <SelectItem value="fiado">FIADO / OUTRO</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label className="font-bold text-muted-foreground ml-1">Observações / Notas</Label>
+                  <Textarea 
+                    value={editFormData.notes}
+                    onChange={(e) => setEditFormData({...editFormData, notes: e.target.value})}
+                    placeholder="Alguma nota sobre este pedido..."
+                    className="rounded-xl border-primary/30 min-h-[120px] bg-card"
+                  />
+                </div>
+              </div>
+              <div className="p-6 bg-card border-t">
+                <Button 
+                  onClick={handleSaveEdit} 
+                  disabled={isSaving}
+                  className="w-full h-16 rounded-2xl font-black text-xl primary-gradient shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3"
+                >
+                  {isSaving ? <Loader2 className="h-6 w-6 animate-spin" /> : <Save className="h-6 w-6" />}
+                  SALVAR ALTERAÇÕES
                 </Button>
               </div>
             </>
