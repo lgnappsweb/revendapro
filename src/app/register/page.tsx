@@ -35,6 +35,12 @@ export default function RegisterPage() {
 
       await updateProfile(user, { displayName: name })
 
+      // Create admin role document first to satisfy security rules for subsequent writes
+      await setDoc(doc(db, "admins", user.uid), {
+        id: user.uid,
+        createdAt: new Date().toISOString()
+      })
+
       // Create user document
       await setDoc(doc(db, "users", user.uid), {
         id: user.uid,
@@ -44,18 +50,13 @@ export default function RegisterPage() {
         createdAt: new Date().toISOString()
       })
 
-      // Create admin role document for security rules
-      await setDoc(doc(db, "admins", user.uid), {
-        id: user.uid,
-        createdAt: new Date().toISOString()
-      })
-
       toast({
         title: "Conta criada!",
         description: "Bem-vinda ao RevendaPro.",
       })
       router.push("/")
     } catch (error: any) {
+      console.error(error)
       toast({
         variant: "destructive",
         title: "Erro ao cadastrar",
