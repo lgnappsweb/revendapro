@@ -11,11 +11,13 @@ import {
   Filter,
   Download,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  Plus
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Badge } from "@/components/ui/badge"
 
 export default function FinancePage() {
   return (
@@ -43,7 +45,7 @@ export default function FinancePage() {
             { title: "Total Vencido", value: "R$ 380,00", color: "text-rose-600", bg: "bg-rose-50", icon: AlertCircle },
             { title: "Lucro Estimado", value: "R$ 1.420,00", color: "text-primary", bg: "bg-primary/5", icon: TrendingUp },
           ].map((stat, i) => (
-            <Card key={i} className="border-none shadow-sm rounded-2xl overflow-hidden">
+            <Card key={i} className="shadow-sm rounded-2xl overflow-hidden">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-3">
                   <div className={`p-2 rounded-xl ${stat.bg}`}>
@@ -59,7 +61,7 @@ export default function FinancePage() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
-          <Card className="lg:col-span-2 border-none shadow-sm rounded-2xl overflow-hidden">
+          <Card className="lg:col-span-2 shadow-sm rounded-2xl overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between px-6 py-5 border-b">
               <CardTitle>Histórico de Transações</CardTitle>
               <div className="flex gap-2">
@@ -104,7 +106,7 @@ export default function FinancePage() {
           </Card>
 
           <div className="space-y-6">
-            <Card className="border-none shadow-sm rounded-2xl overflow-hidden">
+            <Card className="shadow-sm rounded-2xl overflow-hidden">
               <CardHeader>
                 <CardTitle className="text-lg">Metas do Mês</CardTitle>
                 <CardDescription>Acompanhe seu progresso de vendas.</CardDescription>
@@ -130,7 +132,7 @@ export default function FinancePage() {
               </CardContent>
             </Card>
 
-            <Card className="border-none bg-primary/5 rounded-2xl overflow-hidden">
+            <Card className="bg-primary/5 rounded-2xl overflow-hidden">
               <CardContent className="p-6 space-y-4">
                 <h4 className="font-bold text-primary flex items-center gap-2">
                   <TrendingUp className="h-5 w-5" />
@@ -146,25 +148,5 @@ export default function FinancePage() {
         </div>
       </div>
     </LayoutWrapper>
-  )
-}
-
-function Plus(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M5 12h14" />
-      <path d="M12 5v14" />
-    </svg>
   )
 }

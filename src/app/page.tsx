@@ -1,4 +1,3 @@
-
 "use client"
 
 import { LayoutWrapper } from "@/components/layout-wrapper"
@@ -25,6 +24,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
+import Link from "next/link"
 
 const stats = [
   {
@@ -35,6 +35,7 @@ const stats = [
     icon: TrendingUp,
     color: "text-emerald-600",
     bgColor: "bg-emerald-50",
+    href: "/financeiro"
   },
   {
     title: "Recebido",
@@ -44,6 +45,7 @@ const stats = [
     icon: CheckCircle2,
     color: "text-blue-600",
     bgColor: "bg-blue-50",
+    href: "/financeiro"
   },
   {
     title: "Pendente (Fiado)",
@@ -53,6 +55,7 @@ const stats = [
     icon: Clock,
     color: "text-amber-600",
     bgColor: "bg-amber-50",
+    href: "/financeiro"
   },
   {
     title: "Total Clientes",
@@ -62,6 +65,7 @@ const stats = [
     icon: Users,
     color: "text-pink-600",
     bgColor: "bg-pink-50",
+    href: "/clientes"
   },
 ]
 
@@ -126,36 +130,40 @@ export default function Dashboard() {
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat) => (
-            <Card key={stat.title} className="border-none shadow-sm overflow-hidden rounded-2xl">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`p-2.5 rounded-xl ${stat.bgColor}`}>
-                    <stat.icon className={`h-6 w-6 ${stat.color}`} />
+            <Link key={stat.title} href={stat.href} className="block transition-transform hover:scale-[1.02] active:scale-[0.98]">
+              <Card className="shadow-sm overflow-hidden rounded-2xl h-full">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className={`p-2.5 rounded-xl ${stat.bgColor}`}>
+                      <stat.icon className={`h-6 w-6 ${stat.color}`} />
+                    </div>
+                    {stat.trend === "up" && (
+                      <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700 font-bold rounded-lg py-1 px-2">
+                        <ArrowUpRight className="h-3 w-3 mr-1" /> {stat.change}
+                      </Badge>
+                    )}
                   </div>
-                  {stat.trend === "up" && (
-                    <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700 font-bold rounded-lg py-1 px-2">
-                      <ArrowUpRight className="h-3 w-3 mr-1" /> {stat.change}
-                    </Badge>
-                  )}
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">{stat.title}</p>
-                  <h3 className="text-2xl font-bold mt-1">{stat.value}</h3>
-                  <p className="text-xs text-muted-foreground mt-2 font-medium">{stat.change}</p>
-                </div>
-              </CardContent>
-            </Card>
+                  <div>
+                    <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">{stat.title}</p>
+                    <h3 className="text-2xl font-bold mt-1">{stat.value}</h3>
+                    <p className="text-xs text-muted-foreground mt-2 font-medium">{stat.change}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
-          <Card className="lg:col-span-2 border-none shadow-sm rounded-2xl overflow-hidden">
+          <Card className="lg:col-span-2 shadow-sm rounded-2xl overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between border-b bg-white/50 px-6 py-5">
               <div className="space-y-1">
                 <CardTitle className="text-xl">Pedidos Recentes</CardTitle>
                 <CardDescription>Acompanhe suas últimas vendas realizadas.</CardDescription>
               </div>
-              <Button variant="ghost" size="sm" className="rounded-xl text-primary font-semibold">Ver todos</Button>
+              <Button variant="ghost" size="sm" className="rounded-xl text-primary font-semibold" asChild>
+                <Link href="/pedidos">Ver todos</Link>
+              </Button>
             </CardHeader>
             <CardContent className="p-0">
               <Table>
@@ -203,7 +211,7 @@ export default function Dashboard() {
           </Card>
 
           <div className="space-y-6">
-            <Card className="border-none shadow-sm rounded-2xl overflow-hidden">
+            <Card className="shadow-sm rounded-2xl overflow-hidden">
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <TrendingUp className="h-5 w-5 text-primary" />
@@ -230,11 +238,13 @@ export default function Dashboard() {
                     </div>
                   </div>
                 ))}
-                <Button variant="outline" className="w-full rounded-xl border-dashed font-semibold mt-2 hover:bg-primary/5 hover:text-primary hover:border-primary">Ver Relatório Completo</Button>
+                <Button variant="outline" className="w-full rounded-xl border-dashed font-semibold mt-2 hover:bg-primary/5 hover:text-primary hover:border-primary" asChild>
+                  <Link href="/relatorios">Ver Relatório Completo</Link>
+                </Button>
               </CardContent>
             </Card>
 
-            <Card className="border-none bg-rose-50 rounded-2xl shadow-sm border-l-4 border-rose-500">
+            <Card className="bg-rose-50 rounded-2xl shadow-sm border-l-4 border-rose-500">
               <CardContent className="p-5 flex items-start gap-4">
                 <div className="p-2 bg-rose-100 rounded-xl">
                   <AlertCircle className="h-6 w-6 text-rose-600" />
@@ -242,7 +252,9 @@ export default function Dashboard() {
                 <div className="space-y-1">
                   <h4 className="font-bold text-rose-900">Alerta de Pagamento</h4>
                   <p className="text-sm text-rose-800 leading-tight">Você tem <b>3 pagamentos</b> vencidos de clientes que precisam de atenção.</p>
-                  <Button variant="link" className="p-0 h-auto text-rose-700 font-bold underline decoration-2">Ver Detalhes</Button>
+                  <Button variant="link" className="p-0 h-auto text-rose-700 font-bold underline decoration-2" asChild>
+                    <Link href="/financeiro">Ver Detalhes</Link>
+                  </Button>
                 </div>
               </CardContent>
             </Card>

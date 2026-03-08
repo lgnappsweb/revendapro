@@ -73,7 +73,7 @@ export default function ProductsPage() {
 
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filteredProducts.map((product) => (
-            <Card key={product.id} className="group overflow-hidden rounded-2xl border-none shadow-sm hover:shadow-xl transition-all duration-300">
+            <Card key={product.id} className="group overflow-hidden rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300">
               <div className="relative aspect-square overflow-hidden bg-muted">
                 <Image 
                   src={product.image} 
@@ -133,7 +133,7 @@ export default function ProductsPage() {
           
           <Button 
             variant="outline" 
-            className="h-full min-h-[300px] border-2 border-dashed rounded-2xl flex flex-col items-center justify-center gap-4 hover:bg-primary/5 hover:border-primary/40 group transition-all"
+            className="h-full min-h-[300px] border-2 border-dashed rounded-2xl border-primary/40 flex flex-col items-center justify-center gap-4 hover:bg-primary/5 hover:border-primary group transition-all"
           >
             <div className="p-4 rounded-full bg-primary/5 group-hover:bg-primary/10 transition-colors">
               <Plus className="h-10 w-10 text-primary/60 group-hover:text-primary" />
