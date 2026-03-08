@@ -40,6 +40,22 @@ import { useFirestore, useCollection, useMemoFirebase, addDocumentNonBlocking } 
 import { collection, serverTimestamp } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 
+const PRODUCT_CATEGORIES = [
+  "Perfumaria",
+  "Maquiagem",
+  "Rosto",
+  "Corpo",
+  "Cabelos",
+  "Cuidados Diários",
+  "Desodorantes",
+  "Sabonetes",
+  "Infantil",
+  "Masculino",
+  "Moda e Casa",
+  "Promoções",
+  "Kits e Presentes"
+]
+
 export default function ProductsPage() {
   const [activeTab, setActiveTab] = useState("todos")
   const [searchTerm, setSearchTerm] = useState("")
@@ -79,10 +95,10 @@ export default function ProductsPage() {
   }
 
   const handleSaveProduct = () => {
-    if (!formData.name || !formData.price) {
+    if (!formData.name || !formData.price || !formData.category) {
       toast({
         title: "Campos obrigatórios",
-        description: "Por favor, preencha o nome e o preço da revista.",
+        description: "Por favor, preencha o nome, categoria e o preço da revista.",
         variant: "destructive"
       })
       return
@@ -176,18 +192,21 @@ export default function ProductsPage() {
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="category" className="font-bold">Categoria</Label>
-                    <Input 
-                      id="category" 
-                      value={formData.category}
-                      onChange={(e) => setFormData({...formData, category: e.target.value})}
-                      placeholder="Ex: Perfumaria" 
-                      className="rounded-xl border-primary/30" 
-                    />
+                    <Select value={formData.category} onValueChange={(v) => setFormData({...formData, category: v})}>
+                      <SelectTrigger className="rounded-xl border-primary/30">
+                        <SelectValue placeholder="Selecione categoria..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PRODUCT_CATEGORIES.map((cat) => (
+                          <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="price" className="font-bold">Preço da revista(R$)</Label>
+                    <Label htmlFor="price" className="font-bold">Preço da revista (R$)</Label>
                     <Input 
                       id="price" 
                       value={formData.price}
@@ -197,7 +216,7 @@ export default function ProductsPage() {
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="cost" className="font-bold">Preço da revendedora(R$)</Label>
+                    <Label htmlFor="cost" className="font-bold">Preço da revendedora (R$)</Label>
                     <Input 
                       id="cost" 
                       value={formData.cost}
