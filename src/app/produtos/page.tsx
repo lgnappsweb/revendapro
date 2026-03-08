@@ -17,7 +17,9 @@ import {
   Hash,
   Zap,
   TrendingUp,
-  Package
+  Package,
+  MoreVertical,
+  Trash2
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -28,6 +30,22 @@ import {
   DialogHeader, 
   DialogTitle 
 } from "@/components/ui/dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { 
@@ -38,9 +56,10 @@ import {
   SelectValue 
 } from "@/components/ui/select"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
-import { collection, serverTimestamp, addDoc, doc, updateDoc, query, orderBy } from "firebase/firestore"
+import { collection, serverTimestamp, addDoc, doc, updateDoc, deleteDoc, query, orderBy } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
-import { Separator } from "@/components/ui/separator"
+import { errorEmitter } from "@/firebase/error-emitter"
+import { FirestorePermissionError } from "@/firebase/errors"
 
 export default function ProductsPage() {
   const [activeTab, setActiveTab] = useState("todos")
@@ -48,6 +67,7 @@ export default function ProductsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<any>(null)
+  const [productToDelete, setProductToDelete] = useState<any>(null)
   const [editingProductId, setEditingProductId] = useState<string | null>(null)
   
   const db = useFirestore()
@@ -87,7 +107,6 @@ export default function ProductsPage() {
     const formatted = formatCurrencyInput(e.target.value);
     let newFormData = { ...formData, [field]: formatted };
     
-    // Se o preço de revista mudar, recalcula o custo automaticamente com base na marca
     if (field === 'price') {
       newFormData.cost = calculateCost(formatted, formData.brand);
     }
@@ -115,6 +134,22 @@ export default function ProductsPage() {
     })
     setSelectedProduct(null)
     setTimeout(() => setIsDialogOpen(true), 150)
+  }
+
+  const handleDeleteConfirm = () => {
+    if (!productToDelete) return
+    const docRef = doc(db, "products", productToDelete.id)
+    deleteDoc(docRef)
+      .then(() => {
+        toast({ title: "Produto removido!" })
+        setProductToDelete(null)
+      })
+      .catch(async () => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: docRef.path,
+          operation: 'delete'
+        }))
+      })
   }
 
   const handleSaveProduct = () => {
@@ -195,8 +230,25 @@ export default function ProductsPage() {
                 <Card key={product.id} className="group overflow-hidden rounded-[2.5rem] border-primary/20 shadow-sm hover:border-primary transition-all">
                   <CardHeader className="bg-primary/5 border-b p-4">
                      <div className="flex justify-between items-center gap-2">
-                        <Badge className={`rounded-lg font-bold py-1 border-none ${product.brand === 'Natura' ? 'bg-[#FF6A13]' : product.brand === 'Avon' ? 'bg-[#622D91]' : 'bg-emerald-600'}`}>{product.brand === 'CasaEstilo' ? 'Casa/Estilo' : product.brand}</Badge>
-                        <Badge variant="secondary" className="bg-pink-50 text-primary border-none text-[10px] truncate">{product.category || "Geral"}</Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge className={`rounded-lg font-bold py-1 border-none ${product.brand === 'Natura' ? 'bg-[#FF6A13]' : product.brand === 'Avon' ? 'bg-[#622D91]' : 'bg-emerald-600'}`}>{product.brand === 'CasaEstilo' ? 'Casa/Estilo' : product.brand}</Badge>
+                          <Badge variant="secondary" className="bg-pink-50 text-primary border-none text-[10px] truncate max-w-[100px]">{product.category || "Geral"}</Badge>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 hover:bg-primary/10">
+                              <MoreVertical className="h-4 w-4 text-primary" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="rounded-xl border-primary/20">
+                            <DropdownMenuItem className="font-bold gap-2 cursor-pointer" onSelect={() => handleEditProduct(product)}>
+                              <Pencil className="h-4 w-4 text-amber-500" /> Editar Produto
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="font-bold gap-2 text-rose-600 cursor-pointer" onSelect={() => setProductToDelete(product)}>
+                              <Trash2 className="h-4 w-4" /> Excluir do Catálogo
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                      </div>
                   </CardHeader>
                   <CardContent className="p-4 flex flex-col gap-3">
@@ -206,18 +258,18 @@ export default function ProductsPage() {
                     </div>
                     <div className="flex items-center justify-between border-t pt-3 border-primary/10">
                       <div className="flex flex-col">
-                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Venda Sugerida</span>
+                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Preço Venda</span>
                         <span className="text-lg font-black text-foreground">R$ {Number(product.resellerPrice || product.price || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                       </div>
                       <Button 
-                        variant="ghost" 
-                        size="icon" 
+                        variant="secondary" 
+                        size="sm" 
                         onClick={() => {
                           setTimeout(() => setSelectedProduct(product), 150);
                         }} 
-                        className="rounded-full h-9 w-9 hover:bg-primary/10 group-hover:text-primary"
+                        className="rounded-xl font-bold bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all"
                       >
-                        <ChevronRight className="h-5 w-5" />
+                        Ver Detalhes
                       </Button>
                     </div>
                   </CardContent>
@@ -273,7 +325,7 @@ export default function ProductsPage() {
                     <span className="text-lg font-black text-rose-500">R$ {Number(selectedProduct.cost || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                   </div>
                   <div className="bg-card p-4 rounded-2xl border border-primary/10 shadow-sm flex flex-col">
-                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider mb-1">Preço Revendedora</span>
+                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider mb-1">Preço Venda</span>
                     <span className="text-lg font-black text-blue-500">R$ {Number(selectedProduct.resellerPrice || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                   </div>
                   <div className="bg-card p-4 rounded-2xl border border-primary/10 shadow-sm flex flex-col bg-primary/5">
@@ -387,6 +439,21 @@ export default function ProductsPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!productToDelete} onOpenChange={(o) => !o && setProductToDelete(null)}>
+        <AlertDialogContent className="rounded-3xl border-primary">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-2xl font-black text-primary uppercase">Excluir Produto?</AlertDialogTitle>
+            <AlertDialogDescription className="text-lg font-medium text-muted-foreground">
+              Deseja remover <b>{productToDelete?.name}</b> permanentemente do seu catálogo? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl font-bold">Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="rounded-xl font-bold bg-rose-600 hover:bg-rose-700">Confirmar Exclusão</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </LayoutWrapper>
   )
 }
