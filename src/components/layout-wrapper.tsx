@@ -142,14 +142,14 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       <div className="hidden md:block shrink-0 h-full">
         <AppSidebar />
       </div>
-      <SidebarInset className="bg-transparent flex-1 w-full overflow-hidden flex flex-col h-full">
+      <SidebarInset className="bg-transparent flex-1 w-full overflow-hidden flex flex-col h-full relative">
         {pathname !== "/" && (
-          <div className="w-full p-4 sm:p-8 shrink-0 z-[50]">
+          <div className="absolute top-4 left-4 sm:top-6 sm:left-6 z-[100]">
             <Button
               variant="outline"
               size="sm"
               onClick={() => router.push("/")}
-              className="rounded-xl border-primary text-primary bg-card hover:bg-primary/5 font-bold h-12 px-6 shadow-md transition-all active:scale-95 shrink-0 text-base"
+              className="rounded-xl border-primary text-primary bg-card/80 backdrop-blur-md hover:bg-primary/5 font-bold h-12 px-6 shadow-xl transition-all active:scale-95 shrink-0 text-base border-2"
             >
               <ArrowLeft className="mr-2 h-5 w-5" />
               Voltar ao Início
@@ -158,7 +158,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
         )}
         <main className="flex-1 overflow-y-auto w-full pb-24 md:pb-0 scroll-smooth">
           <div className="w-full relative border-l-2 border-primary/20 dark:border-primary/40 bg-card dark:bg-card min-h-full">
-            <div className={cn("w-full p-4 sm:p-8 md:p-12", pathname === "/" ? "pt-12" : "pt-2")}>
+            <div className={cn("w-full p-4 sm:p-8 md:p-12", pathname === "/" ? "pt-12" : "pt-24")}>
               {children}
             </div>
           </div>
