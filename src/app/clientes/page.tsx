@@ -23,7 +23,11 @@ import {
   UserPlus,
   Trash2,
   Pencil,
-  ExternalLink
+  User,
+  FileText,
+  Calendar,
+  ChevronRight,
+  Info
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -32,7 +36,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 import {
   AlertDialog,
@@ -59,6 +62,7 @@ import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
 import { collection, addDoc, serverTimestamp, deleteDoc, doc, updateDoc } from "firebase/firestore"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
+import { Separator } from "@/components/ui/separator"
 
 export default function ClientsPage() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -66,6 +70,7 @@ export default function ClientsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingClient, setEditingClient] = useState<any>(null)
   const [clientToDelete, setClientToDelete] = useState<any>(null)
+  const [selectedClientForDetails, setSelectedClientForDetails] = useState<any>(null)
   const { toast } = useToast()
   const db = useFirestore()
 
@@ -210,7 +215,7 @@ export default function ClientsPage() {
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-primary">
               Meus Clientes
             </h1>
-            <p className="text-muted-foreground font-medium text-lg">Gerencie sua rede de contatos e vendas.</p>
+            <p className="text-muted-foreground font-medium text-lg text-center">Gerencie sua rede de contatos e vendas.</p>
           </div>
           
           <Button onClick={handleOpenAdd} className="w-full rounded-2xl font-bold bg-primary hover:bg-primary/90 shadow-lg h-14 text-lg">
@@ -312,7 +317,7 @@ export default function ClientsPage() {
               <div className="grid gap-4 md:hidden">
                 {filteredClients.map((client) => (
                   <Card key={client.id} className="rounded-3xl border-primary/20 shadow-sm overflow-hidden bg-white">
-                    <CardContent className="p-5">
+                    <CardContent className="p-5 flex flex-col gap-4">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3 min-w-0">
                           <Avatar className="h-12 w-12 border-2 border-primary/10 shrink-0">
@@ -327,35 +332,57 @@ export default function ClientsPage() {
                             <span className="text-sm text-muted-foreground font-medium mt-1 truncate">
                               {client.phone}
                             </span>
-                            <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground font-semibold">
-                              <MapPin className="h-3 w-3 text-primary shrink-0" />
-                              <span className="truncate">{client.neighborhood}{client.neighborhood && client.city ? ', ' : ''}{client.city}</span>
-                            </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <Button variant="ghost" size="icon" onClick={() => openDialer(client.phone)} className="rounded-full h-10 w-10 text-primary hover:bg-primary/10">
-                            <Phone className="h-5 w-5" />
-                          </Button>
-                          <Button variant="ghost" size="icon" onClick={() => openWhatsApp(client.phone)} className="rounded-full h-10 w-10 text-emerald-600 hover:bg-emerald-50">
-                            <MessageSquare className="h-5 w-5" />
-                          </Button>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="rounded-full h-10 w-10">
-                                <MoreVertical className="h-5 w-5" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="rounded-xl">
-                              <DropdownMenuItem className="font-bold gap-2" onClick={() => handleOpenEdit(client)}>
-                                <Pencil className="h-4 w-4 text-blue-500" /> Editar
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="font-bold gap-2 text-rose-600" onClick={() => setClientToDelete(client)}>
-                                <Trash2 className="h-4 w-4" /> Excluir
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="rounded-full h-10 w-10">
+                              <MoreVertical className="h-5 w-5" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="rounded-xl">
+                            <DropdownMenuItem className="font-bold gap-2" onClick={() => handleOpenEdit(client)}>
+                              <Pencil className="h-4 w-4 text-blue-500" /> Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="font-bold gap-2 text-rose-600" onClick={() => setClientToDelete(client)}>
+                              <Trash2 className="h-4 w-4" /> Excluir
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                      
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground font-semibold bg-secondary/20 p-2 rounded-xl">
+                        <MapPin className="h-3 w-3 text-primary shrink-0" />
+                        <span className="truncate">
+                          {client.neighborhood || 'S/ Bairro'}{client.neighborhood && client.city ? ', ' : ''}{client.city || 'S/ Cidade'}
+                        </span>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => openDialer(client.phone)} 
+                          className="flex-1 rounded-xl font-bold border-primary/20 text-primary hover:bg-primary/5 h-10"
+                        >
+                          <Phone className="h-4 w-4 mr-2" /> Ligar
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => openWhatsApp(client.phone)} 
+                          className="flex-1 rounded-xl font-bold border-emerald-200 text-emerald-600 hover:bg-emerald-50 h-10"
+                        >
+                          <MessageSquare className="h-4 w-4 mr-2" /> WhatsApp
+                        </Button>
+                        <Button 
+                          variant="secondary" 
+                          size="sm" 
+                          onClick={() => setSelectedClientForDetails(client)} 
+                          className="flex-1 rounded-xl font-bold bg-secondary/50 text-foreground hover:bg-primary hover:text-white h-10 transition-all"
+                        >
+                          Detalhes
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -368,7 +395,7 @@ export default function ClientsPage() {
                   <TableHeader className="bg-muted/30">
                     <TableRow className="hover:bg-transparent border-none h-14">
                       <TableHead className="px-6 font-black text-muted-foreground uppercase tracking-widest text-xs">Cliente</TableHead>
-                      <TableHead className="font-black text-muted-foreground uppercase tracking-widest text-xs">Telefone</TableHead>
+                      <TableHead className="font-black text-muted-foreground uppercase tracking-widest text-xs">Localização</TableHead>
                       <TableHead className="font-black text-muted-foreground uppercase tracking-widest text-xs">Status</TableHead>
                       <TableHead className="px-6 text-right font-black text-muted-foreground uppercase tracking-widest text-xs">Ações</TableHead>
                     </TableRow>
@@ -385,15 +412,15 @@ export default function ClientsPage() {
                             </Avatar>
                             <div className="flex flex-col">
                               <span className="font-bold text-foreground group-hover:text-primary transition-colors truncate max-w-[200px]">{client.name}</span>
-                              <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-black uppercase tracking-wider mt-0.5">
-                                <MapPin className="h-3 w-3 text-primary/60" />
-                                {client.neighborhood || 'S/ Bairro'}{client.city ? `, ${client.city}` : ''}
-                              </div>
+                              <span className="text-xs text-muted-foreground font-semibold">{client.phone}</span>
                             </div>
                           </div>
                         </TableCell>
                         <TableCell className="font-semibold text-muted-foreground">
-                          {client.phone}
+                          <div className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3 text-primary/60" />
+                            {client.neighborhood || 'S/ Bairro'}{client.city ? `, ${client.city}` : ''}
+                          </div>
                         </TableCell>
                         <TableCell>
                           <Badge variant="secondary" className="rounded-lg font-black bg-pink-100 text-primary border-none text-[10px] uppercase">
@@ -402,11 +429,29 @@ export default function ClientsPage() {
                         </TableCell>
                         <TableCell className="px-6 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <Button variant="outline" size="sm" onClick={() => openDialer(client.phone)} className="rounded-xl font-bold border-primary text-primary hover:bg-primary hover:text-white h-9 px-3">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => openDialer(client.phone)} 
+                              className="rounded-xl font-bold border-primary text-primary hover:bg-primary hover:text-white h-9 px-3"
+                            >
                               <Phone className="h-4 w-4 mr-2" /> Ligar
                             </Button>
-                            <Button variant="outline" size="sm" onClick={() => openWhatsApp(client.phone)} className="rounded-xl font-bold border-emerald-500 text-emerald-600 hover:bg-emerald-500 hover:text-white h-9 px-3">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => openWhatsApp(client.phone)} 
+                              className="rounded-xl font-bold border-emerald-500 text-emerald-600 hover:bg-emerald-500 hover:text-white h-9 px-3"
+                            >
                               <MessageSquare className="h-4 w-4 mr-2" /> WhatsApp
+                            </Button>
+                            <Button 
+                              variant="secondary" 
+                              size="sm" 
+                              onClick={() => setSelectedClientForDetails(client)} 
+                              className="rounded-xl font-bold h-9 bg-secondary/50 hover:bg-primary hover:text-white transition-all"
+                            >
+                              Detalhes <ChevronRight className="ml-1 h-4 w-4" />
                             </Button>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
@@ -434,6 +479,104 @@ export default function ClientsPage() {
           )}
         </div>
       </div>
+
+      {/* Details Dialog */}
+      <Dialog open={!!selectedClientForDetails} onOpenChange={(open) => !open && setSelectedClientForDetails(null)}>
+        <DialogContent className="sm:max-w-[600px] w-[95vw] rounded-3xl border-primary overflow-hidden p-0 flex flex-col max-h-[90vh]">
+          {selectedClientForDetails && (
+            <>
+              <div className="p-8 border-b bg-white">
+                <DialogHeader className="space-y-4">
+                  <div className="flex justify-center">
+                    <Avatar className="h-20 w-20 border-4 border-primary/10">
+                      <AvatarFallback className="bg-secondary text-primary font-black text-2xl">
+                        {selectedClientForDetails.name.substring(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+                  <DialogTitle className="text-3xl md:text-4xl font-black text-center text-primary leading-tight">
+                    {selectedClientForDetails.name}
+                  </DialogTitle>
+                  <div className="flex items-center justify-center gap-3">
+                    <Badge variant="secondary" className="bg-pink-100 text-primary font-bold border-none rounded-lg px-3 py-1">
+                      CLIENTE ATIVO
+                    </Badge>
+                  </div>
+                </DialogHeader>
+              </div>
+
+              <div className="flex-1 overflow-y-auto bg-[#FDFBFB] p-8 space-y-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="bg-white p-5 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-1">
+                    <div className="flex items-center gap-2 text-primary">
+                      <Phone className="h-4 w-4" />
+                      <span className="text-[10px] font-black uppercase tracking-wider">WhatsApp</span>
+                    </div>
+                    <span className="text-xl font-bold text-foreground">
+                      {selectedClientForDetails.phone}
+                    </span>
+                  </div>
+                  <div className="bg-white p-5 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-1">
+                    <div className="flex items-center gap-2 text-blue-600">
+                      <MapPin className="h-4 w-4" />
+                      <span className="text-[10px] font-black uppercase tracking-wider">Localização</span>
+                    </div>
+                    <span className="text-lg font-bold text-foreground truncate">
+                      {selectedClientForDetails.neighborhood || 'S/ Bairro'}
+                    </span>
+                    <span className="text-xs text-muted-foreground font-medium">
+                      {selectedClientForDetails.city || 'S/ Cidade'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="bg-primary/5 p-6 rounded-2xl border border-primary/20 flex items-center justify-between">
+                   <div className="flex items-center gap-3">
+                     <div className="bg-primary text-white p-3 rounded-xl shadow-lg">
+                        <Calendar className="h-6 w-6" />
+                     </div>
+                     <div className="flex flex-col">
+                        <span className="text-sm font-bold text-primary">Data de Cadastro</span>
+                        <span className="text-xs text-muted-foreground font-medium">
+                          {selectedClientForDetails.createdAt ? new Date(selectedClientForDetails.createdAt.seconds * 1000).toLocaleDateString('pt-BR') : 'Não disponível'}
+                        </span>
+                     </div>
+                   </div>
+                </div>
+
+                <div className="space-y-4">
+                   <div className="flex items-center gap-2 text-muted-foreground">
+                      <Info className="h-5 w-5" />
+                      <h4 className="font-bold text-lg">Observações e Notas</h4>
+                   </div>
+                   <Separator className="bg-primary/10" />
+                   <div className="bg-white p-4 rounded-xl border border-primary/5 min-h-[100px]">
+                      <p className="text-muted-foreground leading-relaxed text-base font-medium whitespace-pre-wrap">
+                        {selectedClientForDetails.notes || "Nenhuma observação cadastrada para este cliente."}
+                      </p>
+                   </div>
+                </div>
+              </div>
+
+              <div className="p-6 bg-white border-t flex gap-2">
+                 <Button 
+                   variant="outline"
+                   onClick={() => setSelectedClientForDetails(null)} 
+                   className="flex-1 h-14 rounded-2xl font-bold text-lg border-primary text-primary"
+                 >
+                   Fechar
+                 </Button>
+                 <Button 
+                   onClick={() => openWhatsApp(selectedClientForDetails.phone)} 
+                   className="flex-1 h-14 rounded-2xl font-bold text-lg primary-gradient shadow-xl"
+                 >
+                   Conversar
+                 </Button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={!!clientToDelete} onOpenChange={(o) => !o && setClientToDelete(null)}>
         <AlertDialogContent className="rounded-3xl border-primary">
