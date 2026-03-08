@@ -52,6 +52,7 @@
         "category": { "type": "string" },
         "price": { "type": "number" },
         "cost": { "type": "number" },
+        "resellerPrice": { "type": "number" },
         "code": { "type": "string" },
         "description": { "type": "string" },
         "image": { "type": "string", "format": "uri" },

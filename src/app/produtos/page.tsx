@@ -16,7 +16,8 @@ import {
   Tag,
   Hash,
   Zap,
-  TrendingUp
+  TrendingUp,
+  Package
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -59,7 +60,7 @@ export default function ProductsPage() {
   const { data: categories } = useCollection(categoriesRef)
 
   const [formData, setFormData] = useState({
-    name: "", brand: "Natura", category: "", price: "", cost: "", code: "", description: ""
+    name: "", brand: "Natura", category: "", price: "", cost: "", resellerPrice: "", code: "", description: ""
   })
 
   const formatCurrencyInput = (value: string) => {
@@ -69,14 +70,14 @@ export default function ProductsPage() {
     return amount.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
-  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'price' | 'cost') => {
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'price' | 'cost' | 'resellerPrice') => {
     const formatted = formatCurrencyInput(e.target.value);
     setFormData({ ...formData, [field]: formatted });
   }
 
   const handleOpenNewProduct = () => {
     setEditingProductId(null)
-    setFormData({ name: "", brand: "Natura", category: "", price: "", cost: "", code: "", description: "" })
+    setFormData({ name: "", brand: "Natura", category: "", price: "", cost: "", resellerPrice: "", code: "", description: "" })
     setIsDialogOpen(true)
   }
 
@@ -88,6 +89,7 @@ export default function ProductsPage() {
       category: product.category || "",
       price: product.price ? Number(product.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : "",
       cost: product.cost ? Number(product.cost).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : "",
+      resellerPrice: product.resellerPrice ? Number(product.resellerPrice).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : "",
       code: product.code || "",
       description: product.description || ""
     })
@@ -106,6 +108,7 @@ export default function ProductsPage() {
       ...formData, 
       price: parseCurrencyToNumber(formData.price), 
       cost: formData.cost ? parseCurrencyToNumber(formData.cost) : 0, 
+      resellerPrice: formData.resellerPrice ? parseCurrencyToNumber(formData.resellerPrice) : 0,
       updatedAt: serverTimestamp() 
     }
 
@@ -239,22 +242,26 @@ export default function ProductsPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <div className="bg-card p-4 rounded-2xl border border-primary/10 shadow-sm flex flex-col">
                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider mb-1">Preço Revista</span>
-                    <span className="text-xl font-black text-primary">R$ {Number(selectedProduct.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                    <span className="text-lg font-black text-primary">R$ {Number(selectedProduct.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                   </div>
                   <div className="bg-card p-4 rounded-2xl border border-primary/10 shadow-sm flex flex-col">
                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider mb-1">Preço Custo</span>
-                    <span className="text-xl font-black text-emerald-600">R$ {Number(selectedProduct.cost || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                    <span className="text-lg font-black text-rose-500">R$ {Number(selectedProduct.cost || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="bg-card p-4 rounded-2xl border border-primary/10 shadow-sm flex flex-col">
+                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider mb-1">Preço Revendedora</span>
+                    <span className="text-lg font-black text-blue-500">R$ {Number(selectedProduct.resellerPrice || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                   </div>
                   <div className="bg-card p-4 rounded-2xl border border-primary/10 shadow-sm flex flex-col bg-primary/5">
                     <div className="flex items-center gap-1 mb-1">
                       <TrendingUp className="h-3 w-3 text-primary" />
-                      <span className="text-[10px] font-black text-primary uppercase tracking-wider">Ganhos (Lucro)</span>
+                      <span className="text-[10px] font-black text-primary uppercase tracking-wider">Lucro Estimado</span>
                     </div>
-                    <span className="text-xl font-black text-primary">
-                      R$ {(Number(selectedProduct.price || 0) - Number(selectedProduct.cost || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    <span className="text-lg font-black text-primary">
+                      R$ {(Number(selectedProduct.price || 0) - Number(selectedProduct.resellerPrice || selectedProduct.cost || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </span>
                   </div>
                 </div>
@@ -285,7 +292,7 @@ export default function ProductsPage() {
       </Dialog>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[500px] w-[95vw] rounded-3xl border-primary max-h-[90vh] flex flex-col p-0 overflow-hidden">
+        <DialogContent className="sm:max-w-[550px] w-[95vw] rounded-3xl border-primary max-h-[90vh] flex flex-col p-0 overflow-hidden">
           <div className="p-8 border-b bg-card">
             <DialogHeader>
               <DialogTitle className="text-2xl font-black text-primary text-center uppercase tracking-tight">
@@ -321,7 +328,7 @@ export default function ProductsPage() {
                   </Select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="grid gap-2">
                   <Label className="font-bold text-muted-foreground">Preço Revista</Label>
                   <Input value={formData.price} onChange={e => handlePriceChange(e, 'price')} className="rounded-xl border-primary/30 h-11 bg-card" />
@@ -330,13 +337,17 @@ export default function ProductsPage() {
                   <Label className="font-bold text-muted-foreground">Preço Custo</Label>
                   <Input value={formData.cost} onChange={e => handlePriceChange(e, 'cost')} className="rounded-xl border-primary/30 h-11 bg-card" />
                 </div>
+                <div className="grid gap-2">
+                  <Label className="font-bold text-muted-foreground">Preço Revendedora</Label>
+                  <Input value={formData.resellerPrice} onChange={e => handlePriceChange(e, 'resellerPrice')} className="rounded-xl border-primary/30 h-11 bg-card" />
+                </div>
               </div>
               <div className="grid gap-2">
                 <Label className="font-bold text-muted-foreground">Código de Referência</Label>
                 <Input value={formData.code} onChange={e => setFormData({...formData, code: e.target.value})} placeholder="Ex: 50123" className="rounded-xl border-primary/30 h-11 bg-card" />
               </div>
               <div className="grid gap-2">
-                <Label className="font-bold text-muted-foreground">Descrição / Notas</Label>
+                <Label className="font-bold text-muted-foreground ml-1">Descrição / Notas</Label>
                 <Textarea 
                    value={formData.description} 
                    onChange={e => setFormData({...formData, description: e.target.value})} 
