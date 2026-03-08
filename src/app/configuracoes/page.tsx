@@ -19,7 +19,8 @@ import {
   Brush,
   Type,
   Pipette,
-  Layout
+  Layout,
+  Eye
 } from "lucide-react"
 import { useFirestore, useDoc, useMemoFirebase } from "@/firebase"
 import { doc, setDoc, serverTimestamp } from "firebase/firestore"
@@ -128,7 +129,36 @@ export default function SettingsPage() {
                       <span className={`font-bold text-[10px] uppercase tracking-wider ${themeId === theme.id ? "text-primary" : "text-muted-foreground"}`}>{theme.name}</span>
                     </button>
                   ))}
+                  <button 
+                    onClick={() => setThemeId("custom")} 
+                    className={`flex flex-col items-center gap-2 p-3 rounded-2xl border-2 transition-all ${themeId === "custom" ? "border-primary bg-primary/5 shadow-md scale-105" : "border-transparent bg-muted/20 hover:border-primary/30"}`}
+                  >
+                    <div className="h-8 w-8 rounded-full shadow-inner flex items-center justify-center bg-gradient-to-tr from-rose-400 via-emerald-400 to-blue-400">
+                      <Pipette className="h-4 w-4 text-white" />
+                    </div>
+                    <span className={`font-bold text-[10px] uppercase tracking-wider ${themeId === "custom" ? "text-primary" : "text-muted-foreground"}`}>Personalizada</span>
+                  </button>
                 </div>
+
+                {themeId === "custom" && (
+                  <div className="p-4 bg-muted/30 rounded-2xl border border-primary/20 animate-in fade-in slide-in-from-top-2">
+                    <Label className="font-black text-[10px] text-muted-foreground uppercase tracking-widest block mb-2 ml-1">Código HEX da Cor</Label>
+                    <div className="flex gap-3">
+                      <Input 
+                        type="color" 
+                        value={customColor} 
+                        onChange={(e) => setCustomColor(e.target.value)} 
+                        className="w-12 h-12 p-1 rounded-lg border-none bg-transparent cursor-pointer"
+                      />
+                      <Input 
+                        value={customColor} 
+                        onChange={(e) => setCustomColor(e.target.value)} 
+                        className="h-12 rounded-xl border-primary/30 font-bold uppercase" 
+                        placeholder="#C2185B"
+                      />
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -157,10 +187,59 @@ export default function SettingsPage() {
                     className="data-[state=checked]:bg-primary"
                   />
                 </div>
+
+                <div className="space-y-3">
+                  <Label className="font-bold text-muted-foreground ml-1">Cor de Fundo (Personalizada)</Label>
+                  <div className="flex gap-3">
+                    <Input 
+                      type="color" 
+                      value={customBgColor} 
+                      onChange={(e) => setCustomBgColor(e.target.value)} 
+                      className="w-12 h-12 p-1 rounded-lg border-none bg-transparent cursor-pointer"
+                    />
+                    <Input 
+                      value={customBgColor} 
+                      onChange={(e) => setCustomBgColor(e.target.value)} 
+                      className="h-12 rounded-xl border-primary/30 font-bold uppercase flex-1" 
+                    />
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
-            {/* CARD 4: BOTÃO SALVAR */}
+            {/* CARD 4: PREVIA */}
+            <Card className="rounded-[2.5rem] border-primary/20 overflow-hidden shadow-sm">
+              <CardHeader className="bg-primary/5 border-b px-8 py-6">
+                <CardTitle className="text-xl font-black text-primary flex items-center gap-2 uppercase tracking-tight">
+                  <Eye className="h-6 w-6" /> Prévia do App
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-8">
+                <div className="rounded-2xl border-4 border-muted p-4 bg-muted/10">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center gap-2">
+                       <div className="h-6 w-6 rounded-md bg-primary" />
+                       <div className="h-4 w-24 bg-muted rounded-md" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                       <div className="h-20 bg-primary/10 rounded-xl border border-primary/20 flex flex-col p-2 gap-1">
+                          <div className="h-2 w-8 bg-primary/30 rounded" />
+                          <div className="h-4 w-12 bg-primary rounded" />
+                       </div>
+                       <div className="h-20 bg-muted/30 rounded-xl border border-muted flex flex-col p-2 gap-1">
+                          <div className="h-2 w-8 bg-muted rounded" />
+                          <div className="h-4 w-12 bg-muted rounded" />
+                       </div>
+                    </div>
+                    <div className="h-10 bg-primary rounded-xl flex items-center justify-center">
+                       <div className="h-2 w-20 bg-white/30 rounded" />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* CARD 5: SALVAR */}
             <Card className="rounded-[2.5rem] border-primary/20 overflow-hidden shadow-sm">
               <CardHeader className="bg-primary/5 border-b px-8 py-6 text-center">
                  <CardTitle className="text-xl font-black text-primary uppercase tracking-tight">Ações</CardTitle>
