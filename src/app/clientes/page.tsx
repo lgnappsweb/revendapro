@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -23,7 +22,6 @@ import {
   UserPlus,
   Trash2,
   Pencil,
-  User,
   FileText,
   Calendar,
   ChevronRight,
@@ -341,10 +339,22 @@ export default function ClientsPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="rounded-xl">
-                            <DropdownMenuItem className="font-bold gap-2" onClick={() => handleOpenEdit(client)}>
+                            <DropdownMenuItem 
+                              className="font-bold gap-2" 
+                              onSelect={(e) => {
+                                e.preventDefault();
+                                handleOpenEdit(client);
+                              }}
+                            >
                               <Pencil className="h-4 w-4 text-blue-500" /> Editar
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="font-bold gap-2 text-rose-600" onClick={() => setClientToDelete(client)}>
+                            <DropdownMenuItem 
+                              className="font-bold gap-2 text-rose-600" 
+                              onSelect={(e) => {
+                                e.preventDefault();
+                                setClientToDelete(client);
+                              }}
+                            >
                               <Trash2 className="h-4 w-4" /> Excluir
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -460,10 +470,22 @@ export default function ClientsPage() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="rounded-xl">
-                                <DropdownMenuItem className="font-bold gap-2" onClick={() => handleOpenEdit(client)}>
+                                <DropdownMenuItem 
+                                  className="font-bold gap-2" 
+                                  onSelect={(e) => {
+                                    e.preventDefault();
+                                    handleOpenEdit(client);
+                                  }}
+                                >
                                   <Pencil className="h-4 w-4 text-blue-500" /> Editar
                                 </DropdownMenuItem>
-                                <DropdownMenuItem className="font-bold gap-2 text-rose-600" onClick={() => setClientToDelete(client)}>
+                                <DropdownMenuItem 
+                                  className="font-bold gap-2 text-rose-600" 
+                                  onSelect={(e) => {
+                                    e.preventDefault();
+                                    setClientToDelete(client);
+                                  }}
+                                >
                                   <Trash2 className="h-4 w-4" /> Excluir
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
