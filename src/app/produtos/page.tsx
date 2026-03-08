@@ -17,8 +17,6 @@ import {
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import Image from "next/image"
-import { PlaceHolderImages } from "@/lib/placeholder-images"
 import { 
   Dialog, 
   DialogContent, 
@@ -112,7 +110,7 @@ export default function ProductsPage() {
       ...formData,
       price: parseCurrencyToNumber(formData.price),
       cost: formData.cost ? parseCurrencyToNumber(formData.cost) : 0,
-      image: PlaceHolderImages[Math.floor(Math.random() * (PlaceHolderImages?.length || 1))]?.imageUrl || "",
+      image: "", // We are no longer using images
       createdAt: serverTimestamp()
     }
 
@@ -158,7 +156,7 @@ export default function ProductsPage() {
       <div className="flex flex-col gap-10">
         <div className="flex flex-col items-center text-center gap-6 py-4">
           <div className="space-y-2 w-full text-center flex flex-col items-center">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter text-primary text-center whitespace-nowrap overflow-hidden">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-primary text-center lg:whitespace-nowrap">
               Catálogo de Produtos
             </h1>
             <p className="text-muted-foreground font-medium text-lg">Controle seu estoque e preços de venda.</p>
@@ -173,15 +171,15 @@ export default function ProductsPage() {
             <DialogContent className="sm:max-w-[500px] w-[95vw] rounded-2xl border-primary max-h-[90vh] flex flex-col p-0 overflow-hidden">
               <div className="p-8 pb-4 border-b">
                 <DialogHeader>
-                  <DialogTitle className="text-3xl font-black text-primary text-center">Cadastrar Produto</DialogTitle>
-                  <DialogDescription className="font-bold text-muted-foreground text-center text-lg mt-1">
+                  <DialogTitle className="text-4xl font-black text-primary text-center uppercase tracking-tight">Cadastrar Produto</DialogTitle>
+                  <DialogDescription className="font-bold text-muted-foreground text-center text-xl mt-1">
                     Adicione um novo item ao seu catálogo de revenda.
                   </DialogDescription>
                 </DialogHeader>
               </div>
               
-              <div className="flex-1 overflow-y-auto px-6 py-6">
-                <div className="grid gap-6">
+              <div className="flex-1 overflow-y-auto px-6 py-6 bg-[#FDFBFB]">
+                <div className="grid gap-6 pb-2">
                   <div className="grid gap-2">
                     <Label htmlFor="name" className="font-bold text-muted-foreground text-base">Nome do Produto</Label>
                     <Input 
@@ -189,14 +187,14 @@ export default function ProductsPage() {
                       value={formData.name}
                       onChange={(e) => setFormData({...formData, name: e.target.value})}
                       placeholder="Ex: Kaiak Aventura" 
-                      className="rounded-xl border-primary/30 h-11" 
+                      className="rounded-xl border-primary/30 h-11 bg-white" 
                     />
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="grid gap-2">
                       <Label htmlFor="brand" className="font-bold text-muted-foreground text-base">Marca</Label>
                       <Select value={formData.brand} onValueChange={(v) => setFormData({...formData, brand: v})}>
-                        <SelectTrigger className="rounded-xl border-primary/30 h-11">
+                        <SelectTrigger className="rounded-xl border-primary/30 h-11 bg-white">
                           <SelectValue placeholder="Selecione..." />
                         </SelectTrigger>
                         <SelectContent>
@@ -209,7 +207,7 @@ export default function ProductsPage() {
                     <div className="grid gap-2">
                       <Label htmlFor="category" className="font-bold text-muted-foreground text-base">Categoria</Label>
                       <Select value={formData.category} onValueChange={(v) => setFormData({...formData, category: v})}>
-                        <SelectTrigger className="rounded-xl border-primary/30 h-11">
+                        <SelectTrigger className="rounded-xl border-primary/30 h-11 bg-white">
                           <SelectValue placeholder="Selecione categoria..." />
                         </SelectTrigger>
                         <SelectContent>
@@ -228,7 +226,7 @@ export default function ProductsPage() {
                         value={formData.price}
                         onChange={(e) => handlePriceChange(e, 'price')}
                         placeholder="0,00" 
-                        className="rounded-xl border-primary/30 h-11" 
+                        className="rounded-xl border-primary/30 h-11 bg-white" 
                       />
                     </div>
                     <div className="grid gap-2">
@@ -238,7 +236,7 @@ export default function ProductsPage() {
                         value={formData.cost}
                         onChange={(e) => handlePriceChange(e, 'cost')}
                         placeholder="0,00" 
-                        className="rounded-xl border-primary/30 h-11" 
+                        className="rounded-xl border-primary/30 h-11 bg-white" 
                       />
                     </div>
                   </div>
@@ -249,7 +247,7 @@ export default function ProductsPage() {
                       value={formData.code}
                       onChange={(e) => setFormData({...formData, code: e.target.value})}
                       placeholder="Ex: NAT-123" 
-                      className="rounded-xl border-primary/30 h-11" 
+                      className="rounded-xl border-primary/30 h-11 bg-white" 
                     />
                   </div>
                   <div className="grid gap-2">
@@ -259,11 +257,11 @@ export default function ProductsPage() {
                       value={formData.description}
                       onChange={(e) => setFormData({...formData, description: e.target.value})}
                       placeholder="Detalhes sobre o produto..." 
-                      className="rounded-xl border-primary/30 min-h-[120px]" 
+                      className="rounded-xl border-primary/30 min-h-[120px] bg-white" 
                     />
                   </div>
                   
-                  <div className="pt-2 pb-8">
+                  <div className="pt-4">
                     <Button onClick={handleSaveProduct} className="w-full rounded-xl font-bold h-14 text-lg primary-gradient shadow-lg">
                       Salvar Produto
                     </Button>
@@ -316,42 +314,28 @@ export default function ProductsPage() {
         ) : (
           <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredProducts.map((product) => (
-              <Card key={product.id} className="group overflow-hidden rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border-primary">
-                <div className="relative aspect-square overflow-hidden bg-muted">
-                  <Image 
-                    src={product.image || PlaceHolderImages[0]?.imageUrl || ""} 
-                    alt={product.name || "Produto"}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                  <div className="absolute top-3 left-3 flex flex-col gap-2">
-                    <Badge className={`rounded-lg font-bold shadow-md py-1 border-none ${
-                      product.brand === 'Natura' ? 'bg-[#FF6A13] text-white' : 'bg-[#622D91] text-white'
-                    }`}>
-                      {product.brand}
-                    </Badge>
-                  </div>
-                  <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                     <Button variant="secondary" size="icon" className="rounded-full shadow-lg h-9 w-9 border-none">
-                      <MoreVertical className="h-5 w-5" />
-                    </Button>
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent">
-                    <Badge variant="secondary" className="bg-white/90 text-primary font-bold border-none backdrop-blur-sm">
-                      {product.category || "Geral"}
-                    </Badge>
-                  </div>
-                </div>
-                <CardContent className="p-5">
-                  <div className="flex flex-col h-full justify-between gap-3">
-                    <div>
-                      <h3 className="font-bold text-lg leading-tight group-hover:text-primary transition-colors line-clamp-1">{product.name}</h3>
-                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium mt-1 uppercase tracking-wider">
+              <Card key={product.id} className="group overflow-hidden rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border-primary bg-white">
+                <CardContent className="p-6">
+                  <div className="flex flex-col h-full gap-4">
+                    <div className="flex justify-between items-start">
+                      <Badge className={`rounded-lg font-bold py-1 border-none ${
+                        product.brand === 'Natura' ? 'bg-[#FF6A13] text-white' : 'bg-[#622D91] text-white'
+                      }`}>
+                        {product.brand}
+                      </Badge>
+                      <Badge variant="secondary" className="bg-pink-50 text-primary font-bold border-none">
+                        {product.category || "Geral"}
+                      </Badge>
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <h3 className="font-bold text-xl leading-tight group-hover:text-primary transition-colors line-clamp-2 min-h-[3.5rem]">{product.name}</h3>
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium uppercase tracking-wider">
                         <Tag className="h-3 w-3" /> COD: {product.code || "S/ REF"}
                       </div>
                     </div>
                     
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between border-t pt-4 border-primary/10">
                       <div className="flex flex-col">
                         <span className="text-2xl font-black text-foreground">
                           R$ {Number(product.price || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
@@ -366,9 +350,14 @@ export default function ProductsPage() {
                       </div>
                     </div>
 
-                    <Button variant="secondary" className="w-full rounded-xl font-bold bg-secondary/50 hover:bg-primary hover:text-white transition-all">
-                      Ver Detalhes <ChevronRight className="ml-1 h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Button variant="secondary" className="flex-1 rounded-xl font-bold bg-secondary/50 hover:bg-primary hover:text-white transition-all">
+                        Detalhes <ChevronRight className="ml-1 h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="rounded-full h-10 w-10 shrink-0">
+                        <MoreVertical className="h-5 w-5" />
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
