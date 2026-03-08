@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -66,9 +65,9 @@ export default function OrdersPage() {
 
   return (
     <LayoutWrapper>
-      <div className="flex flex-col gap-8 w-full">
+      <div className="flex flex-col gap-8 w-full max-w-full overflow-hidden">
         <div className="space-y-2 w-full text-center flex flex-col items-center">
-          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-primary text-center whitespace-nowrap overflow-hidden text-ellipsis w-full px-2">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-primary text-center whitespace-nowrap overflow-hidden text-ellipsis w-full px-2">
             Meus Pedidos
           </h1>
           <p className="text-muted-foreground font-medium text-lg text-center">Histórico completo de todas as vendas realizadas.</p>
@@ -101,9 +100,9 @@ export default function OrdersPage() {
           ) : (
             <>
               {/* Mobile View: Cards */}
-              <div className="grid gap-4 md:hidden">
+              <div className="grid gap-4 md:hidden w-full">
                 {filteredOrders.map((order) => (
-                  <Card key={order.id} className="rounded-3xl border-primary/20 shadow-sm overflow-hidden bg-white">
+                  <Card key={order.id} className="rounded-3xl border-primary/20 shadow-sm overflow-hidden bg-white w-full">
                     <CardContent className="p-5 flex flex-col gap-4">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex flex-col gap-1 min-w-0 flex-1">

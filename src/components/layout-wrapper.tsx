@@ -81,27 +81,29 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-[#FDFBFB]">
       <div className="hidden md:block">
         <AppSidebar />
       </div>
       <SidebarInset className="bg-transparent">
-        <main className="p-4 md:p-6 lg:p-8 flex justify-center pb-24 md:pb-8">
-          <div className="w-full max-w-7xl relative">
+        <main className="p-3 sm:p-4 md:p-6 lg:p-8 flex justify-center pb-24 md:pb-8 w-full overflow-x-hidden">
+          <div className="w-full max-w-6xl relative border-2 border-primary rounded-[2rem] sm:rounded-[3rem] bg-white shadow-sm p-4 sm:p-6 md:p-10 min-h-[calc(100vh-4rem)] flex flex-col gap-6 overflow-hidden">
             {pathname !== "/" && (
-              <div className="h-20 mb-4">
+              <div className="flex items-start">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => router.push("/")}
-                  className="fixed top-6 left-4 md:left-[18rem] z-50 rounded-xl border-primary text-primary bg-white/80 backdrop-blur-md hover:bg-primary/5 font-bold h-10 px-4 shadow-sm"
+                  className="rounded-xl border-primary text-primary bg-white hover:bg-primary/5 font-bold h-10 px-4 shadow-sm transition-all active:scale-95"
                 >
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Voltar ao Início
                 </Button>
               </div>
             )}
-            {children}
+            <div className="flex-1 w-full overflow-x-hidden">
+              {children}
+            </div>
           </div>
         </main>
       </SidebarInset>
