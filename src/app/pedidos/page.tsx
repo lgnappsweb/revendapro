@@ -69,7 +69,7 @@ export default function OrdersPage() {
 
   return (
     <LayoutWrapper>
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-8 w-full max-w-full overflow-hidden">
         <div className="space-y-2 w-full text-center flex flex-col items-center">
           <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-primary text-center whitespace-nowrap overflow-hidden text-ellipsis w-full px-2">
             Meus Pedidos
@@ -77,8 +77,8 @@ export default function OrdersPage() {
           <p className="text-muted-foreground font-medium text-lg text-center">Histórico completo de todas as vendas realizadas.</p>
         </div>
 
-        <div className="relative max-w-2xl mx-auto w-full">
-          <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+        <div className="relative max-w-2xl mx-auto w-full px-4 sm:px-0">
+          <Search className="absolute left-7 sm:left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <Input 
             placeholder="Pesquisar por cliente ou ID do pedido..." 
             className="h-14 pl-12 rounded-2xl border-primary/30 shadow-sm bg-white text-base focus-visible:ring-primary/20"
@@ -87,7 +87,7 @@ export default function OrdersPage() {
           />
         </div>
 
-        <div className="w-full">
+        <div className="w-full px-4 sm:px-0">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20">
               <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
@@ -103,21 +103,21 @@ export default function OrdersPage() {
             </div>
           ) : (
             <>
-              {/* Mobile Cards */}
+              {/* Mobile Cards - Simplified and unified size */}
               <div className="grid gap-4 md:hidden">
                 {filteredOrders.map((order) => (
-                  <Card key={order.id} className="rounded-3xl border-primary/20 shadow-sm overflow-hidden bg-white">
+                  <Card key={order.id} className="rounded-3xl border-primary/20 shadow-sm overflow-hidden bg-white w-full max-w-full">
                     <CardContent className="p-5 flex flex-col gap-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex flex-col gap-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex flex-col gap-1 min-w-0 flex-1">
                           <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">#{order.id.slice(-6).toUpperCase()}</span>
-                          <span className="font-bold text-lg text-foreground truncate">{order.clientName}</span>
-                          <span className="text-sm text-muted-foreground font-medium">
+                          <span className="font-bold text-lg text-foreground truncate block">{order.clientName}</span>
+                          <span className="text-xs text-muted-foreground font-medium">
                             {order.createdAt ? new Date(order.createdAt.seconds * 1000).toLocaleDateString('pt-BR') : 'Recentemente'}
                           </span>
                         </div>
                         <Badge 
-                          className={`rounded-lg font-bold px-3 py-1 ${
+                          className={`rounded-lg font-bold px-3 py-1 shrink-0 ${
                             order.paymentStatus === "Pago" 
                             ? "bg-emerald-100 text-emerald-700" 
                             : "bg-amber-100 text-amber-700"
@@ -128,9 +128,9 @@ export default function OrdersPage() {
                       </div>
                       
                       <div className="flex items-center justify-between border-t border-primary/5 pt-3">
-                        <div className="flex flex-col">
+                        <div className="flex flex-col min-w-0">
                           <span className="text-[10px] font-black text-muted-foreground uppercase">Valor Total</span>
-                          <span className="text-xl font-black text-primary">
+                          <span className="text-xl font-black text-primary truncate">
                             R$ {order.finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                           </span>
                         </div>
@@ -138,7 +138,7 @@ export default function OrdersPage() {
                           variant="secondary" 
                           size="sm" 
                           onClick={() => setSelectedOrder(order)}
-                          className="rounded-xl font-bold bg-secondary/50 hover:bg-primary hover:text-white transition-all"
+                          className="rounded-xl font-bold bg-secondary/50 hover:bg-primary hover:text-white transition-all shrink-0"
                         >
                           Ver Detalhes
                         </Button>
@@ -148,7 +148,7 @@ export default function OrdersPage() {
                 ))}
               </div>
 
-              {/* Desktop Table - Optimized for Organization */}
+              {/* Desktop Table - Optimized and consistent with Clients page */}
               <div className="hidden md:block rounded-3xl border border-primary/20 bg-white shadow-sm overflow-hidden">
                 <Table>
                   <TableHeader className="bg-muted/30">
@@ -172,8 +172,8 @@ export default function OrdersPage() {
                                   {order.clientName.substring(0, 2).toUpperCase()}
                                 </AvatarFallback>
                               </Avatar>
-                              <div className="flex flex-col">
-                                <span className="font-bold text-foreground group-hover:text-primary transition-colors text-base">{order.clientName}</span>
+                              <div className="flex flex-col min-w-0">
+                                <span className="font-bold text-foreground group-hover:text-primary transition-colors text-base truncate max-w-[200px]">{order.clientName}</span>
                                 <span className="text-xs text-muted-foreground font-semibold flex items-center gap-1.5 uppercase tracking-tight">
                                   {getPaymentIcon(order.paymentMethod)} {order.paymentMethod}
                                 </span>
