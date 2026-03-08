@@ -1,4 +1,4 @@
-"use client"
+["use client"
 
 import { useState } from "react"
 import { LayoutWrapper } from "@/components/layout-wrapper"
@@ -36,6 +36,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { useFirestore, useCollection, useMemoFirebase, addDocumentNonBlocking } from "@/firebase"
 import { collection, serverTimestamp } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
@@ -160,98 +161,106 @@ export default function ProductsPage() {
                 <Plus className="mr-2 h-5 w-5" /> Novo Produto
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px] rounded-2xl border-primary">
-              <DialogHeader>
-                <DialogTitle className="text-2xl font-bold text-primary">Cadastrar Produto</DialogTitle>
-                <DialogDescription className="font-medium">Adicione um novo item ao seu catálogo de revenda.</DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="name" className="font-bold">Nome do Produto</Label>
-                  <Input 
-                    id="name" 
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    placeholder="Ex: Kaiak Aventura" 
-                    className="rounded-xl border-primary/30" 
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="brand" className="font-bold">Marca</Label>
-                    <Select value={formData.brand} onValueChange={(v) => setFormData({...formData, brand: v})}>
-                      <SelectTrigger className="rounded-xl border-primary/30">
-                        <SelectValue placeholder="Selecione..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Natura">Natura</SelectItem>
-                        <SelectItem value="Avon">Avon</SelectItem>
-                        <SelectItem value="Outra">Outra</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="category" className="font-bold">Categoria</Label>
-                    <Select value={formData.category} onValueChange={(v) => setFormData({...formData, category: v})}>
-                      <SelectTrigger className="rounded-xl border-primary/30">
-                        <SelectValue placeholder="Selecione categoria..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {PRODUCT_CATEGORIES.map((cat) => (
-                          <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="price" className="font-bold">Preço da revista (R$)</Label>
-                    <Input 
-                      id="price" 
-                      value={formData.price}
-                      onChange={(e) => handlePriceChange(e, 'price')}
-                      placeholder="0,00" 
-                      className="rounded-xl border-primary/30" 
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="cost" className="font-bold">Preço da revendedora (R$)</Label>
-                    <Input 
-                      id="cost" 
-                      value={formData.cost}
-                      onChange={(e) => handlePriceChange(e, 'cost')}
-                      placeholder="0,00" 
-                      className="rounded-xl border-primary/30" 
-                    />
-                  </div>
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="code" className="font-bold">Código / Referência</Label>
-                  <Input 
-                    id="code" 
-                    value={formData.code}
-                    onChange={(e) => setFormData({...formData, code: e.target.value})}
-                    placeholder="Ex: NAT-123" 
-                    className="rounded-xl border-primary/30" 
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="description" className="font-bold">Descrição (Opcional)</Label>
-                  <Textarea 
-                    id="description" 
-                    value={formData.description}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    placeholder="Detalhes sobre o produto..." 
-                    className="rounded-xl border-primary/30 min-h-[100px]" 
-                  />
-                </div>
+            <DialogContent className="sm:max-w-[500px] rounded-2xl border-primary max-h-[90vh] flex flex-col p-0 overflow-hidden">
+              <div className="p-6 pb-2">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-bold text-primary">Cadastrar Produto</DialogTitle>
+                  <DialogDescription className="font-medium">Adicione um novo item ao seu catálogo de revenda.</DialogDescription>
+                </DialogHeader>
               </div>
-              <DialogFooter>
-                <Button onClick={handleSaveProduct} className="w-full rounded-xl font-bold h-12 text-lg">
-                  Salvar Produto
-                </Button>
-              </DialogFooter>
+              
+              <ScrollArea className="flex-1 px-6">
+                <div className="grid gap-4 py-2">
+                  <div className="grid gap-2">
+                    <Label htmlFor="name" className="font-bold">Nome do Produto</Label>
+                    <Input 
+                      id="name" 
+                      value={formData.name}
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
+                      placeholder="Ex: Kaiak Aventura" 
+                      className="rounded-xl border-primary/30" 
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="brand" className="font-bold">Marca</Label>
+                      <Select value={formData.brand} onValueChange={(v) => setFormData({...formData, brand: v})}>
+                        <SelectTrigger className="rounded-xl border-primary/30">
+                          <SelectValue placeholder="Selecione..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Natura">Natura</SelectItem>
+                          <SelectItem value="Avon">Avon</SelectItem>
+                          <SelectItem value="Outra">Outra</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="category" className="font-bold">Categoria</Label>
+                      <Select value={formData.category} onValueChange={(v) => setFormData({...formData, category: v})}>
+                        <SelectTrigger className="rounded-xl border-primary/30">
+                          <SelectValue placeholder="Selecione categoria..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PRODUCT_CATEGORIES.map((cat) => (
+                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="price" className="font-bold">Preço da revista (R$)</Label>
+                      <Input 
+                        id="price" 
+                        value={formData.price}
+                        onChange={(e) => handlePriceChange(e, 'price')}
+                        placeholder="0,00" 
+                        className="rounded-xl border-primary/30" 
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="cost" className="font-bold">Preço da revendedora (R$)</Label>
+                      <Input 
+                        id="cost" 
+                        value={formData.cost}
+                        onChange={(e) => handlePriceChange(e, 'cost')}
+                        placeholder="0,00" 
+                        className="rounded-xl border-primary/30" 
+                      />
+                    </div>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="code" className="font-bold">Código / Referência</Label>
+                    <Input 
+                      id="code" 
+                      value={formData.code}
+                      onChange={(e) => setFormData({...formData, code: e.target.value})}
+                      placeholder="Ex: NAT-123" 
+                      className="rounded-xl border-primary/30" 
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="description" className="font-bold">Descrição (Opcional)</Label>
+                    <Textarea 
+                      id="description" 
+                      value={formData.description}
+                      onChange={(e) => setFormData({...formData, description: e.target.value})}
+                      placeholder="Detalhes sobre o produto..." 
+                      className="rounded-xl border-primary/30 min-h-[100px]" 
+                    />
+                  </div>
+                </div>
+              </ScrollArea>
+
+              <div className="p-6 pt-2">
+                <DialogFooter>
+                  <Button onClick={handleSaveProduct} className="w-full rounded-xl font-bold h-12 text-lg">
+                    Salvar Produto
+                  </Button>
+                </DialogFooter>
+              </div>
             </DialogContent>
           </Dialog>
         </div>
@@ -361,3 +370,5 @@ export default function ProductsPage() {
     </LayoutWrapper>
   )
 }
+
+    
