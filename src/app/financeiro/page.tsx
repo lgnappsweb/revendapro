@@ -277,7 +277,7 @@ export default function FinancePage() {
         <div className="grid gap-6 lg:grid-cols-3 px-1">
           <Card className="lg:col-span-2 shadow-sm rounded-[2.5rem] overflow-hidden border-primary/20">
             <Tabs defaultValue="todos" className="w-full">
-              <CardHeader className="flex flex-col sm:flex-row items-center justify-between px-8 py-6 border-b bg-card gap-4">
+              <CardHeader className="flex flex-col sm:flex-row items-center justify-between px-8 py-6 border-b bg-primary/5 gap-4">
                 <CardTitle className="text-xl font-black text-primary uppercase tracking-tight">Fluxo de Caixa</CardTitle>
                 <TabsList className="bg-muted/50 rounded-xl p-1 h-10">
                   <TabsTrigger value="todos" className="rounded-lg font-bold text-xs px-4">Todos</TabsTrigger>
@@ -308,14 +308,14 @@ export default function FinancePage() {
 
           <div className="space-y-6">
             <Card className="shadow-sm rounded-[2.5rem] overflow-hidden border-primary/20">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg font-black text-primary flex items-center gap-2">
+              <CardHeader className="bg-primary/5 border-b px-8 py-6 pb-4">
+                <CardTitle className="text-lg font-black text-primary flex items-center gap-2 uppercase tracking-tight">
                   <TrendingUp className="h-5 w-5" />
                   Metas Mensais
                 </CardTitle>
                 <CardDescription className="font-medium text-xs">Seu desempenho comercial no mês atual.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-8 pt-4">
+              <CardContent className="space-y-8 p-8 pt-10">
                 <div className="space-y-3">
                   <div className="flex justify-between text-xs font-black uppercase tracking-wider">
                     <span>Meta de Vendas</span>

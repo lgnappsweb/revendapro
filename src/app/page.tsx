@@ -114,7 +114,7 @@ export default function Dashboard() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 px-1">
           {stats.map((stat) => (
             <Link key={stat.title} href={stat.href} className="block transition-transform hover:scale-[1.02] active:scale-[0.98]">
-              <Card className="shadow-sm overflow-hidden rounded-3xl h-full border-primary/10">
+              <Card className="shadow-sm overflow-hidden rounded-[2rem] h-full border-primary/10">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div className={`p-2.5 rounded-xl ${stat.bgColor}`}>
@@ -138,11 +138,11 @@ export default function Dashboard() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3 px-1">
-          <Card className="lg:col-span-2 shadow-sm rounded-3xl overflow-hidden border-primary/10">
-            <CardHeader className="flex flex-row items-center justify-between border-b bg-muted/20 px-6 py-5">
+          <Card className="lg:col-span-2 shadow-sm rounded-[2.5rem] overflow-hidden border-primary/10">
+            <CardHeader className="flex flex-row items-center justify-between border-b bg-primary/5 px-8 py-6 gap-4">
               <div className="space-y-1">
-                <CardTitle className="text-xl">Pedidos Recentes</CardTitle>
-                <CardDescription>Suas últimas vendas.</CardDescription>
+                <CardTitle className="text-xl text-primary font-black uppercase tracking-tight">Pedidos Recentes</CardTitle>
+                <CardDescription>Acompanhe suas últimas vendas realizadas.</CardDescription>
               </div>
               <Button variant="ghost" size="sm" className="rounded-xl text-primary font-black uppercase text-xs" asChild>
                 <Link href="/pedidos">Ver todos</Link>
@@ -160,10 +160,9 @@ export default function Dashboard() {
                 </div>
               ) : (
                 <>
-                  {/* Mobile View: List of Cards */}
                   <div className="md:hidden divide-y divide-primary/5">
                     {recentOrders?.map((order) => (
-                      <Link key={order.id} href="/pedidos" className="flex items-center justify-between p-4 hover:bg-muted/30 transition-colors">
+                      <Link key={order.id} href="/pedidos" className="flex items-center justify-between p-6 hover:bg-muted/30 transition-colors">
                         <div className="flex flex-col min-w-0 pr-4">
                           <span className="font-black text-foreground text-sm truncate">{order.clientName}</span>
                           <span className="text-[10px] text-muted-foreground font-bold uppercase">
@@ -186,22 +185,21 @@ export default function Dashboard() {
                     ))}
                   </div>
 
-                  {/* Desktop View: Table */}
                   <div className="hidden md:block">
                     <Table>
                       <TableHeader className="bg-muted/10">
                         <TableRow className="hover:bg-transparent border-none">
-                          <TableHead className="px-6 font-black text-muted-foreground uppercase tracking-widest text-[10px]">Cliente</TableHead>
+                          <TableHead className="px-8 font-black text-muted-foreground uppercase tracking-widest text-[10px]">Cliente</TableHead>
                           <TableHead className="font-black text-muted-foreground uppercase tracking-widest text-[10px]">Data</TableHead>
                           <TableHead className="font-black text-muted-foreground uppercase tracking-widest text-[10px] text-right">Valor</TableHead>
                           <TableHead className="font-black text-muted-foreground uppercase tracking-widest text-[10px]">Status</TableHead>
-                          <TableHead className="px-6"></TableHead>
+                          <TableHead className="px-8"></TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {recentOrders?.map((order) => (
                           <TableRow key={order.id} className="cursor-pointer group hover:bg-muted/50 transition-colors border-b border-muted/20 last:border-0">
-                            <TableCell className="px-6 py-4">
+                            <TableCell className="px-8 py-5">
                               <span className="font-black text-foreground group-hover:text-primary transition-colors text-sm">{order.clientName}</span>
                               <div className="text-[10px] text-muted-foreground font-bold mt-0.5">#{order.id.slice(-6).toUpperCase()}</div>
                             </TableCell>
@@ -222,7 +220,7 @@ export default function Dashboard() {
                                 {order.paymentStatus}
                               </Badge>
                             </TableCell>
-                            <TableCell className="px-6 text-right">
+                            <TableCell className="px-8 text-right">
                               <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" asChild>
                                 <Link href="/pedidos">
                                   <ChevronRight className="h-4 w-4" />
@@ -239,15 +237,15 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <div className="space-y-4">
-            <Card className="shadow-sm rounded-3xl overflow-hidden border-primary/10">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-primary" />
+          <div className="space-y-6">
+            <Card className="shadow-sm rounded-[2.5rem] overflow-hidden border-primary/10">
+              <CardHeader className="bg-primary/5 border-b px-8 py-6">
+                <CardTitle className="text-lg text-primary font-black flex items-center gap-2 uppercase tracking-tight">
+                  <TrendingUp className="h-5 w-5" />
                   Mais Vendidos
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-5 pt-4">
+              <CardContent className="space-y-5 p-8">
                 {[
                   { name: "Kaiak Aventura", brand: "Natura", count: 12, value: "R$ 1.200" },
                   { name: "Batom Matte Avon", brand: "Avon", count: 8, value: "R$ 240" },
@@ -267,15 +265,15 @@ export default function Dashboard() {
                     </div>
                   </div>
                 ))}
-                <Button variant="outline" className="w-full rounded-2xl border-dashed font-black uppercase text-xs mt-2 hover:bg-primary/5 hover:text-primary hover:border-primary" asChild>
+                <Button variant="outline" className="w-full rounded-2xl border-dashed font-black uppercase text-xs mt-2 hover:bg-primary/5 hover:text-primary hover:border-primary h-12" asChild>
                   <Link href="/pedidos">Ver Histórico</Link>
                 </Button>
               </CardContent>
             </Card>
 
-            <Card className="bg-rose-500/10 rounded-3xl shadow-sm border-l-4 border-rose-500 overflow-hidden">
-              <CardContent className="p-5 flex items-start gap-4">
-                <div className="p-2 bg-rose-500/20 rounded-xl shrink-0">
+            <Card className="bg-rose-500/10 rounded-[2.5rem] shadow-sm border-l-4 border-rose-500 overflow-hidden">
+              <CardContent className="p-8 flex items-start gap-4">
+                <div className="p-3 bg-rose-500/20 rounded-xl shrink-0">
                   <AlertCircle className="h-6 w-6 text-rose-500" />
                 </div>
                 <div className="space-y-1 min-w-0">

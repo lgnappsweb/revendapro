@@ -226,9 +226,9 @@ export default function NewSalePage() {
 
         <div className="grid gap-6 lg:grid-cols-5 px-1">
           <div className="lg:col-span-3 space-y-6">
-            <Card className="shadow-sm rounded-3xl border-primary/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-primary font-black">
+            <Card className="shadow-sm rounded-[2.5rem] overflow-hidden border-primary/20">
+              <CardHeader className="bg-primary/5 border-b px-8 py-6">
+                <CardTitle className="flex items-center gap-2 text-primary font-black uppercase tracking-tight">
                   <div className="p-2 bg-primary/10 rounded-lg">
                     <ShoppingCart className="h-5 w-5" />
                   </div>
@@ -236,7 +236,7 @@ export default function NewSalePage() {
                 </CardTitle>
                 <CardDescription className="font-medium">Selecione o cliente e os produtos.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-6 p-8">
                 <div className="space-y-2">
                   <Label className="font-bold text-muted-foreground">Cliente</Label>
                   <Select value={selectedClientId} onValueChange={setSelectedClientId}>
@@ -389,9 +389,9 @@ export default function NewSalePage() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-sm rounded-3xl border-primary/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-primary font-black">
+            <Card className="shadow-sm rounded-[2.5rem] overflow-hidden border-primary/20">
+              <CardHeader className="bg-primary/5 border-b px-8 py-6">
+                <CardTitle className="flex items-center gap-2 text-primary font-black uppercase tracking-tight">
                   <div className="p-2 bg-primary/10 rounded-lg">
                     <CreditCard className="h-5 w-5" />
                   </div>
@@ -399,7 +399,7 @@ export default function NewSalePage() {
                 </CardTitle>
                 <CardDescription className="font-medium">Como e quando a venda será paga.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-6 p-8">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label className="font-bold text-muted-foreground">Forma de Pagamento</Label>
@@ -444,8 +444,8 @@ export default function NewSalePage() {
           </div>
 
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-card rounded-3xl p-6 shadow-sm space-y-4 border border-primary/10">
-              <h4 className="font-black text-foreground flex items-center gap-2">
+            <div className="bg-card rounded-[2.5rem] p-8 shadow-sm space-y-4 border border-primary/10">
+              <h4 className="font-black text-foreground flex items-center gap-2 uppercase tracking-tight text-primary">
                 <CheckCircle2 className="h-5 w-5 text-emerald-500" />
                 Checklist da Venda
               </h4>
@@ -466,10 +466,10 @@ export default function NewSalePage() {
             </div>
 
             <Card className="shadow-lg rounded-[2.5rem] overflow-hidden primary-gradient text-white border-none">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xl opacity-90 font-black">Resumo do Pedido</CardTitle>
+              <CardHeader className="p-8 pb-4">
+                <CardTitle className="text-xl opacity-90 font-black uppercase tracking-tight">Resumo do Pedido</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4 pt-4">
+              <CardContent className="space-y-4 p-8 pt-0">
                 <div className="flex justify-between items-center text-white/80 font-bold">
                   <span>Subtotal</span>
                   <span>R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
@@ -509,11 +509,11 @@ export default function NewSalePage() {
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="p-6 bg-black/10">
+              <CardFooter className="p-8 bg-black/10">
                 <Button 
                   onClick={handleFinalize}
                   disabled={isSubmitting || items.length === 0}
-                  className="w-full h-14 rounded-2xl bg-white text-primary hover:bg-white/90 text-lg font-bold shadow-xl transition-all active:scale-95 group"
+                  className="w-full h-16 rounded-2xl bg-white text-primary hover:bg-white/90 text-lg font-bold shadow-xl transition-all active:scale-95 group"
                 >
                   {isSubmitting ? <Loader2 className="h-6 w-6 animate-spin" /> : (
                     <>
