@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -148,17 +149,17 @@ export default function ProductsPage() {
 
   return (
     <LayoutWrapper>
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <h1 className="text-3xl font-bold tracking-tight text-primary">Catálogo de Produtos</h1>
-            <p className="text-muted-foreground font-medium">Controle seu estoque e preços de venda.</p>
+      <div className="flex flex-col gap-10">
+        <div className="flex flex-col items-center text-center gap-6 py-4">
+          <div className="space-y-2">
+            <h1 className="text-6xl font-black tracking-tighter text-primary">Produtos</h1>
+            <p className="text-muted-foreground font-medium text-lg">Controle seu estoque e preços de venda.</p>
           </div>
           
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="rounded-xl font-bold bg-primary hover:bg-primary/90 shadow-md h-11 px-6">
-                <Plus className="mr-2 h-5 w-5" /> Novo Produto
+              <Button className="w-full rounded-2xl font-bold bg-primary hover:bg-primary/90 shadow-lg h-14 text-lg">
+                <Plus className="mr-2 h-6 w-6" /> Novo Produto
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px] rounded-2xl border-primary max-h-[90vh] flex flex-col p-0 overflow-hidden">
