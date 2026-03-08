@@ -42,8 +42,8 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-[#F6F0F2]">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center space-y-2">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl primary-gradient text-white shadow-lg mb-4">
-            <Sparkles className="h-7 w-7" />
+          <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl primary-gradient text-white shadow-lg mb-4">
+            <Sparkles className="h-9 w-9" />
           </div>
           <h1 className="text-4xl font-black tracking-tighter text-primary">RevendaPro</h1>
           <p className="text-muted-foreground font-medium">Gestão profissional para consultoras.</p>
