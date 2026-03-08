@@ -45,7 +45,7 @@ export default function ProductsPage() {
   const [activeTab, setActiveTab] = useState("todos")
   const [searchTerm, setSearchTerm] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const { db } = useFirestore()
+  const db = useFirestore()
   const { toast } = useToast()
 
   // Firestore setup
