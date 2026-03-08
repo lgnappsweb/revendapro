@@ -7,7 +7,7 @@ service cloud.firestore {
       return request.auth != null;
     }
     
-    // Regra específica para o administrador baseada na existência na coleção admins
+    // Verifica se o usuário é um administrador (tem um registro na coleção admins)
     function isAdmin() {
       return isAuthenticated() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
@@ -17,8 +17,10 @@ service cloud.firestore {
     }
     
     match /admins/{adminId} {
+      // Permite leitura se for o próprio usuário
       allow read: if isAuthenticated() && request.auth.uid == adminId;
-      allow write: if false; // Configurado manualmente ou via backend seguro
+      // Permite escrita (criação) se for o próprio usuário se cadastrando
+      allow write: if isAuthenticated() && request.auth.uid == adminId;
     }
 
     match /clients/{clientId} {
