@@ -46,7 +46,7 @@ export default function LoginPage() {
           <div className="inline-flex h-20 w-20 items-center justify-center rounded-3xl primary-gradient text-white shadow-xl mb-4">
             <Sparkles className="h-12 w-12" />
           </div>
-          <h1 className="text-5xl font-black tracking-tighter text-primary">RevendaPRO</h1>
+          <h1 className="text-5xl font-black tracking-tighter text-primary">RevendaPro</h1>
           <p className="text-muted-foreground font-medium">Gestão profissional para consultoras.</p>
         </div>
 
