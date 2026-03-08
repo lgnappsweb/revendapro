@@ -144,7 +144,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       </div>
       <SidebarInset className="relative flex-1 w-full flex flex-col h-svh max-h-svh overflow-hidden bg-transparent max-w-full">
         {pathname !== "/" && (
-          <div className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20 pointer-events-none">
+          <div className="absolute top-4 left-4 sm:top-6 sm:left-6 z-10 pointer-events-none">
             <Button
               variant="outline"
               size="sm"

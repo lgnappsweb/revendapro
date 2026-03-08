@@ -8,18 +8,11 @@ import { Input } from "@/components/ui/input"
 import { 
   Plus, 
   Search, 
-  Tag, 
   ChevronRight, 
-  MoreVertical,
   Loader2,
   PackageSearch,
-  DollarSign,
-  Info,
-  Layers,
   ShoppingBag,
-  Pencil,
-  Trash2,
-  Sparkles
+  Pencil
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -27,28 +20,10 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { 
   Dialog, 
   DialogContent, 
-  DialogDescription, 
   DialogHeader, 
   DialogTitle 
 } from "@/components/ui/dialog"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { 
   Select, 
   SelectContent, 
@@ -61,7 +36,6 @@ import { collection, serverTimestamp, addDoc, doc, updateDoc, deleteDoc, query, 
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 import { useToast } from "@/hooks/use-toast"
-import { Separator } from "@/components/ui/separator"
 
 export default function ProductsPage() {
   const [activeTab, setActiveTab] = useState("todos")
@@ -69,7 +43,6 @@ export default function ProductsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<any>(null)
-  const [productToDelete, setProductToDelete] = useState<any>(null)
   const [editingProductId, setEditingProductId] = useState<string | null>(null)
   
   const db = useFirestore()
@@ -79,7 +52,7 @@ export default function ProductsPage() {
   const { data: products, isLoading: isLoadingProducts } = useCollection(productsRef)
 
   const categoriesRef = useMemoFirebase(() => query(collection(db, "categories"), orderBy("name", "asc")), [db])
-  const { data: categories, isLoading: isLoadingCategories } = useCollection(categoriesRef)
+  const { data: categories } = useCollection(categoriesRef)
 
   const [formData, setFormData] = useState({
     name: "", brand: "Natura", category: "", price: "", cost: "", code: "", description: ""
@@ -114,16 +87,8 @@ export default function ProductsPage() {
       code: product.code || "",
       description: product.description || ""
     })
+    setSelectedProduct(null)
     setTimeout(() => setIsDialogOpen(true), 100)
-  }
-
-  const handleDeleteConfirm = () => {
-    if (!productToDelete) return
-    const docRef = doc(db, "products", productToDelete.id)
-    deleteDoc(docRef)
-      .then(() => toast({ title: "Produto removido" }))
-      .catch(async () => errorEmitter.emit('permission-error', new FirestorePermissionError({ path: docRef.path, operation: 'delete' })))
-    setProductToDelete(null)
   }
 
   const handleSaveProduct = () => {
@@ -262,8 +227,10 @@ export default function ProductsPage() {
               </div>
 
               <div className="p-6 bg-card border-t flex gap-2">
-                 <Button variant="outline" className="flex-1 h-12 rounded-xl font-bold border-primary text-primary" onClick={() => handleEditProduct(selectedProduct)}>Editar</Button>
-                 <Button onClick={() => setSelectedProduct(null)} className="flex-1 h-12 rounded-xl font-bold primary-gradient shadow-lg">Fechar</Button>
+                 <Button variant="outline" className="flex-1 h-14 rounded-2xl font-bold border-primary text-primary" onClick={() => handleEditProduct(selectedProduct)}>
+                    <Pencil className="h-4 w-4 mr-2" /> Editar
+                 </Button>
+                 <Button onClick={() => setSelectedProduct(null)} className="flex-1 h-14 rounded-2xl font-bold primary-gradient shadow-lg">Fechar</Button>
               </div>
             </>
           )}
@@ -316,6 +283,15 @@ export default function ProductsPage() {
                   <Label className="font-bold text-muted-foreground">Preço Custo</Label>
                   <Input value={formData.cost} onChange={e => handlePriceChange(e, 'cost')} className="rounded-xl border-primary/30 h-11 bg-card" />
                 </div>
+              </div>
+              <div className="grid gap-2">
+                <Label className="font-bold text-muted-foreground">Descrição</Label>
+                <Textarea 
+                   value={formData.description} 
+                   onChange={e => setFormData({...formData, description: e.target.value})} 
+                   placeholder="Detalhes do produto..."
+                   className="rounded-xl border-primary/30 min-h-[100px] bg-card"
+                />
               </div>
               <Button onClick={handleSaveProduct} disabled={isSaving} className="w-full rounded-xl font-bold h-14 text-lg primary-gradient shadow-lg">Salvar</Button>
             </div>
