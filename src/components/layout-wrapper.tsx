@@ -19,7 +19,6 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
 
   const isPublicPage = pathname === "/login" || pathname === "/register"
 
-  // Real-time listener for user profile and admin status
   const userDocRef = useMemoFirebase(() => {
     if (!user) return null
     return doc(db, "users", user.uid)
@@ -33,15 +32,12 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const { data: userProfile } = useDoc(userDocRef)
   const { data: adminRecord, isLoading: isAdminLoading } = useDoc(adminDocRef)
 
-  // Auth redirection and Admin Auto-Repair logic
   useEffect(() => {
     if (!isUserLoading && !user && !isPublicPage) {
       router.push("/login")
       return
     }
 
-    // Auto-repair: If user is authenticated but lacks admin record, create it.
-    // This fixes "Missing or insufficient permissions" for existing users.
     if (user && !isUserLoading && !isAdminLoading && !adminRecord && !isPublicPage && !isRepairing) {
       setIsRepairing(true)
       const adminRef = doc(db, "admins", user.uid)
@@ -81,15 +77,15 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#FDFBFB]">
-      <div className="hidden md:block">
+    <div className="flex min-h-screen bg-[#FDFBFB] overflow-x-hidden">
+      <div className="hidden md:block shrink-0">
         <AppSidebar />
       </div>
-      <SidebarInset className="bg-transparent">
-        <main className="p-3 sm:p-4 md:p-6 lg:p-8 flex justify-center pb-24 md:pb-8 w-full overflow-x-hidden">
-          <div className="w-full max-w-6xl relative border-2 border-primary rounded-[2rem] sm:rounded-[3rem] bg-white shadow-sm p-4 sm:p-6 md:p-10 min-h-[calc(100vh-4rem)] flex flex-col gap-6 overflow-hidden">
+      <SidebarInset className="bg-transparent flex-1 w-full overflow-x-hidden">
+        <main className="p-2 sm:p-4 md:p-6 lg:p-8 flex justify-center pb-24 md:pb-8 w-full">
+          <div className="w-full max-w-[95vw] md:max-w-6xl relative border-2 border-primary rounded-[2rem] sm:rounded-[3rem] bg-white shadow-sm p-3 sm:p-6 md:p-10 min-h-[calc(100vh-4rem)] flex flex-col gap-6 overflow-hidden">
             {pathname !== "/" && (
-              <div className="flex items-start">
+              <div className="flex items-start shrink-0">
                 <Button
                   variant="outline"
                   size="sm"
@@ -97,7 +93,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
                   className="rounded-xl border-primary text-primary bg-white hover:bg-primary/5 font-bold h-10 px-4 shadow-sm transition-all active:scale-95"
                 >
                   <ArrowLeft className="mr-2 h-4 w-4" />
-                  Voltar ao Início
+                  Voltar
                 </Button>
               </div>
             )}

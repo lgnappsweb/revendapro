@@ -65,25 +65,25 @@ export default function OrdersPage() {
 
   return (
     <LayoutWrapper>
-      <div className="flex flex-col gap-8 w-full max-w-full overflow-hidden">
+      <div className="flex flex-col gap-6 w-full max-w-full overflow-hidden">
         <div className="space-y-2 w-full text-center flex flex-col items-center">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-primary text-center whitespace-nowrap overflow-hidden text-ellipsis w-full px-2">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-primary text-center break-words w-full px-2">
             Meus Pedidos
           </h1>
-          <p className="text-muted-foreground font-medium text-lg text-center">Histórico completo de todas as vendas realizadas.</p>
+          <p className="text-muted-foreground font-medium text-base sm:text-lg text-center">Histórico completo de todas as vendas.</p>
         </div>
 
-        <div className="relative max-w-2xl mx-auto w-full">
+        <div className="relative w-full">
           <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <Input 
-            placeholder="Pesquisar por cliente ou ID do pedido..." 
+            placeholder="Pesquisar por cliente ou ID..." 
             className="h-14 pl-12 rounded-2xl border-primary/30 shadow-sm bg-white text-base focus-visible:ring-primary/20"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
-        <div className="w-full">
+        <div className="w-full overflow-x-hidden">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20">
               <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
@@ -103,7 +103,7 @@ export default function OrdersPage() {
               <div className="grid gap-4 md:hidden w-full">
                 {filteredOrders.map((order) => (
                   <Card key={order.id} className="rounded-3xl border-primary/20 shadow-sm overflow-hidden bg-white w-full">
-                    <CardContent className="p-5 flex flex-col gap-4">
+                    <CardContent className="p-4 flex flex-col gap-4">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex flex-col gap-1 min-w-0 flex-1">
                           <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">#{order.id.slice(-6).toUpperCase()}</span>
@@ -126,7 +126,7 @@ export default function OrdersPage() {
                       <div className="flex items-center justify-between border-t border-primary/5 pt-3">
                         <div className="flex flex-col min-w-0">
                           <span className="text-[10px] font-black text-muted-foreground uppercase">Valor Total</span>
-                          <span className="text-xl font-black text-primary truncate">
+                          <span className="text-lg font-black text-primary truncate">
                             R$ {order.finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                           </span>
                         </div>
@@ -136,7 +136,7 @@ export default function OrdersPage() {
                           onClick={() => setSelectedOrder(order)}
                           className="rounded-xl font-bold bg-secondary/50 hover:bg-primary hover:text-white transition-all shrink-0"
                         >
-                          Ver Detalhes
+                          Detalhes
                         </Button>
                       </div>
                     </CardContent>
@@ -145,7 +145,7 @@ export default function OrdersPage() {
               </div>
 
               {/* Desktop View: Table */}
-              <div className="hidden md:block rounded-3xl border border-primary/20 bg-white shadow-sm overflow-hidden">
+              <div className="hidden md:block rounded-3xl border border-primary/20 bg-white shadow-sm overflow-hidden w-full">
                 <Table>
                   <TableHeader className="bg-muted/30">
                     <TableRow className="hover:bg-transparent border-none h-14">
@@ -178,11 +178,9 @@ export default function OrdersPage() {
                           </div>
                         </TableCell>
                         <TableCell className="text-center">
-                          <div className="flex flex-col items-center">
-                            <span className="font-bold text-muted-foreground text-sm">
-                              {order.createdAt ? new Date(order.createdAt.seconds * 1000).toLocaleDateString('pt-BR') : 'Hoje'}
-                            </span>
-                          </div>
+                          <span className="font-bold text-muted-foreground text-sm">
+                            {order.createdAt ? new Date(order.createdAt.seconds * 1000).toLocaleDateString('pt-BR') : 'Hoje'}
+                          </span>
                         </TableCell>
                         <TableCell className="text-center">
                           <Badge 
@@ -200,11 +198,6 @@ export default function OrdersPage() {
                             <span className="font-black text-primary text-xl tracking-tight">
                               R$ {order.finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                             </span>
-                            {order.discount > 0 && (
-                              <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
-                                Com Desconto
-                              </span>
-                            )}
                           </div>
                         </TableCell>
                         <TableCell className="px-6 text-right">
@@ -239,7 +232,7 @@ export default function OrdersPage() {
                       <ShoppingCart className="h-10 w-10 text-primary" />
                     </div>
                   </div>
-                  <DialogTitle className="text-3xl font-black text-center text-primary leading-tight">
+                  <DialogTitle className="text-2xl sm:text-3xl font-black text-center text-primary leading-tight">
                     Pedido #{selectedOrder.id.slice(-6).toUpperCase()}
                   </DialogTitle>
                   <div className="flex items-center justify-center gap-3">
@@ -250,11 +243,11 @@ export default function OrdersPage() {
                 </DialogHeader>
               </div>
 
-              <div className="flex-1 overflow-y-auto bg-[#FDFBFB] p-8 space-y-8">
+              <div className="flex-1 overflow-y-auto bg-[#FDFBFB] p-6 sm:p-8 space-y-8">
                 <div className="flex flex-col gap-4">
                   <div className="bg-white p-5 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-1">
                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Cliente</span>
-                    <span className="text-xl font-bold text-foreground break-words">{selectedOrder.clientName}</span>
+                    <span className="text-lg font-bold text-foreground break-words">{selectedOrder.clientName}</span>
                   </div>
                   <div className="bg-white p-5 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-1">
                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Pagamento</span>
@@ -292,7 +285,7 @@ export default function OrdersPage() {
                   <Separator className="bg-white/20" />
                   <div className="flex justify-between items-center pt-2">
                     <span className="font-black text-lg">Total Final</span>
-                    <span className="text-3xl font-black">R$ {selectedOrder.finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                    <span className="text-2xl font-black">R$ {selectedOrder.finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                   </div>
                 </div>
               </div>
@@ -302,7 +295,7 @@ export default function OrdersPage() {
                   onClick={() => setSelectedOrder(null)} 
                   className="w-full h-14 rounded-2xl font-bold text-lg primary-gradient shadow-xl"
                 >
-                  Fechar Detalhes
+                  Fechar
                 </Button>
               </div>
             </>

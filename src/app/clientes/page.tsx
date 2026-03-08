@@ -207,13 +207,13 @@ export default function ClientsPage() {
 
   return (
     <LayoutWrapper>
-      <div className="flex flex-col gap-8 max-w-full overflow-hidden">
+      <div className="flex flex-col gap-6 w-full max-w-full overflow-hidden">
         <div className="flex flex-col gap-6 py-4">
           <div className="space-y-2 w-full text-center flex flex-col items-center">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-primary text-center whitespace-nowrap overflow-hidden text-ellipsis w-full px-2">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-primary text-center break-words w-full px-2">
               Meus Clientes
             </h1>
-            <p className="text-muted-foreground font-medium text-lg text-center">Gerencie sua rede de contatos e vendas.</p>
+            <p className="text-muted-foreground font-medium text-base sm:text-lg text-center">Gerencie sua rede de contatos e vendas.</p>
           </div>
           
           <Button onClick={handleOpenAdd} className="w-full rounded-2xl font-bold bg-primary hover:bg-primary/90 shadow-lg h-14 text-lg">
@@ -224,7 +224,7 @@ export default function ClientsPage() {
             <DialogContent className="sm:max-w-[500px] w-[95vw] rounded-3xl border-primary max-h-[90vh] flex flex-col p-0 overflow-hidden">
               <div className="p-8 border-b bg-white">
                 <DialogHeader>
-                  <DialogTitle className="text-3xl font-black text-primary text-center uppercase tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">
+                  <DialogTitle className="text-2xl font-black text-primary text-center uppercase tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">
                     {editingClient ? "Editar Cliente" : "Novo Cliente"}
                   </DialogTitle>
                 </DialogHeader>
@@ -294,7 +294,7 @@ export default function ClientsPage() {
           </Dialog>
         </div>
 
-        <div className="relative max-w-2xl mx-auto w-full">
+        <div className="relative w-full">
           <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <Input 
             placeholder="Pesquisar por nome ou telefone..." 
@@ -304,7 +304,7 @@ export default function ClientsPage() {
           />
         </div>
 
-        <div className="w-full">
+        <div className="w-full overflow-x-hidden">
           {isLoading ? (
             <div className="flex justify-center py-20">
               <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -315,7 +315,7 @@ export default function ClientsPage() {
               <div className="grid gap-4 md:hidden w-full">
                 {filteredClients.map((client) => (
                   <Card key={client.id} className="rounded-3xl border-primary/20 shadow-sm overflow-hidden bg-white w-full">
-                    <CardContent className="p-5 flex flex-col gap-4">
+                    <CardContent className="p-4 flex flex-col gap-4">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3 min-w-0">
                           <Avatar className="h-12 w-12 border-2 border-primary/10 shrink-0">
@@ -361,21 +361,21 @@ export default function ClientsPage() {
                         </DropdownMenu>
                       </div>
                       
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground font-semibold bg-secondary/20 p-2 rounded-xl">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground font-semibold bg-secondary/20 p-2 rounded-xl overflow-hidden">
                         <MapPin className="h-3 w-3 text-primary shrink-0" />
                         <span className="truncate">
                           {client.neighborhood || 'S/ Bairro'}{client.neighborhood && client.city ? ', ' : ''}{client.city || 'S/ Cidade'}
                         </span>
                       </div>
 
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
                         <Button 
                           variant="outline" 
                           size="sm" 
                           onClick={() => openDialer(client.phone)} 
                           className="flex-1 rounded-xl font-bold border-primary/20 text-primary hover:bg-primary/5 h-10"
                         >
-                          <Phone className="h-4 w-4 mr-2" /> Ligar
+                          <Phone className="h-4 w-4" />
                         </Button>
                         <Button 
                           variant="outline" 
@@ -383,7 +383,7 @@ export default function ClientsPage() {
                           onClick={() => openWhatsApp(client.phone)} 
                           className="flex-1 rounded-xl font-bold border-emerald-200 text-emerald-600 hover:bg-emerald-50 h-10"
                         >
-                          <MessageSquare className="h-4 w-4 mr-2" /> WhatsApp
+                          <MessageSquare className="h-4 w-4" />
                         </Button>
                         <Button 
                           variant="secondary" 
@@ -400,7 +400,7 @@ export default function ClientsPage() {
               </div>
 
               {/* Desktop View: Table */}
-              <div className="hidden md:block rounded-3xl border border-primary/20 bg-white shadow-sm overflow-hidden">
+              <div className="hidden md:block rounded-3xl border border-primary/20 bg-white shadow-sm overflow-hidden w-full">
                 <Table>
                   <TableHeader className="bg-muted/30">
                     <TableRow className="hover:bg-transparent border-none h-14">
@@ -516,7 +516,7 @@ export default function ClientsPage() {
                       </AvatarFallback>
                     </Avatar>
                   </div>
-                  <DialogTitle className="text-3xl md:text-4xl font-black text-center text-primary leading-tight">
+                  <DialogTitle className="text-2xl sm:text-3xl font-black text-center text-primary leading-tight">
                     {selectedClientForDetails.name}
                   </DialogTitle>
                   <div className="flex items-center justify-center gap-3">
@@ -527,14 +527,14 @@ export default function ClientsPage() {
                 </DialogHeader>
               </div>
 
-              <div className="flex-1 overflow-y-auto bg-[#FDFBFB] p-8 space-y-8">
+              <div className="flex-1 overflow-y-auto bg-[#FDFBFB] p-6 sm:p-8 space-y-8">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="bg-white p-5 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-1">
                     <div className="flex items-center gap-2 text-primary">
                       <Phone className="h-4 w-4" />
                       <span className="text-[10px] font-black uppercase tracking-wider">WhatsApp</span>
                     </div>
-                    <span className="text-xl font-bold text-foreground">
+                    <span className="text-lg font-bold text-foreground">
                       {selectedClientForDetails.phone}
                     </span>
                   </div>
@@ -543,7 +543,7 @@ export default function ClientsPage() {
                       <MapPin className="h-4 w-4" />
                       <span className="text-[10px] font-black uppercase tracking-wider">Localização</span>
                     </div>
-                    <span className="text-lg font-bold text-foreground">
+                    <span className="text-lg font-bold text-foreground break-words">
                       {selectedClientForDetails.neighborhood || 'S/ Bairro'}
                     </span>
                     <span className="text-xs text-muted-foreground font-medium">
