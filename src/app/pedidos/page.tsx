@@ -27,7 +27,11 @@ import {
   Smartphone,
   AlertTriangle,
   Sparkles,
-  Receipt
+  Receipt,
+  Package,
+  Calendar,
+  Clock,
+  User
 } from "lucide-react"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
 import { collection, query, orderBy } from "firebase/firestore"
@@ -183,25 +187,90 @@ export default function OrdersPage() {
                   <DialogTitle className="text-2xl font-black text-center text-primary uppercase">Pedido #{selectedOrder.id.slice(-6).toUpperCase()}</DialogTitle>
                 </DialogHeader>
               </div>
-              <div className="flex-1 overflow-y-auto bg-background p-6 space-y-6">
-                <div className="bg-card p-5 rounded-2xl border border-primary/10 shadow-sm">
-                   <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider block mb-1">Cliente</span>
-                   <span className="text-lg font-bold text-foreground">{selectedOrder.clientName}</span>
+              <div className="flex-1 overflow-y-auto bg-background p-6 space-y-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="bg-card p-5 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-1">
+                    <div className="flex items-center gap-2 text-primary">
+                      <User className="h-4 w-4" />
+                      <span className="text-[10px] font-black uppercase tracking-wider">Cliente</span>
+                    </div>
+                    <span className="text-lg font-bold text-foreground truncate">{selectedOrder.clientName}</span>
+                  </div>
+                  <div className="bg-card p-5 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-1">
+                    <div className="flex items-center gap-2 text-blue-600">
+                      <Calendar className="h-4 w-4" />
+                      <span className="text-[10px] font-black uppercase tracking-wider">Data do Pedido</span>
+                    </div>
+                    <span className="text-lg font-bold text-foreground">
+                      {selectedOrder.createdAt ? new Date(selectedOrder.createdAt.seconds * 1000).toLocaleDateString('pt-BR') : 'Hoje'}
+                    </span>
+                  </div>
                 </div>
-                <div className="bg-primary text-white p-6 rounded-3xl shadow-lg">
-                  <div className="flex justify-between items-center opacity-80 text-[10px] font-black uppercase">
-                    <span>Subtotal</span>
+
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Package className="h-5 w-5" />
+                    <h4 className="font-bold text-lg uppercase tracking-tight">Itens do Pedido</h4>
+                  </div>
+                  <Separator className="bg-primary/10" />
+                  <div className="space-y-3">
+                    {selectedOrder.items?.map((item: any, idx: number) => (
+                      <div key={idx} className="flex justify-between items-center p-4 rounded-2xl bg-card border border-primary/5 hover:border-primary/20 transition-all">
+                        <div className="flex flex-col min-w-0 pr-4">
+                          <span className="font-bold text-sm truncate">{item.productName}</span>
+                          <span className="text-[10px] text-muted-foreground font-black uppercase tracking-wider">
+                            {item.quantity}un x R$ {Number(item.unitPrice).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </span>
+                        </div>
+                        <span className="font-black text-primary shrink-0">
+                          R$ {Number(item.subtotal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-card p-5 rounded-2xl border border-primary/10 shadow-sm space-y-4">
+                   <div className="flex items-center gap-2 text-muted-foreground">
+                      <CreditCard className="h-4 w-4" />
+                      <span className="text-[10px] font-black uppercase tracking-widest">Informações de Pagamento</span>
+                   </div>
+                   <div className="grid grid-cols-2 gap-4">
+                      <div className="flex flex-col">
+                         <span className="text-[9px] font-bold text-muted-foreground uppercase">Método</span>
+                         <span className="font-black uppercase text-xs">{selectedOrder.paymentMethod || 'N/A'}</span>
+                      </div>
+                      <div className="flex flex-col text-right">
+                         <span className="text-[9px] font-bold text-muted-foreground uppercase">Status</span>
+                         <span className={`font-black uppercase text-xs ${selectedOrder.paymentStatus === 'Pago' ? 'text-emerald-500' : 'text-amber-500'}`}>
+                           {selectedOrder.paymentStatus}
+                         </span>
+                      </div>
+                   </div>
+                </div>
+
+                <div className="bg-primary text-white p-6 rounded-[2rem] shadow-xl space-y-4">
+                  <div className="flex justify-between items-center opacity-80 text-[10px] font-black uppercase tracking-widest">
+                    <span>Subtotal Bruto</span>
                     <span>R$ {selectedOrder.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                   </div>
-                  <Separator className="bg-white/20 my-2" />
+                  {selectedOrder.discount > 0 && (
+                    <div className="flex justify-between items-center text-pink-200 text-[10px] font-black uppercase tracking-widest">
+                      <span>Desconto Aplicado</span>
+                      <span>- R$ {selectedOrder.discount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                  )}
+                  <Separator className="bg-white/20" />
                   <div className="flex justify-between items-center pt-1">
-                    <span className="font-black text-lg">Total</span>
-                    <span className="text-2xl font-black">R$ {selectedOrder.finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                    <span className="font-black text-lg uppercase tracking-tighter">Total do Pedido</span>
+                    <span className="text-3xl font-black">R$ {selectedOrder.finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                   </div>
                 </div>
               </div>
               <div className="p-6 bg-card border-t">
-                <Button onClick={() => setSelectedOrder(null)} className="w-full h-14 rounded-2xl font-bold text-lg primary-gradient shadow-xl">Fechar</Button>
+                <Button onClick={() => setSelectedOrder(null)} className="w-full h-16 rounded-2xl font-black text-xl primary-gradient shadow-xl active:scale-95 transition-all">
+                  FECHAR DETALHES
+                </Button>
               </div>
             </>
           )}
