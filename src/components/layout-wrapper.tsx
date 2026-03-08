@@ -1,13 +1,45 @@
+
 "use client"
 
+import { useEffect } from "react"
+import { useRouter, usePathname } from "next/navigation"
+import { useUser } from "@/firebase"
 import { AppSidebar } from "./app-sidebar"
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
-import { Search, Bell } from "lucide-react"
+import { Search, Bell, Loader2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
+  const { user, isUserLoading } = useUser()
+  const router = useRouter()
+  const pathname = usePathname()
+
+  const isPublicPage = pathname === "/login" || pathname === "/register"
+
+  useEffect(() => {
+    if (!isUserLoading && !user && !isPublicPage) {
+      router.push("/login")
+    }
+  }, [user, isUserLoading, isPublicPage, router])
+
+  if (isUserLoading) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (!user && !isPublicPage) {
+    return null
+  }
+
+  if (isPublicPage) {
+    return <div className="min-h-screen bg-background">{children}</div>
+  }
+
   return (
     <div className="flex min-h-screen bg-background">
       <AppSidebar />
@@ -31,12 +63,14 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
             <div className="h-8 w-px bg-border mx-1" />
             <div className="flex items-center gap-3 pl-2 cursor-pointer hover:bg-white/50 p-1 rounded-full transition-colors">
               <div className="hidden flex-col items-end text-right md:flex">
-                <span className="text-sm font-semibold leading-none">Minha Esposa</span>
+                <span className="text-sm font-semibold leading-none">{user?.displayName || "Administradora"}</span>
                 <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mt-0.5">Administradora</span>
               </div>
               <Avatar className="h-9 w-9 border-2 border-primary/10">
-                <AvatarImage src="https://picsum.photos/seed/user/100/100" />
-                <AvatarFallback className="bg-primary text-white">AD</AvatarFallback>
+                <AvatarImage src={user?.photoURL || "https://picsum.photos/seed/user/100/100"} />
+                <AvatarFallback className="bg-primary text-white">
+                  {user?.displayName?.substring(0, 2).toUpperCase() || "AD"}
+                </AvatarFallback>
               </Avatar>
             </div>
           </div>
