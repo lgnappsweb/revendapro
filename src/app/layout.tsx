@@ -10,6 +10,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  viewportFit: 'cover',
 };
 
 export const metadata: Metadata = {
@@ -17,12 +18,17 @@ export const metadata: Metadata = {
   description: 'Aplicativo profissional para revendedoras Avon e Natura.',
   manifest: '/manifest.json',
   icons: {
-    icon: '/icon-192x192.png',
-    apple: '/icon-192x192.png',
+    icon: [
+      { url: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+    ],
   },
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'default',
+    statusBarStyle: 'black-translucent',
     title: 'RevendaPro',
   },
   formatDetection: {
@@ -42,6 +48,8 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
         <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
       <body className="font-body antialiased bg-background">
         <FirebaseClientProvider>

@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -148,7 +147,7 @@ export default function RegisterPage() {
                 Fazer Login
               </Link>
             </p>
-            <div className="pt-2 border-t border-primary/5 w-full flex justify-center">
+            <div className="pt-2 border-t border-primary/5 w-full flex justify-center overflow-hidden">
               <p className="text-[10px] font-black text-muted-foreground/60 text-center uppercase tracking-widest whitespace-nowrap">
                 Desenvolvedor: <span className="text-primary/70">Lucas Gregório do Nascimento</span>
               </p>
