@@ -65,15 +65,15 @@ export default function OrdersPage() {
 
   return (
     <LayoutWrapper>
-      <div className="flex flex-col gap-6 w-full max-w-full overflow-hidden">
+      <div className="flex flex-col gap-6 w-full max-w-full overflow-x-hidden">
         <div className="space-y-2 w-full text-center flex flex-col items-center">
-          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-primary text-center break-words w-full px-2">
+          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-primary text-center break-words w-full px-2">
             Meus Pedidos
           </h1>
           <p className="text-muted-foreground font-medium text-base sm:text-lg text-center">Histórico completo de todas as vendas.</p>
         </div>
 
-        <div className="relative w-full">
+        <div className="relative w-full px-1">
           <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <Input 
             placeholder="Pesquisar por cliente ou ID..." 
@@ -83,7 +83,7 @@ export default function OrdersPage() {
           />
         </div>
 
-        <div className="w-full overflow-x-hidden">
+        <div className="w-full overflow-x-hidden px-1">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20">
               <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />

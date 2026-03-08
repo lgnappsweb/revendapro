@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -218,15 +217,15 @@ export default function NewSalePage() {
 
   return (
     <LayoutWrapper>
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6 w-full max-w-full overflow-x-hidden">
         <div className="space-y-1 text-center py-4">
-          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-primary text-center whitespace-nowrap overflow-hidden text-ellipsis w-full px-2">Nova Venda</h1>
+          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-primary text-center break-words w-full px-2">Nova Venda</h1>
           <p className="text-muted-foreground font-medium text-lg">Registre uma nova venda de forma rápida e organizada.</p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-5">
+        <div className="grid gap-6 lg:grid-cols-5 px-1">
           <div className="lg:col-span-3 space-y-6">
-            <Card className="shadow-sm rounded-2xl border-primary/20 bg-white">
+            <Card className="shadow-sm rounded-3xl border-primary/20 bg-white">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-primary font-black">
                   <div className="p-2 bg-primary/10 rounded-lg">
@@ -389,7 +388,7 @@ export default function NewSalePage() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-sm rounded-2xl border-primary/20 bg-white">
+            <Card className="shadow-sm rounded-3xl border-primary/20 bg-white">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-accent font-black">
                   <div className="p-2 bg-accent/10 rounded-lg">
@@ -444,7 +443,7 @@ export default function NewSalePage() {
           </div>
 
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white rounded-2xl p-6 shadow-sm space-y-4 border border-primary/10">
+            <div className="bg-white rounded-3xl p-6 shadow-sm space-y-4 border border-primary/10">
               <h4 className="font-black text-foreground flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5 text-emerald-500" />
                 Checklist da Venda
@@ -465,7 +464,7 @@ export default function NewSalePage() {
               </ul>
             </div>
 
-            <Card className="shadow-lg rounded-3xl overflow-hidden primary-gradient text-white border-none">
+            <Card className="shadow-lg rounded-[2.5rem] overflow-hidden primary-gradient text-white border-none">
               <CardHeader className="pb-2">
                 <CardTitle className="text-xl opacity-90 font-black">Resumo do Pedido</CardTitle>
               </CardHeader>

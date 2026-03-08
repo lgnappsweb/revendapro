@@ -1,4 +1,3 @@
-
 "use client"
 
 import { LayoutWrapper } from "@/components/layout-wrapper"
@@ -97,19 +96,19 @@ export default function Dashboard() {
 
   return (
     <LayoutWrapper>
-      <div className="flex flex-col gap-10 pt-12">
+      <div className="flex flex-col gap-10 pt-12 w-full max-w-full overflow-x-hidden">
         <div className="flex flex-col gap-8 items-center text-center">
           <div className="flex flex-col items-center gap-4">
             <div className="inline-flex h-20 w-20 items-center justify-center rounded-3xl primary-gradient text-white shadow-xl">
               <Sparkles className="h-12 w-12" />
             </div>
             <div className="flex flex-col gap-2">
-              <h1 className="text-5xl md:text-6xl font-black tracking-tighter text-primary">RevendaPro</h1>
+              <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-primary">RevendaPro</h1>
               <p className="text-muted-foreground font-medium text-lg">Aqui está o resumo da sua revenda hoje.</p>
             </div>
           </div>
           
-          <div className="relative w-full max-w-2xl">
+          <div className="relative w-full max-w-2xl px-1">
             <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
             <Input 
               placeholder="Pesquisar pedidos, clientes ou metas..." 
@@ -118,10 +117,10 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 px-1">
           {stats.map((stat) => (
             <Link key={stat.title} href={stat.href} className="block transition-transform hover:scale-[1.02] active:scale-[0.98]">
-              <Card className="shadow-sm overflow-hidden rounded-2xl h-full">
+              <Card className="shadow-sm overflow-hidden rounded-3xl h-full border-primary/20">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div className={`p-2.5 rounded-xl ${stat.bgColor}`}>
@@ -144,8 +143,8 @@ export default function Dashboard() {
           ))}
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          <Card className="lg:col-span-2 shadow-sm rounded-2xl overflow-hidden">
+        <div className="grid gap-6 lg:grid-cols-3 px-1">
+          <Card className="lg:col-span-2 shadow-sm rounded-3xl overflow-hidden border-primary/20">
             <CardHeader className="flex flex-row items-center justify-between border-b bg-white/50 px-6 py-5">
               <div className="space-y-1">
                 <CardTitle className="text-xl">Pedidos Recentes</CardTitle>
@@ -218,7 +217,7 @@ export default function Dashboard() {
           </Card>
 
           <div className="space-y-6">
-            <Card className="shadow-sm rounded-2xl overflow-hidden">
+            <Card className="shadow-sm rounded-3xl overflow-hidden border-primary/20">
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <TrendingUp className="h-5 w-5 text-primary" />
@@ -245,13 +244,13 @@ export default function Dashboard() {
                     </div>
                   </div>
                 ))}
-                <Button variant="outline" className="w-full rounded-xl border-dashed font-semibold mt-2 hover:bg-primary/5 hover:text-primary hover:border-primary" asChild>
+                <Button variant="outline" className="w-full rounded-2xl border-dashed font-semibold mt-2 hover:bg-primary/5 hover:text-primary hover:border-primary" asChild>
                   <Link href="/pedidos">Ver Histórico Completo</Link>
                 </Button>
               </CardContent>
             </Card>
 
-            <Card className="bg-rose-50 rounded-2xl shadow-sm border-l-4 border-rose-500">
+            <Card className="bg-rose-50 rounded-3xl shadow-sm border-l-4 border-rose-500">
               <CardContent className="p-5 flex items-start gap-4">
                 <div className="p-2 bg-rose-100 rounded-xl">
                   <AlertCircle className="h-6 w-6 text-rose-600" />

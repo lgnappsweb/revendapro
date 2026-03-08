@@ -207,10 +207,10 @@ export default function ClientsPage() {
 
   return (
     <LayoutWrapper>
-      <div className="flex flex-col gap-6 w-full max-w-full overflow-hidden">
+      <div className="flex flex-col gap-6 w-full max-w-full overflow-x-hidden">
         <div className="flex flex-col gap-6 py-4">
           <div className="space-y-2 w-full text-center flex flex-col items-center">
-            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-primary text-center break-words w-full px-2">
+            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-primary text-center break-words w-full px-2">
               Meus Clientes
             </h1>
             <p className="text-muted-foreground font-medium text-base sm:text-lg text-center">Gerencie sua rede de contatos e vendas.</p>
@@ -294,7 +294,7 @@ export default function ClientsPage() {
           </Dialog>
         </div>
 
-        <div className="relative w-full">
+        <div className="relative w-full px-1">
           <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <Input 
             placeholder="Pesquisar por nome ou telefone..." 
@@ -304,7 +304,7 @@ export default function ClientsPage() {
           />
         </div>
 
-        <div className="w-full overflow-x-hidden">
+        <div className="w-full overflow-x-hidden px-1">
           {isLoading ? (
             <div className="flex justify-center py-20">
               <Loader2 className="h-10 w-10 animate-spin text-primary" />
