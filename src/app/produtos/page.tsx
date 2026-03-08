@@ -376,8 +376,8 @@ export default function ProductsPage() {
           <Tabs defaultValue="todos" className="w-full md:w-auto" onValueChange={setActiveTab}>
             <TabsList className="h-12 p-1.5 bg-white shadow-sm border border-primary/30 rounded-2xl w-full">
               <TabsTrigger value="todos" className="rounded-xl font-bold data-[state=active]:bg-primary data-[state=active]:text-white transition-all">Todos</TabsTrigger>
-              <TabsTrigger value="Natura" className="rounded-xl font-bold data-[state=active]:bg-[#FF6A13] data-[state=active]:text-white transition-all">Natura</TabsTrigger>
-              <TabsTrigger value="Avon" className="rounded-xl font-bold data-[state=active]:bg-[#622D91] data-[state=active]:text-white transition-all">Avon</TabsTrigger>
+              <TabsTrigger value="natura" className="rounded-xl font-bold data-[state=active]:bg-[#FF6A13] data-[state=active]:text-white transition-all">Natura</TabsTrigger>
+              <TabsTrigger value="avon" className="rounded-xl font-bold data-[state=active]:bg-[#622D91] data-[state=active]:text-white transition-all">Avon</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
