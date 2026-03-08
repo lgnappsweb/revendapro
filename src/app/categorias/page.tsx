@@ -69,7 +69,8 @@ export default function CategoriesPage() {
   const handleEditCategory = (category: any) => {
     setEditingCategoryId(category.id)
     setFormData({ name: category.name || "" })
-    setIsDialogOpen(true)
+    // Pequeno atraso para evitar conflito de foco com o DropdownMenu
+    setTimeout(() => setIsDialogOpen(true), 100)
   }
 
   const handleDeleteConfirm = () => {
@@ -162,10 +163,22 @@ export default function CategoriesPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="rounded-xl w-48">
-                        <DropdownMenuItem className="font-bold gap-2" onSelect={() => handleEditCategory(category)}>
+                        <DropdownMenuItem 
+                          className="font-bold gap-2" 
+                          onSelect={(e) => {
+                            e.preventDefault();
+                            handleEditCategory(category);
+                          }}
+                        >
                           <Pencil className="h-4 w-4 text-blue-500" /> Editar
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="font-bold gap-2 text-rose-600" onSelect={() => setCategoryToDelete(category)}>
+                        <DropdownMenuItem 
+                          className="font-bold gap-2 text-rose-600" 
+                          onSelect={(e) => {
+                            e.preventDefault();
+                            setCategoryToDelete(category);
+                          }}
+                        >
                           <Trash2 className="h-4 w-4" /> Excluir
                         </DropdownMenuItem>
                       </DropdownMenuContent>
