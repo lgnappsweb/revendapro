@@ -37,7 +37,13 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   }
 
   if (isPublicPage) {
-    return <div className="min-h-screen bg-background">{children}</div>
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="w-full flex justify-center">
+          {children}
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -75,8 +81,8 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </header>
-        <main className="p-4 md:p-6 lg:p-8">
-          <div className="mx-auto max-w-7xl">
+        <main className="p-4 md:p-6 lg:p-8 flex justify-center">
+          <div className="w-full max-w-7xl">
             {children}
           </div>
         </main>
