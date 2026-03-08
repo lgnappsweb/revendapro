@@ -1,4 +1,4 @@
-["use client"
+"use client"
 
 import { useState } from "react"
 import { LayoutWrapper } from "@/components/layout-wrapper"
@@ -370,5 +370,3 @@ export default function ProductsPage() {
     </LayoutWrapper>
   )
 }
-
-    
