@@ -69,6 +69,26 @@ export default function ClientsPage() {
     notes: ""
   })
 
+  const formatPhone = (value: string) => {
+    const input = value.replace(/\D/g, "").substring(0, 11);
+    let formatted = input;
+    if (input.length > 0) {
+      formatted = "(" + input.substring(0, 2);
+      if (input.length > 2) {
+        formatted += ") " + input.substring(2, 7);
+        if (input.length > 7) {
+          formatted += "-" + input.substring(7, 11);
+        }
+      }
+    }
+    return formatted;
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhone(e.target.value);
+    setFormData({ ...formData, phone: formatted });
+  };
+
   const handleSaveClient = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData.name || !formData.phone) {
@@ -119,7 +139,7 @@ export default function ClientsPage() {
     try {
       const result = await generateWhatsappMarketingMessage({
         clientName: client.name,
-        lastPurchasedProducts: [], // No histórico real implementado ainda
+        lastPurchasedProducts: [], 
         preferredCategories: ["beleza"]
       })
       
@@ -193,8 +213,8 @@ export default function ClientsPage() {
                     <Input 
                       id="phone" 
                       value={formData.phone}
-                      onChange={e => setFormData({...formData, phone: e.target.value})}
-                      placeholder="11 99999-9999" 
+                      onChange={handlePhoneChange}
+                      placeholder="(11) 99999-9999" 
                       className="rounded-xl border-primary/30 h-11 bg-white" 
                     />
                   </div>
