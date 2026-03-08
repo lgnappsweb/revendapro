@@ -29,7 +29,9 @@ import {
   Package,
   Loader2,
   Tag,
-  Zap
+  Zap,
+  Minus,
+  Percent
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
@@ -76,6 +78,7 @@ export default function NewSalePage() {
   const [isProductPickerOpen, setIsProductPickerOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [itemToRemove, setItemToRemove] = useState<CartItem | null>(null)
+  const [discount, setDiscount] = useState(0)
   
   const { toast } = useToast()
   const router = useRouter()
@@ -92,8 +95,7 @@ export default function NewSalePage() {
     return acc + (price * item.qty)
   }, 0)
 
-  const [discount, setDiscount] = useState(0)
-  const total = subtotal - discount
+  const total = Math.max(0, subtotal - discount)
 
   const handleAddProductToCart = (product: any) => {
     const existingItem = items.find(i => i.id === product.id)
@@ -110,14 +112,11 @@ export default function NewSalePage() {
       }])
     }
     setIsProductPickerOpen(false)
+    toast({ title: "Produto adicionado", description: product.name })
   }
 
   const toggleItemPriceMode = (id: string) => {
     setItems(items.map(item => item.id === id ? { ...item, useCost: !item.useCost } : item))
-  }
-
-  const toggleAllToCost = (useCost: boolean) => {
-    setItems(items.map(item => ({ ...item, useCost })))
   }
 
   const updateQty = (id: string, delta: number) => {
@@ -138,10 +137,19 @@ export default function NewSalePage() {
   }
 
   const handleFinalize = async () => {
-    if (!selectedClientId || items.length === 0 || !paymentMethod) {
-      toast({ title: "Atenção", description: "Verifique os dados da venda.", variant: "destructive" })
+    if (!selectedClientId) {
+      toast({ title: "Selecione um cliente", variant: "destructive" })
       return
     }
+    if (items.length === 0) {
+      toast({ title: "Adicione produtos ao pedido", variant: "destructive" })
+      return
+    }
+    if (!paymentMethod) {
+      toast({ title: "Selecione o método de pagamento", variant: "destructive" })
+      return
+    }
+
     setIsSubmitting(true)
     try {
       const selectedClient = dbClients?.find(c => c.id === selectedClientId)
@@ -163,9 +171,12 @@ export default function NewSalePage() {
         createdAt: serverTimestamp()
       }
       await addDoc(collection(db, "orders"), saleData)
-      toast({ title: "Venda Registrada!" })
+      toast({ title: "Venda Registrada com sucesso!" })
       router.push('/pedidos')
-    } catch (error) { toast({ title: "Erro", variant: "destructive" }) }
+    } catch (error) { 
+      console.error(error)
+      toast({ title: "Erro ao salvar venda", variant: "destructive" }) 
+    }
     finally { setIsSubmitting(false) }
   }
 
@@ -181,74 +192,234 @@ export default function NewSalePage() {
         <div className="flex flex-col gap-6 items-center text-center">
           <div className="flex flex-col gap-2">
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-primary uppercase text-center">Nova Venda</h1>
-            <p className="text-muted-foreground font-medium text-lg">Registre um novo pedido.</p>
+            <p className="text-muted-foreground font-medium text-lg">Registre um novo pedido para seus clientes.</p>
           </div>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-5 px-1">
           <div className="lg:col-span-3 space-y-6">
+            {/* Card de Cliente e Busca */}
             <Card className="shadow-sm rounded-[2.5rem] overflow-hidden border-primary/20">
               <CardHeader className="bg-primary/5 border-b px-8 py-6">
                 <CardTitle className="text-xl font-black text-primary flex items-center gap-2 uppercase tracking-tight">
-                  <ShoppingCart className="h-6 w-6" /> Pedido
+                  <ShoppingCart className="h-6 w-6" /> Dados do Pedido
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6 p-8">
                 <div className="space-y-2">
-                  <Label className="font-bold text-muted-foreground">Cliente</Label>
+                  <Label className="font-bold text-muted-foreground text-base">Selecione o Cliente</Label>
                   <Select value={selectedClientId} onValueChange={setSelectedClientId}>
-                    <SelectTrigger className="rounded-xl h-11 bg-muted/30 border-none"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                    <SelectTrigger className="rounded-xl h-12 bg-muted/30 border-none text-base font-medium">
+                      <SelectValue placeholder="Escolha um cliente..." />
+                    </SelectTrigger>
                     <SelectContent className="rounded-xl">
-                      {dbClients?.map(client => <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>)}
+                      {dbClients?.map(client => (
+                        <SelectItem key={client.id} value={client.id} className="font-medium">{client.name}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="flex items-center justify-between">
-                  <Label className="font-bold text-muted-foreground">Produtos</Label>
-                  <Button variant="outline" size="sm" onClick={() => setIsProductPickerOpen(true)} className="rounded-xl font-bold border-primary text-primary">Buscar</Button>
+
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <Label className="font-bold text-muted-foreground text-base">Produtos no Carrinho</Label>
+                  <Button 
+                    onClick={() => setIsProductPickerOpen(true)} 
+                    className="w-full sm:w-auto rounded-xl font-bold border-primary text-primary h-12 px-6"
+                    variant="outline"
+                  >
+                    <Plus className="h-5 w-5 mr-2" /> Buscar Produtos
+                  </Button>
                 </div>
-                {items.length > 0 && (
-                   <div className="space-y-2">
-                      {items.map(item => (
-                         <div key={item.id} className="p-3 bg-card rounded-xl border border-primary/10 flex justify-between items-center">
-                            <span className="font-bold text-sm truncate max-w-[150px]">{item.name}</span>
-                            <span className="font-black text-primary">R$ {(item.useCost ? item.costPrice : item.magazinePrice).toLocaleString('pt-BR')}</span>
-                         </div>
-                      ))}
-                   </div>
+
+                <Separator className="bg-primary/10" />
+
+                {items.length === 0 ? (
+                  <div className="py-12 flex flex-col items-center justify-center text-center gap-2 border-2 border-dashed border-primary/10 rounded-3xl">
+                    <Package className="h-12 w-12 text-primary/20" />
+                    <p className="text-muted-foreground font-bold uppercase text-xs tracking-widest">Carrinho vazio</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {items.map(item => (
+                      <div key={item.id} className="p-4 bg-card rounded-2xl border border-primary/10 flex flex-col gap-4">
+                        <div className="flex justify-between items-start gap-2">
+                          <div className="flex flex-col min-w-0">
+                            <span className="font-bold text-lg truncate leading-tight">{item.name}</span>
+                            <div className="flex items-center gap-2 mt-1">
+                               <button 
+                                 onClick={() => toggleItemPriceMode(item.id)}
+                                 className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md transition-colors ${item.useCost ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}
+                               >
+                                 {item.useCost ? 'PREÇO CUSTO' : 'PREÇO REVISTA'}
+                               </button>
+                            </div>
+                          </div>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="text-rose-500 hover:bg-rose-50"
+                            onClick={() => setItemToRemove(item)}
+                          >
+                            <Trash2 className="h-5 w-5" />
+                          </Button>
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1 bg-secondary/50 rounded-xl p-1">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => updateQty(item.id, -1)}><Minus className="h-4 w-4" /></Button>
+                            <span className="w-10 text-center font-black text-sm">{item.qty}</span>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => updateQty(item.id, 1)}><Plus className="h-4 w-4" /></Button>
+                          </div>
+                          <span className="font-black text-xl text-primary">
+                            R$ {((item.useCost ? item.costPrice : item.magazinePrice) * item.qty).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </CardContent>
             </Card>
-          </div>
-          <div className="lg:col-span-2 space-y-6">
-            <Card className="shadow-lg rounded-[2.5rem] overflow-hidden primary-gradient text-white border-none">
-              <CardHeader className="p-8 pb-4">
-                <CardTitle className="text-xl font-black uppercase tracking-tight">Total</CardTitle>
+
+            {/* Card de Pagamento */}
+            <Card className="shadow-sm rounded-[2.5rem] overflow-hidden border-primary/20">
+              <CardHeader className="bg-primary/5 border-b px-8 py-6">
+                <CardTitle className="text-xl font-black text-primary flex items-center gap-2 uppercase tracking-tight">
+                  <CreditCard className="h-6 w-6" /> Pagamento
+                </CardTitle>
               </CardHeader>
-              <CardContent className="p-8 pt-0">
-                <div className="text-4xl font-black">R$ {total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                <Button onClick={handleFinalize} disabled={isSubmitting || items.length === 0} className="w-full h-16 rounded-2xl bg-white text-primary mt-6 text-lg font-bold">Finalizar</Button>
+              <CardContent className="p-8 space-y-6">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                   {[
+                     { id: 'pix', label: 'PIX', icon: Smartphone, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+                     { id: 'dinheiro', label: 'Dinheiro', icon: Banknote, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+                     { id: 'cartao', label: 'Cartão', icon: CreditCard, color: 'text-blue-500', bg: 'bg-blue-50' },
+                     { id: 'fiado', label: 'Fiado', icon: AlertTriangle, color: 'text-amber-500', bg: 'bg-amber-50' },
+                   ].map(method => (
+                     <button
+                       key={method.id}
+                       onClick={() => setPaymentMethod(method.id)}
+                       className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all gap-2 ${paymentMethod === method.id ? 'border-primary bg-primary/5' : 'border-transparent bg-muted/20 hover:bg-muted/30'}`}
+                     >
+                        <method.icon className={`h-6 w-6 ${method.color}`} />
+                        <span className="text-[10px] font-black uppercase tracking-widest">{method.label}</span>
+                     </button>
+                   ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="lg:col-span-2 space-y-6">
+            {/* Card de Resumo e Finalização */}
+            <Card className="shadow-lg rounded-[2.5rem] overflow-hidden primary-gradient text-white border-none sticky top-24">
+              <CardHeader className="p-8 pb-4">
+                <CardTitle className="text-xl font-black uppercase tracking-tight">Resumo do Pedido</CardTitle>
+              </CardHeader>
+              <CardContent className="p-8 pt-0 space-y-6">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center opacity-80 font-bold">
+                    <span>Subtotal</span>
+                    <span>R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="opacity-80 font-bold">Desconto</span>
+                    <div className="relative w-32">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 font-black text-sm text-primary">R$</span>
+                      <Input 
+                        type="number" 
+                        value={discount}
+                        onChange={(e) => setDiscount(Number(e.target.value))}
+                        className="h-10 pl-10 rounded-xl bg-white/20 border-none text-white font-black placeholder:text-white/50 text-right focus-visible:ring-white/30" 
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <Separator className="bg-white/20" />
+
+                <div className="space-y-1">
+                  <span className="text-[10px] font-black uppercase tracking-widest opacity-80">Total Final</span>
+                  <div className="text-5xl font-black tracking-tighter">R$ {total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                </div>
+
+                <Button 
+                  onClick={handleFinalize} 
+                  disabled={isSubmitting || items.length === 0} 
+                  className="w-full h-16 rounded-2xl bg-white text-primary hover:bg-white/90 mt-4 text-xl font-black uppercase tracking-tight shadow-xl active:scale-95 transition-all"
+                >
+                  {isSubmitting ? <Loader2 className="h-6 w-6 animate-spin" /> : "Finalizar Venda"}
+                </Button>
               </CardContent>
             </Card>
           </div>
         </div>
       </div>
       
+      {/* Dialog de Seleção de Produtos */}
       <Dialog open={isProductPickerOpen} onOpenChange={setIsProductPickerOpen}>
-         <DialogContent className="sm:max-w-[500px] w-[95vw] rounded-3xl p-0 overflow-hidden">
-            <div className="p-6 bg-card border-b"><DialogTitle className="text-xl font-black text-primary uppercase text-center">Selecionar</DialogTitle></div>
-            <ScrollArea className="max-h-[60vh] p-6">
-               <div className="grid gap-2">
-                  {filteredProducts.map(p => (
-                     <button key={p.id} onClick={() => handleAddProductToCart(p)} className="p-4 rounded-xl border border-primary/10 text-left hover:bg-primary/5">
-                        <span className="font-bold block">{p.name}</span>
-                        <span className="text-xs text-primary font-black">R$ {Number(p.price).toLocaleString('pt-BR')}</span>
-                     </button>
-                  ))}
-               </div>
+         <DialogContent className="sm:max-w-[550px] w-[95vw] rounded-[2rem] p-0 overflow-hidden border-primary">
+            <div className="p-6 bg-card border-b flex flex-col gap-4">
+                <DialogTitle className="text-xl font-black text-primary uppercase text-center tracking-tight">Selecionar Produtos</DialogTitle>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Input 
+                    placeholder="Nome ou código do produto..." 
+                    className="h-12 pl-10 rounded-xl bg-muted/30 border-none font-medium"
+                    value={productSearch}
+                    onChange={(e) => setProductSearch(e.target.value)}
+                  />
+                </div>
+                <Tabs value={dialogActiveTab} onValueChange={setDialogActiveTab} className="w-full">
+                  <TabsList className="grid grid-cols-3 h-10 bg-muted/30 rounded-xl p-1">
+                    <TabsTrigger value="todos" className="rounded-lg font-bold text-xs uppercase">Todos</TabsTrigger>
+                    <TabsTrigger value="natura" className="rounded-lg font-bold text-xs uppercase">Natura</TabsTrigger>
+                    <TabsTrigger value="avon" className="rounded-lg font-bold text-xs uppercase">Avon</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+            </div>
+            <ScrollArea className="max-h-[60vh] p-4">
+               {filteredProducts.length === 0 ? (
+                 <div className="py-20 text-center text-muted-foreground font-bold uppercase text-[10px] tracking-widest">Nenhum produto encontrado</div>
+               ) : (
+                 <div className="grid gap-2">
+                    {filteredProducts.map(p => (
+                       <button 
+                         key={p.id} 
+                         onClick={() => handleAddProductToCart(p)} 
+                         className="p-4 rounded-2xl border border-primary/10 text-left hover:bg-primary/5 transition-all flex justify-between items-center group"
+                       >
+                          <div className="flex flex-col min-w-0 pr-4">
+                            <span className="font-bold text-base group-hover:text-primary truncate">{p.name}</span>
+                            <span className="text-[10px] text-muted-foreground font-black uppercase tracking-wider">{p.brand} | {p.category}</span>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <span className="text-lg font-black text-primary block">R$ {Number(p.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                            <span className="text-[9px] text-muted-foreground font-bold">Custo: R$ {Number(p.cost).toLocaleString('pt-BR')}</span>
+                          </div>
+                       </button>
+                    ))}
+                 </div>
+               )}
             </ScrollArea>
          </DialogContent>
       </Dialog>
+
+      {/* Alerta de Remoção de Item */}
+      <AlertDialog open={!!itemToRemove} onOpenChange={(open) => !open && setItemToRemove(null)}>
+        <AlertDialogContent className="rounded-3xl border-primary">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-2xl font-black text-primary uppercase">Remover Item?</AlertDialogTitle>
+            <AlertDialogDescription className="text-lg font-medium text-muted-foreground">
+              Deseja remover <b>{itemToRemove?.name}</b> do carrinho?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl font-bold">Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmRemove} className="rounded-xl font-bold bg-rose-600 hover:bg-rose-700">Remover</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </LayoutWrapper>
   )
 }
