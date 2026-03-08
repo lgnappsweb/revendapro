@@ -444,6 +444,27 @@ export default function NewSalePage() {
           </div>
 
           <div className="lg:col-span-2 space-y-6">
+            <div className="bg-white rounded-2xl p-6 shadow-sm space-y-4 border border-primary/10">
+              <h4 className="font-black text-foreground flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                Checklist da Venda
+              </h4>
+              <ul className="space-y-3">
+                {[
+                  { label: "Cliente Selecionado", checked: !!selectedClientId },
+                  { label: "Produtos no Carrinho", checked: items.length > 0 },
+                  { label: "Forma de Pagamento", checked: !!paymentMethod },
+                ].map((check, i) => (
+                  <li key={i} className="flex items-center gap-3 text-sm font-bold">
+                    <div className={`h-5 w-5 rounded-md flex items-center justify-center border transition-colors ${check.checked ? 'bg-emerald-500 border-emerald-500' : 'border-muted'}`}>
+                      {check.checked && <CheckCircle2 className="h-3.3 w-3.3 text-white" strokeWidth={4} />}
+                    </div>
+                    <span className={check.checked ? 'text-foreground' : 'text-muted-foreground'}>{check.label}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
             <Card className="shadow-lg rounded-3xl overflow-hidden primary-gradient text-white border-none">
               <CardHeader className="pb-2">
                 <CardTitle className="text-xl opacity-90 font-black">Resumo do Pedido</CardTitle>
@@ -503,27 +524,6 @@ export default function NewSalePage() {
                 </Button>
               </CardFooter>
             </Card>
-
-            <div className="bg-white rounded-2xl p-6 shadow-sm space-y-4 border border-primary/10">
-              <h4 className="font-black text-foreground flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-                Checklist da Venda
-              </h4>
-              <ul className="space-y-3">
-                {[
-                  { label: "Cliente Selecionado", checked: !!selectedClientId },
-                  { label: "Produtos no Carrinho", checked: items.length > 0 },
-                  { label: "Forma de Pagamento", checked: !!paymentMethod },
-                ].map((check, i) => (
-                  <li key={i} className="flex items-center gap-3 text-sm font-bold">
-                    <div className={`h-5 w-5 rounded-md flex items-center justify-center border transition-colors ${check.checked ? 'bg-emerald-500 border-emerald-500' : 'border-muted'}`}>
-                      {check.checked && <CheckCircle2 className="h-3.3 w-3.3 text-white" strokeWidth={4} />}
-                    </div>
-                    <span className={check.checked ? 'text-foreground' : 'text-muted-foreground'}>{check.label}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
           </div>
         </div>
       </div>
@@ -538,7 +538,7 @@ export default function NewSalePage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="rounded-xl font-bold">Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmRemove} className="rounded-xl font-bold bg-rose-600 hover:bg-rose-700">
+            <AlertDialogAction onClick={handleConfirmRemove} className="rounded-xl font-bold bg-rose-600 font-bold">
               Confirmar Remoção
             </AlertDialogAction>
           </AlertDialogFooter>
