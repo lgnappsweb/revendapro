@@ -56,7 +56,7 @@ export function MobileBottomNav() {
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 z-50 w-full">
-      <nav className="bg-card/95 backdrop-blur-lg border-t border-primary/20 shadow-[0_-8px_30px_rgb(0,0,0,0.12)] rounded-t-[2.5rem] h-24 flex items-center justify-around px-4 pb-2">
+      <nav className="bg-card/95 backdrop-blur-lg border-t border-primary/20 shadow-[0_-8px_30px_rgb(0,0,0,0.12)] h-24 flex items-center justify-around px-4 pb-2">
         {mainItems.map((item) => (
           <Link
             key={item.href}
@@ -67,7 +67,7 @@ export function MobileBottomNav() {
             )}
           >
             <item.icon className={cn("h-7 w-7", pathname === item.href ? "text-primary" : "text-primary/70")} />
-            <span className="text-[10px] font-black uppercase tracking-tight">
+            <span className="text-[9px] font-black uppercase tracking-tight">
               {item.title}
             </span>
           </Link>
@@ -79,7 +79,7 @@ export function MobileBottomNav() {
               <div className="h-7 w-7 flex items-center justify-center">
                 <Plus className="h-8 w-8 text-primary" strokeWidth={3} />
               </div>
-              <span className="text-[10px] font-black uppercase tracking-tight">Mais</span>
+              <span className="text-[9px] font-black uppercase tracking-tight">Mais</span>
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent 

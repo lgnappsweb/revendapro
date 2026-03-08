@@ -27,7 +27,8 @@ import {
   Calendar,
   ChevronRight,
   Info,
-  Sparkles
+  Sparkles,
+  Users
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import {
