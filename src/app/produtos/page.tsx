@@ -143,7 +143,6 @@ export default function ProductsPage() {
       code: product.code || "",
       description: product.description || ""
     })
-    // Atraso para garantir que o menu feche antes de abrir o diálogo e evitar congelamento
     setTimeout(() => setIsDialogOpen(true), 100)
   }
 
@@ -249,8 +248,8 @@ export default function ProductsPage() {
 
   return (
     <LayoutWrapper>
-      <div className="flex flex-col gap-10 w-full max-w-full overflow-hidden">
-        <div className="flex flex-col gap-6 py-4 px-4 sm:px-0">
+      <div className="flex flex-col gap-10 w-full">
+        <div className="flex flex-col gap-6 py-4">
           <div className="space-y-2 w-full text-center flex flex-col items-center">
             <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-primary text-center whitespace-nowrap overflow-hidden text-ellipsis w-full px-2">
               Catálogo de Produtos
@@ -269,9 +268,6 @@ export default function ProductsPage() {
                   <DialogTitle className="text-2xl sm:text-3xl font-black text-primary text-center uppercase tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">
                     {editingProductId ? "Editar Produto" : "Cadastrar Produto"}
                   </DialogTitle>
-                  <DialogDescription className="font-bold text-muted-foreground text-center text-base sm:text-lg mt-1">
-                    {editingProductId ? "Atualize as informações do item." : "Adicione um item ao seu catálogo."}
-                  </DialogDescription>
                 </DialogHeader>
               </div>
               
@@ -369,7 +365,7 @@ export default function ProductsPage() {
           </Dialog>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-4 px-4 sm:px-0">
+        <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
             <Input 
@@ -388,7 +384,7 @@ export default function ProductsPage() {
           </Tabs>
         </div>
 
-        <div className="w-full px-4 sm:px-0">
+        <div className="w-full">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20">
               <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
@@ -401,18 +397,11 @@ export default function ProductsPage() {
               <p className="text-muted-foreground font-medium max-w-xs mt-2">
                 Comece adicionando novos produtos ao seu catálogo para gerenciar suas vendas.
               </p>
-              <Button 
-                variant="outline" 
-                className="mt-6 rounded-xl border-primary text-primary font-bold hover:bg-primary/5"
-                onClick={handleOpenNewProduct}
-              >
-                Adicionar Primeiro Produto
-              </Button>
             </div>
           ) : (
-            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pb-20">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pb-20">
               {filteredProducts.map((product) => (
-                <Card key={product.id} className="group overflow-hidden rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border-primary bg-white w-full">
+                <Card key={product.id} className="group overflow-hidden rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border-primary bg-white">
                   <CardContent className="p-6">
                     <div className="flex flex-col h-full gap-4">
                       <div className="flex justify-between items-start">
@@ -527,14 +516,6 @@ export default function ProductsPage() {
                   <DialogTitle className="text-3xl md:text-4xl font-black text-center text-primary leading-tight">
                     {selectedProduct.name}
                   </DialogTitle>
-                  <div className="flex items-center justify-center gap-3">
-                    <Badge variant="secondary" className="bg-pink-100 text-primary font-bold border-none rounded-lg px-3 py-1">
-                      {selectedProduct.category}
-                    </Badge>
-                    <span className="text-xs text-muted-foreground font-bold uppercase tracking-widest border-l pl-3 border-primary/20">
-                      REF: {selectedProduct.code || "S/ COD"}
-                    </span>
-                  </div>
                 </DialogHeader>
               </div>
 

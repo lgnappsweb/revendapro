@@ -18,13 +18,10 @@ import { Input } from "@/components/ui/input"
 import { 
   Search, 
   ShoppingCart, 
-  Calendar, 
-  User, 
   MoreVertical, 
   Loader2, 
   PackageSearch,
   ChevronRight,
-  Eye,
   CreditCard,
   Banknote,
   Smartphone,
@@ -69,7 +66,7 @@ export default function OrdersPage() {
 
   return (
     <LayoutWrapper>
-      <div className="flex flex-col gap-8 w-full max-w-full overflow-hidden">
+      <div className="flex flex-col gap-8 w-full">
         <div className="space-y-2 w-full text-center flex flex-col items-center">
           <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-primary text-center whitespace-nowrap overflow-hidden text-ellipsis w-full px-2">
             Meus Pedidos
@@ -77,8 +74,8 @@ export default function OrdersPage() {
           <p className="text-muted-foreground font-medium text-lg text-center">Histórico completo de todas as vendas realizadas.</p>
         </div>
 
-        <div className="relative max-w-2xl mx-auto w-full px-4 sm:px-0">
-          <Search className="absolute left-7 sm:left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+        <div className="relative max-w-2xl mx-auto w-full">
+          <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <Input 
             placeholder="Pesquisar por cliente ou ID do pedido..." 
             className="h-14 pl-12 rounded-2xl border-primary/30 shadow-sm bg-white text-base focus-visible:ring-primary/20"
@@ -87,7 +84,7 @@ export default function OrdersPage() {
           />
         </div>
 
-        <div className="w-full px-4 sm:px-0">
+        <div className="w-full">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20">
               <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
@@ -103,10 +100,10 @@ export default function OrdersPage() {
             </div>
           ) : (
             <>
-              {/* Mobile Cards - Simplified and unified size */}
+              {/* Mobile View: Cards */}
               <div className="grid gap-4 md:hidden">
                 {filteredOrders.map((order) => (
-                  <Card key={order.id} className="rounded-3xl border-primary/20 shadow-sm overflow-hidden bg-white w-full max-w-full">
+                  <Card key={order.id} className="rounded-3xl border-primary/20 shadow-sm overflow-hidden bg-white">
                     <CardContent className="p-5 flex flex-col gap-4">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex flex-col gap-1 min-w-0 flex-1">
@@ -148,7 +145,7 @@ export default function OrdersPage() {
                 ))}
               </div>
 
-              {/* Desktop Table - Optimized and consistent with Clients page */}
+              {/* Desktop View: Table */}
               <div className="hidden md:block rounded-3xl border border-primary/20 bg-white shadow-sm overflow-hidden">
                 <Table>
                   <TableHeader className="bg-muted/30">
@@ -186,7 +183,6 @@ export default function OrdersPage() {
                             <span className="font-bold text-muted-foreground text-sm">
                               {order.createdAt ? new Date(order.createdAt.seconds * 1000).toLocaleDateString('pt-BR') : 'Hoje'}
                             </span>
-                            <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter opacity-70">Data da Venda</span>
                           </div>
                         </TableCell>
                         <TableCell className="text-center">
