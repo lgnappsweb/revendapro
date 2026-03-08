@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -16,7 +15,8 @@ import {
   Loader2,
   CheckCircle2,
   Search,
-  ChevronRight
+  ChevronRight,
+  Sparkles
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
