@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -341,18 +342,18 @@ export default function ClientsPage() {
                           <DropdownMenuContent align="end" className="rounded-xl">
                             <DropdownMenuItem 
                               className="font-bold gap-2" 
-                              onSelect={(e) => {
-                                e.preventDefault();
-                                handleOpenEdit(client);
+                              onSelect={() => {
+                                // Pequeno delay para garantir que o menu feche antes de abrir o diálogo
+                                // Isso evita o congelamento da tela em alguns navegadores/ambientes
+                                setTimeout(() => handleOpenEdit(client), 100);
                               }}
                             >
                               <Pencil className="h-4 w-4 text-blue-500" /> Editar
                             </DropdownMenuItem>
                             <DropdownMenuItem 
                               className="font-bold gap-2 text-rose-600" 
-                              onSelect={(e) => {
-                                e.preventDefault();
-                                setClientToDelete(client);
+                              onSelect={() => {
+                                setTimeout(() => setClientToDelete(client), 100);
                               }}
                             >
                               <Trash2 className="h-4 w-4" /> Excluir
@@ -472,18 +473,16 @@ export default function ClientsPage() {
                               <DropdownMenuContent align="end" className="rounded-xl">
                                 <DropdownMenuItem 
                                   className="font-bold gap-2" 
-                                  onSelect={(e) => {
-                                    e.preventDefault();
-                                    handleOpenEdit(client);
+                                  onSelect={() => {
+                                    setTimeout(() => handleOpenEdit(client), 100);
                                   }}
                                 >
                                   <Pencil className="h-4 w-4 text-blue-500" /> Editar
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
                                   className="font-bold gap-2 text-rose-600" 
-                                  onSelect={(e) => {
-                                    e.preventDefault();
-                                    setClientToDelete(client);
+                                  onSelect={() => {
+                                    setTimeout(() => setClientToDelete(client), 100);
                                   }}
                                 >
                                   <Trash2 className="h-4 w-4" /> Excluir

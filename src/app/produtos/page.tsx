@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -81,6 +82,7 @@ export default function ProductsPage() {
   const [activeTab, setActiveTab] = useState("todos")
   const [searchTerm, setSearchTerm] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<any>(null)
   const [productToDelete, setProductToDelete] = useState<any>(null)
   const [editingProductId, setEditingProductId] = useState<string | null>(null)
@@ -176,6 +178,7 @@ export default function ProductsPage() {
       return
     }
 
+    setIsSaving(true)
     const parseCurrencyToNumber = (val: string) => {
       if (!val) return 0;
       return parseFloat(val.replace(/\./g, '').replace(',', '.'));
@@ -197,6 +200,7 @@ export default function ProductsPage() {
             title: "Produto Atualizado!",
             description: `${formData.name} foi atualizado com sucesso.`
           })
+          setIsDialogOpen(false)
         })
         .catch(async () => {
           const permissionError = new FirestorePermissionError({
@@ -205,13 +209,21 @@ export default function ProductsPage() {
             requestResourceData: productData,
           });
           errorEmitter.emit('permission-error', permissionError);
-        });
+        })
+        .finally(() => setIsSaving(false))
     } else {
       const newProduct = {
         ...productData,
         createdAt: serverTimestamp()
       }
       addDoc(productsRef, newProduct)
+        .then(() => {
+          toast({
+            title: "Produto Salvo!",
+            description: `${formData.name} foi adicionado ao catálogo.`
+          })
+          setIsDialogOpen(false)
+        })
         .catch(async () => {
           const permissionError = new FirestorePermissionError({
             path: productsRef.path,
@@ -219,15 +231,9 @@ export default function ProductsPage() {
             requestResourceData: newProduct,
           });
           errorEmitter.emit('permission-error', permissionError);
-        });
-      
-      toast({
-        title: "Produto Salvo!",
-        description: `${formData.name} foi adicionado ao catálogo.`
-      })
+        })
+        .finally(() => setIsSaving(false))
     }
-    
-    setIsDialogOpen(false)
   }
 
   const filteredProducts = products?.filter(p => {
@@ -352,8 +358,8 @@ export default function ProductsPage() {
                   </div>
                   
                   <div className="pt-2 pb-10">
-                    <Button onClick={handleSaveProduct} className="w-full rounded-xl font-bold h-14 text-lg primary-gradient shadow-lg">
-                      {editingProductId ? "Salvar Alterações" : "Salvar Produto"}
+                    <Button onClick={handleSaveProduct} disabled={isSaving} className="w-full rounded-xl font-bold h-14 text-lg primary-gradient shadow-lg">
+                      {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : (editingProductId ? "Salvar Alterações" : "Salvar Produto")}
                     </Button>
                   </div>
                 </div>
@@ -457,18 +463,16 @@ export default function ProductsPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="rounded-xl p-2 w-40">
                           <DropdownMenuItem 
-                            onSelect={(e) => {
-                              e.preventDefault();
-                              handleEditProduct(product);
+                            onSelect={() => {
+                              setTimeout(() => handleEditProduct(product), 100);
                             }} 
                             className="rounded-lg font-bold gap-2 cursor-pointer"
                           >
                             <Pencil className="h-4 w-4 text-blue-500" /> Editar
                           </DropdownMenuItem>
                           <DropdownMenuItem 
-                            onSelect={(e) => {
-                              e.preventDefault();
-                              setProductToDelete(product);
+                            onSelect={() => {
+                              setTimeout(() => setProductToDelete(product), 100);
                             }} 
                             className="rounded-lg font-bold gap-2 text-rose-600 cursor-pointer"
                           >
