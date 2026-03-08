@@ -1,0 +1,28 @@
+{
+  "placeholderImages": [
+    {
+      "id": "perfume-natura",
+      "description": "Perfume Natura",
+      "imageUrl": "https://picsum.photos/seed/natura1/400/400",
+      "imageHint": "perfume natura"
+    },
+    {
+      "id": "creme-avon",
+      "description": "Creme Avon",
+      "imageUrl": "https://picsum.photos/seed/avon1/400/400",
+      "imageHint": "avon cream"
+    },
+    {
+      "id": "makeup-pallete",
+      "description": "Maquiagem Profissional",
+      "imageUrl": "https://picsum.photos/seed/makeup1/400/400",
+      "imageHint": "makeup palette"
+    },
+    {
+      "id": "face-serum",
+      "description": "Sérum Facial",
+      "imageUrl": "https://picsum.photos/seed/skin1/400/400",
+      "imageHint": "face serum"
+    }
+  ]
+}
