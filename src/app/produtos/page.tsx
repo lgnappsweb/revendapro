@@ -14,7 +14,9 @@ import {
   ShoppingBag,
   Pencil,
   Tag,
-  Hash
+  Hash,
+  Zap,
+  TrendingUp
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -90,7 +92,7 @@ export default function ProductsPage() {
       description: product.description || ""
     })
     setSelectedProduct(null)
-    setTimeout(() => setIsDialogOpen(true), 100)
+    setTimeout(() => setIsDialogOpen(true), 150)
   }
 
   const handleSaveProduct = () => {
@@ -187,7 +189,7 @@ export default function ProductsPage() {
                         variant="ghost" 
                         size="icon" 
                         onClick={() => {
-                          setTimeout(() => setSelectedProduct(product), 100);
+                          setTimeout(() => setSelectedProduct(product), 150);
                         }} 
                         className="rounded-full h-9 w-9 hover:bg-primary/10 group-hover:text-primary"
                       >
@@ -203,7 +205,7 @@ export default function ProductsPage() {
       </div>
       
       <Dialog open={!!selectedProduct} onOpenChange={(open) => !open && setSelectedProduct(null)}>
-        <DialogContent className="sm:max-w-[500px] w-[95vw] rounded-3xl border-primary overflow-hidden p-0 flex flex-col max-h-[90vh]">
+        <DialogContent className="sm:max-w-[600px] w-[95vw] rounded-[2rem] border-primary overflow-hidden p-0 flex flex-col max-h-[90vh]">
           {selectedProduct && (
             <>
               <div className="p-8 border-b bg-card">
@@ -237,7 +239,7 @@ export default function ProductsPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="bg-card p-4 rounded-2xl border border-primary/10 shadow-sm flex flex-col">
                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider mb-1">Preço Revista</span>
                     <span className="text-xl font-black text-primary">R$ {Number(selectedProduct.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
@@ -246,13 +248,22 @@ export default function ProductsPage() {
                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider mb-1">Preço Custo</span>
                     <span className="text-xl font-black text-emerald-600">R$ {Number(selectedProduct.cost || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                   </div>
+                  <div className="bg-card p-4 rounded-2xl border border-primary/10 shadow-sm flex flex-col bg-primary/5">
+                    <div className="flex items-center gap-1 mb-1">
+                      <TrendingUp className="h-3 w-3 text-primary" />
+                      <span className="text-[10px] font-black text-primary uppercase tracking-wider">Ganhos (Lucro)</span>
+                    </div>
+                    <span className="text-xl font-black text-primary">
+                      R$ {(Number(selectedProduct.price || 0) - Number(selectedProduct.cost || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="font-bold text-muted-foreground ml-1">Descrição</Label>
+                  <Label className="font-bold text-muted-foreground ml-1">Descrição do Produto</Label>
                   <div className="bg-card p-4 rounded-xl border border-primary/5 min-h-[100px]">
                     <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap font-medium">
-                      {selectedProduct.description || "Sem descrição cadastrada."}
+                      {selectedProduct.description || "Sem descrição cadastrada para este item."}
                     </p>
                   </div>
                 </div>
@@ -286,7 +297,7 @@ export default function ProductsPage() {
           <div className="flex-1 overflow-y-auto px-6 py-6 bg-background">
             <div className="grid gap-6">
               <div className="grid gap-2">
-                <Label className="font-bold text-muted-foreground">Nome</Label>
+                <Label className="font-bold text-muted-foreground">Nome do Produto</Label>
                 <Input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="Ex: Kaiak Aventura 100ml" className="rounded-xl border-primary/30 h-11 bg-card" />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -321,7 +332,11 @@ export default function ProductsPage() {
                 </div>
               </div>
               <div className="grid gap-2">
-                <Label className="font-bold text-muted-foreground">Descrição</Label>
+                <Label className="font-bold text-muted-foreground">Código de Referência</Label>
+                <Input value={formData.code} onChange={e => setFormData({...formData, code: e.target.value})} placeholder="Ex: 50123" className="rounded-xl border-primary/30 h-11 bg-card" />
+              </div>
+              <div className="grid gap-2">
+                <Label className="font-bold text-muted-foreground">Descrição / Notas</Label>
                 <Textarea 
                    value={formData.description} 
                    onChange={e => setFormData({...formData, description: e.target.value})} 
@@ -329,7 +344,9 @@ export default function ProductsPage() {
                    className="rounded-xl border-primary/30 min-h-[100px] bg-card"
                 />
               </div>
-              <Button onClick={handleSaveProduct} disabled={isSaving} className="w-full rounded-xl font-bold h-14 text-lg primary-gradient shadow-lg">Salvar</Button>
+              <Button onClick={handleSaveProduct} disabled={isSaving} className="w-full rounded-xl font-bold h-14 text-lg primary-gradient shadow-lg">
+                {isSaving ? <Loader2 className="h-6 w-6 animate-spin" /> : "Salvar Produto"}
+              </Button>
             </div>
           </div>
         </DialogContent>
