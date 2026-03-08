@@ -17,7 +17,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import Image from "next/image"
+import Image from "image"
 import { PlaceHolderImages } from "@/lib/placeholder-images"
 import { 
   Dialog, 
@@ -164,7 +164,7 @@ export default function ProductsPage() {
       <div className="flex flex-col gap-10">
         <div className="flex flex-col items-center text-center gap-6 py-4">
           <div className="space-y-2 w-full">
-            <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter text-primary whitespace-nowrap overflow-hidden text-ellipsis">
+            <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter text-primary text-center">
               Catálogo de Produtos
             </h1>
             <p className="text-muted-foreground font-medium text-lg">Controle seu estoque e preços de venda.</p>
@@ -266,16 +266,11 @@ export default function ProductsPage() {
                       className="rounded-xl border-primary/30 min-h-[100px]" 
                     />
                   </div>
-                </div>
-              </ScrollArea>
-
-              <div className="p-6 pt-4 border-t bg-white">
-                <DialogFooter>
-                  <Button onClick={handleSaveProduct} className="w-full rounded-xl font-bold h-12 text-lg primary-gradient shadow-lg">
+                  <Button onClick={handleSaveProduct} className="w-full rounded-xl font-bold h-12 text-lg primary-gradient shadow-lg mt-4">
                     Salvar Produto
                   </Button>
-                </DialogFooter>
-              </div>
+                </div>
+              </ScrollArea>
             </DialogContent>
           </Dialog>
         </div>
