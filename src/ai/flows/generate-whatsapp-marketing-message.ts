@@ -18,7 +18,7 @@ const GenerateWhatsappMarketingMessageInputSchema = z.object({
   preferredCategories: z
     .array(z.string())
     .describe(
-      'A list of product categories that the client has shown interest in or frequently buys (e.g., perfume, maquiagem).' Byron'
+      'A list of product categories that the client has shown interest in or frequently buys (e.g., perfume, maquiagem).'
     ),
 });
 
