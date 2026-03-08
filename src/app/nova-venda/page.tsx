@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -73,14 +74,14 @@ export default function NewSalePage() {
   return (
     <LayoutWrapper>
       <div className="flex flex-col gap-6">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">Nova Venda</h1>
+        <div className="space-y-1 text-center py-4">
+          <h1 className="text-4xl font-black tracking-tight text-primary">Nova Venda</h1>
           <p className="text-muted-foreground font-medium">Registre uma nova venda de forma rápida e organizada.</p>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-5">
           <div className="lg:col-span-3 space-y-6">
-            <Card className="border-none shadow-sm rounded-2xl">
+            <Card className="shadow-sm rounded-2xl">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <div className="p-2 bg-primary/10 rounded-lg">
@@ -156,7 +157,7 @@ export default function NewSalePage() {
               </CardContent>
             </Card>
 
-            <Card className="border-none shadow-sm rounded-2xl">
+            <Card className="shadow-sm rounded-2xl">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <div className="p-2 bg-accent/10 rounded-lg">
@@ -211,7 +212,7 @@ export default function NewSalePage() {
           </div>
 
           <div className="lg:col-span-2 space-y-6">
-            <Card className="border-none shadow-lg rounded-3xl overflow-hidden primary-gradient text-white">
+            <Card className="shadow-lg rounded-3xl overflow-hidden primary-gradient text-white">
               <CardHeader className="pb-2">
                 <CardTitle className="text-xl opacity-90">Resumo do Pedido</CardTitle>
               </CardHeader>
