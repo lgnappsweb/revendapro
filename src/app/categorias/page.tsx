@@ -13,7 +13,9 @@ import {
   Loader2,
   Trash2,
   Pencil,
-  Tag
+  Tag,
+  Sparkles,
+  ChevronDown
 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { 
@@ -39,11 +41,32 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Label } from "@/components/ui/label"
+import { 
+  Accordion, 
+  AccordionContent, 
+  AccordionItem, 
+  AccordionTrigger 
+} from "@/components/ui/accordion"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
 import { collection, serverTimestamp, addDoc, doc, updateDoc, deleteDoc, query, orderBy } from "firebase/firestore"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 import { useToast } from "@/hooks/use-toast"
+
+const SUGGESTED_CATEGORIES = [
+  "Perfumaria",
+  "Maquiagem",
+  "Cuidados com o Rosto",
+  "Cuidados com o Corpo",
+  "Banho e Sabonetes",
+  "Cabelos",
+  "Infantil / Bebê",
+  "Masculino",
+  "Presentes e Kits",
+  "Proteção Solar",
+  "Desodorantes",
+  "Acessórios"
+]
 
 export default function CategoriesPage() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -212,7 +235,35 @@ export default function CategoriesPage() {
                   className="rounded-xl border-primary/30 h-12 bg-white text-lg font-medium" 
                 />
               </div>
-              <Button onClick={handleSaveCategory} disabled={isSaving} className="w-full rounded-xl font-bold h-14 text-lg primary-gradient shadow-lg mt-4">
+
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="suggestions" className="border-none">
+                  <AccordionTrigger className="hover:no-underline py-2 px-1 rounded-xl hover:bg-primary/5 transition-all group">
+                    <div className="flex items-center gap-2 text-primary font-bold">
+                      <Sparkles className="h-4 w-4" />
+                      <span className="text-sm">Sugestões de Categorias</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="pt-2">
+                    <div className="grid grid-cols-2 gap-2 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
+                      {SUGGESTED_CATEGORIES.map(cat => (
+                        <Button 
+                          key={cat}
+                          variant="outline"
+                          size="sm"
+                          className="rounded-xl border-primary/20 hover:border-primary hover:bg-primary/5 text-xs font-bold h-10 px-2 justify-start overflow-hidden text-ellipsis whitespace-nowrap"
+                          onClick={() => setFormData({ ...formData, name: cat })}
+                        >
+                          <Plus className="h-3 w-3 mr-1 shrink-0" />
+                          {cat}
+                        </Button>
+                      ))}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+
+              <Button onClick={handleSaveCategory} disabled={isSaving} className="w-full rounded-xl font-bold h-14 text-lg primary-gradient shadow-lg mt-2">
                 {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : "Salvar Categoria"}
               </Button>
             </div>
