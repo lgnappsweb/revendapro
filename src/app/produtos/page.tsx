@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -163,7 +164,7 @@ export default function ProductsPage() {
       <div className="flex flex-col gap-10">
         <div className="flex flex-col items-center text-center gap-6 py-4">
           <div className="space-y-2 w-full">
-            <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter text-primary whitespace-nowrap overflow-hidden text-ellipsis">
+            <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter text-primary">
               Catálogo de Produtos
             </h1>
             <p className="text-muted-foreground font-medium text-lg">Controle seu estoque e preços de venda.</p>
@@ -175,31 +176,31 @@ export default function ProductsPage() {
                 <Plus className="mr-2 h-6 w-6" /> Novo Produto
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px] rounded-2xl border-primary max-h-[90vh] flex flex-col p-0 overflow-hidden">
+            <DialogContent className="sm:max-w-[500px] w-[95vw] rounded-2xl border-primary max-h-[90vh] flex flex-col p-0 overflow-hidden">
               <div className="p-6 pb-2">
                 <DialogHeader>
                   <DialogTitle className="text-2xl font-bold text-primary">Cadastrar Produto</DialogTitle>
-                  <DialogDescription className="font-medium">Adicione um novo item ao seu catálogo de revenda.</DialogDescription>
+                  <DialogDescription className="font-medium text-muted-foreground">Adicione um novo item ao seu catálogo de revenda.</DialogDescription>
                 </DialogHeader>
               </div>
               
               <ScrollArea className="flex-1 px-6">
-                <div className="grid gap-4 py-2">
+                <div className="grid gap-6 py-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="name" className="font-bold">Nome do Produto</Label>
+                    <Label htmlFor="name" className="font-bold text-muted-foreground">Nome do Produto</Label>
                     <Input 
                       id="name" 
                       value={formData.name}
                       onChange={(e) => setFormData({...formData, name: e.target.value})}
                       placeholder="Ex: Kaiak Aventura" 
-                      className="rounded-xl border-primary/30" 
+                      className="rounded-xl border-primary/30 h-11" 
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="brand" className="font-bold">Marca</Label>
+                      <Label htmlFor="brand" className="font-bold text-muted-foreground">Marca</Label>
                       <Select value={formData.brand} onValueChange={(v) => setFormData({...formData, brand: v})}>
-                        <SelectTrigger className="rounded-xl border-primary/30">
+                        <SelectTrigger className="rounded-xl border-primary/30 h-11">
                           <SelectValue placeholder="Selecione..." />
                         </SelectTrigger>
                         <SelectContent>
@@ -210,9 +211,9 @@ export default function ProductsPage() {
                       </Select>
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="category" className="font-bold">Categoria</Label>
+                      <Label htmlFor="category" className="font-bold text-muted-foreground">Categoria</Label>
                       <Select value={formData.category} onValueChange={(v) => setFormData({...formData, category: v})}>
-                        <SelectTrigger className="rounded-xl border-primary/30">
+                        <SelectTrigger className="rounded-xl border-primary/30 h-11">
                           <SelectValue placeholder="Selecione categoria..." />
                         </SelectTrigger>
                         <SelectContent>
@@ -223,40 +224,40 @@ export default function ProductsPage() {
                       </Select>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="price" className="font-bold">Preço da revista (R$)</Label>
+                      <Label htmlFor="price" className="font-bold text-muted-foreground">Preço da revista (R$)</Label>
                       <Input 
                         id="price" 
                         value={formData.price}
                         onChange={(e) => handlePriceChange(e, 'price')}
                         placeholder="0,00" 
-                        className="rounded-xl border-primary/30" 
+                        className="rounded-xl border-primary/30 h-11" 
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="cost" className="font-bold">Preço da revendedora (R$)</Label>
+                      <Label htmlFor="cost" className="font-bold text-muted-foreground">Preço da revendedora (R$)</Label>
                       <Input 
                         id="cost" 
                         value={formData.cost}
                         onChange={(e) => handlePriceChange(e, 'cost')}
                         placeholder="0,00" 
-                        className="rounded-xl border-primary/30" 
+                        className="rounded-xl border-primary/30 h-11" 
                       />
                     </div>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="code" className="font-bold">Código / Referência</Label>
+                    <Label htmlFor="code" className="font-bold text-muted-foreground">Código / Referência</Label>
                     <Input 
                       id="code" 
                       value={formData.code}
                       onChange={(e) => setFormData({...formData, code: e.target.value})}
                       placeholder="Ex: NAT-123" 
-                      className="rounded-xl border-primary/30" 
+                      className="rounded-xl border-primary/30 h-11" 
                     />
                   </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="description" className="font-bold">Descrição (Opcional)</Label>
+                  <div className="grid gap-2 mb-4">
+                    <Label htmlFor="description" className="font-bold text-muted-foreground">Descrição (Opcional)</Label>
                     <Textarea 
                       id="description" 
                       value={formData.description}
@@ -268,9 +269,9 @@ export default function ProductsPage() {
                 </div>
               </ScrollArea>
 
-              <div className="p-6 pt-2">
+              <div className="p-6 pt-4 border-t bg-white">
                 <DialogFooter>
-                  <Button onClick={handleSaveProduct} className="w-full rounded-xl font-bold h-12 text-lg">
+                  <Button onClick={handleSaveProduct} className="w-full rounded-xl font-bold h-12 text-lg primary-gradient shadow-lg">
                     Salvar Produto
                   </Button>
                 </DialogFooter>
