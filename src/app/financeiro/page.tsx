@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { LayoutWrapper } from "@/components/layout-wrapper"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { 
@@ -50,9 +50,15 @@ export default function FinancePage() {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedPeriod, setSelectedPeriod] = useState("mes")
+  const [selectedPeriod, setSelectedPeriod] = useState("hoje")
+  const [currentDate, setCurrentDate] = useState<Date | null>(null)
   const { toast } = useToast()
   const db = useFirestore()
+
+  // Evita erros de hidratação garantindo que a data só seja definida no cliente
+  useEffect(() => {
+    setCurrentDate(new Date())
+  }, [])
 
   const ordersRef = useMemoFirebase(() => 
     query(collection(db, "orders"), orderBy("createdAt", "desc")), 
@@ -60,10 +66,27 @@ export default function FinancePage() {
   )
   const { data: orders, isLoading } = useCollection(ordersRef)
 
+  // Labels formatadas para o seletor
+  const todayLabel = useMemo(() => {
+    if (!currentDate) return "Carregando..."
+    const day = format(currentDate, 'dd')
+    const month = format(currentDate, 'MMMM', { locale: ptBR })
+    const year = format(currentDate, 'yyyy')
+    const capitalizedMonth = month.charAt(0).toUpperCase() + month.slice(1)
+    return `${day}/ ${capitalizedMonth}/ ${year}`
+  }, [currentDate])
+
+  const monthLabel = useMemo(() => {
+    if (!currentDate) return "Carregando..."
+    const month = format(currentDate, 'MMMM', { locale: ptBR })
+    const year = format(currentDate, 'yyyy')
+    const capitalizedMonth = month.charAt(0).toUpperCase() + month.slice(1)
+    return `${capitalizedMonth}/ ${year}`
+  }, [currentDate])
+
   // Filtro de ordens pelo período selecionado
   const filteredOrdersByPeriod = useMemo(() => {
-    if (!orders) return []
-    const now = new Date()
+    if (!orders || !currentDate) return []
     
     return orders.filter(order => {
       const orderDate = order.createdAt?.seconds 
@@ -71,18 +94,15 @@ export default function FinancePage() {
         : new Date(order.createdAt)
       
       if (selectedPeriod === "hoje") {
-        return isSameDay(orderDate, now)
+        return isSameDay(orderDate, currentDate)
       }
       if (selectedPeriod === "mes") {
-        return isSameMonth(orderDate, now) && isSameYear(orderDate, now)
+        return isSameMonth(orderDate, currentDate) && isSameYear(orderDate, currentDate)
       }
       return true // "todos"
     })
-  }, [orders, selectedPeriod])
+  }, [orders, selectedPeriod, currentDate])
 
-  // Cálculos financeiros baseados no período filtrado
-  const now = new Date()
-  
   const totalReceived = filteredOrdersByPeriod?.filter(o => o.paymentStatus === 'Pago')
     .reduce((acc, o) => acc + (o.finalTotal || 0), 0) || 0
 
@@ -91,9 +111,9 @@ export default function FinancePage() {
   const totalPending = pendingOrders.reduce((acc, o) => acc + (o.finalTotal || 0), 0) || 0
 
   const totalOverdue = pendingOrders.filter(o => {
-    if (!o.dueDate) return false
+    if (!o.dueDate || !currentDate) return false
     const dDate = o.dueDate.seconds ? new Date(o.dueDate.seconds * 1000) : new Date(o.dueDate)
-    return dDate < now
+    return dDate < currentDate
   }).reduce((acc, o) => acc + (o.finalTotal || 0), 0) || 0
 
   // Filtro para o diálogo de registrar entrada
@@ -152,22 +172,20 @@ export default function FinancePage() {
           </div>
           
           <div className="flex flex-col items-center justify-center gap-6 w-full max-w-2xl px-4">
-            {/* Seletor de Período em cima */}
             <div className="flex items-center gap-2 w-full max-w-sm">
               <CalendarDays className="h-5 w-5 text-primary shrink-0" />
               <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-                <SelectTrigger className="w-full rounded-xl font-bold border-primary/20 bg-white h-12">
+                <SelectTrigger className="w-full rounded-xl font-bold border-primary/20 bg-white h-12 shadow-sm">
                   <SelectValue placeholder="Período" />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl font-bold">
-                  <SelectItem value="hoje">Hoje ({format(new Date(), 'dd/MM/yyyy')})</SelectItem>
-                  <SelectItem value="mes">Este Mês ({format(new Date(), 'MMMM', { locale: ptBR })})</SelectItem>
+                  <SelectItem value="hoje">{todayLabel}</SelectItem>
+                  <SelectItem value="mes">{monthLabel}</SelectItem>
                   <SelectItem value="todos">Todo o Período</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Botões lado a lado em baixo */}
             <div className="flex items-center gap-3 w-full max-w-sm">
               <Button onClick={exportData} variant="outline" className="flex-1 rounded-xl font-bold h-12 border-primary text-primary hover:bg-primary/5 transition-all px-2 text-xs sm:text-sm">
                 <Download className="mr-1 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Exportar
@@ -305,11 +323,11 @@ export default function FinancePage() {
                   <div className="flex justify-between text-xs font-black uppercase tracking-wider">
                     <span>Eficiência de Cobrança</span>
                     <span className="text-emerald-600">
-                      {filteredOrdersByPeriod.length ? Math.round((totalReceived / (totalReceived + totalPending)) * 100) : 0}% Recebido
+                      {(totalReceived + totalPending) > 0 ? Math.round((totalReceived / (totalReceived + totalPending)) * 100) : 0}% Recebido
                     </span>
                   </div>
                   <Progress 
-                    value={filteredOrdersByPeriod.length ? (totalReceived / (totalReceived + totalPending)) * 100 : 0} 
+                    value={(totalReceived + totalPending) > 0 ? (totalReceived / (totalReceived + totalPending)) * 100 : 0} 
                     className="h-3 bg-emerald-50 [&>div]:bg-emerald-500" 
                   />
                   <p className="text-[10px] text-muted-foreground font-bold text-right italic">
