@@ -20,7 +20,7 @@ import {
   Eye,
   Sparkles
 } from "lucide-react"
-import { useFirestore, useDoc, useMemoFirebase } from "@/firebase"
+import { useFirestore, useDoc, useMemoFirebase, useUser } from "@/firebase"
 import { doc, setDoc, serverTimestamp } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 
@@ -33,10 +33,15 @@ const COLOR_THEMES = [
 ]
 
 export default function SettingsPage() {
+  const { user } = useUser()
   const db = useFirestore()
   const { toast } = useToast()
   
-  const settingsRef = useMemoFirebase(() => doc(db, "settings", "global"), [db])
+  const settingsRef = useMemoFirebase(() => {
+    if (!user) return null
+    return doc(db, "settings", "global")
+  }, [db, user])
+  
   const { data: settings, isLoading } = useDoc(settingsRef)
 
   const [appName, setAppName] = useState("")
@@ -57,6 +62,7 @@ export default function SettingsPage() {
   }, [settings])
 
   const handleSave = async () => {
+    if (!settingsRef) return
     setIsSaving(true)
     try {
       await setDoc(settingsRef, {

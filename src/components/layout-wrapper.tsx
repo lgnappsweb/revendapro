@@ -63,7 +63,11 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     return doc(db, "admins", user.uid)
   }, [user, db])
 
-  const settingsRef = useMemoFirebase(() => doc(db, "settings", "global"), [db])
+  const settingsRef = useMemoFirebase(() => {
+    if (!user) return null
+    return doc(db, "settings", "global")
+  }, [db, user])
+  
   const { data: settings } = useDoc(settingsRef)
   const { data: adminRecord, isLoading: isAdminLoading } = useDoc(adminDocRef)
 

@@ -55,13 +55,14 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select"
-import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
+import { useFirestore, useCollection, useMemoFirebase, useUser } from "@/firebase"
 import { collection, serverTimestamp, addDoc, doc, updateDoc, deleteDoc, query, orderBy } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 
 export default function ProductsPage() {
+  const { user } = useUser()
   const [activeTab, setActiveTab] = useState("todos")
   const [searchTerm, setSearchTerm] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -73,10 +74,18 @@ export default function ProductsPage() {
   const db = useFirestore()
   const { toast } = useToast()
 
-  const productsRef = useMemoFirebase(() => collection(db, "products"), [db])
+  const productsRef = useMemoFirebase(() => {
+    if (!user) return null
+    return collection(db, "products")
+  }, [db, user])
+  
   const { data: products, isLoading: isLoadingProducts } = useCollection(productsRef)
 
-  const categoriesRef = useMemoFirebase(() => query(collection(db, "categories"), orderBy("name", "asc")), [db])
+  const categoriesRef = useMemoFirebase(() => {
+    if (!user) return null
+    return query(collection(db, "categories"), orderBy("name", "asc"))
+  }, [db, user])
+  
   const { data: categories } = useCollection(categoriesRef)
 
   const [formData, setFormData] = useState({
@@ -171,7 +180,9 @@ export default function ProductsPage() {
       const docRef = doc(db, "products", editingProductId)
       updateDoc(docRef, productData).then(() => { toast({ title: "Atualizado!" }); setIsDialogOpen(false); }).finally(() => setIsSaving(false))
     } else {
-      addDoc(productsRef, { ...productData, createdAt: serverTimestamp() }).then(() => { toast({ title: "Salvo!" }); setIsDialogOpen(false); }).finally(() => setIsSaving(false))
+      if (productsRef) {
+        addDoc(productsRef, { ...productData, createdAt: serverTimestamp() }).then(() => { toast({ title: "Salvo!" }); setIsDialogOpen(false); }).finally(() => setIsSaving(false))
+      }
     }
   }
 
@@ -449,6 +460,12 @@ export default function ProductsPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
+            <Accordion type="single" collapsible className="w-full sm:hidden mb-4">
+              <AccordionItem value="item-1" className="border-none">
+                <AccordionTrigger className="text-xs font-bold text-muted-foreground hover:no-underline">Saiba mais sobre a exclusão</AccordionTrigger>
+                <AccordionContent className="text-xs text-muted-foreground">A exclusão remove o item apenas do catálogo. Vendas passadas que contém este produto não serão afetadas.</AccordionContent>
+              </AccordionItem>
+            </Accordion>
             <AlertDialogCancel className="rounded-xl font-bold">Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteConfirm} className="rounded-xl font-bold bg-rose-600 hover:bg-rose-700">Confirmar Exclusão</AlertDialogAction>
           </AlertDialogFooter>

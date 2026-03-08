@@ -46,7 +46,7 @@ import {
   AccordionItem, 
   AccordionTrigger 
 } from "@/components/ui/accordion"
-import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
+import { useFirestore, useCollection, useMemoFirebase, useUser } from "@/firebase"
 import { collection, serverTimestamp, addDoc, doc, updateDoc, deleteDoc, query, orderBy } from "firebase/firestore"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
@@ -62,6 +62,7 @@ const SUGGESTED_CATEGORIES = [
 ]
 
 export default function CategoriesPage() {
+  const { user } = useUser()
   const [searchTerm, setSearchTerm] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -72,7 +73,11 @@ export default function CategoriesPage() {
   const db = useFirestore()
   const { toast } = useToast()
 
-  const categoriesRef = useMemoFirebase(() => query(collection(db, "categories"), orderBy("name", "asc")), [db])
+  const categoriesRef = useMemoFirebase(() => {
+    if (!user) return null
+    return query(collection(db, "categories"), orderBy("name", "asc"))
+  }, [db, user])
+  
   const { data: categories, isLoading } = useCollection(categoriesRef)
 
   const [formData, setFormData] = useState({ name: "" })

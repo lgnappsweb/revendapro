@@ -55,9 +55,12 @@ export function AppSidebar() {
     return doc(db, "users", user.uid)
   }, [user, db])
 
-  const settingsRef = useMemoFirebase(() => doc(db, "settings", "global"), [db])
-  const { data: settings } = useDoc(settingsRef)
+  const settingsRef = useMemoFirebase(() => {
+    if (!user) return null
+    return doc(db, "settings", "global")
+  }, [db, user])
 
+  const { data: settings } = useDoc(settingsRef)
   const { data: userProfile } = useDoc(userDocRef)
 
   const handleLogout = async () => {

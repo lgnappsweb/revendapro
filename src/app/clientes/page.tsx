@@ -59,13 +59,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu"
-import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
+import { useFirestore, useCollection, useMemoFirebase, useUser } from "@/firebase"
 import { collection, addDoc, serverTimestamp, deleteDoc, doc, updateDoc } from "firebase/firestore"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 import { Separator } from "@/components/ui/separator"
 
 export default function ClientsPage() {
+  const { user } = useUser()
   const [searchTerm, setSearchTerm] = useState("")
   const [isSaving, setIsSaving] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -75,7 +76,11 @@ export default function ClientsPage() {
   const { toast } = useToast()
   const db = useFirestore()
 
-  const clientsRef = useMemoFirebase(() => collection(db, "clients"), [db])
+  const clientsRef = useMemoFirebase(() => {
+    if (!user) return null
+    return collection(db, "clients")
+  }, [db, user])
+  
   const { data: clients, isLoading } = useCollection(clientsRef)
 
   const [formData, setFormData] = useState({
@@ -161,19 +166,21 @@ export default function ClientsPage() {
         ...clientData,
         createdAt: serverTimestamp()
       }
-      addDoc(clientsRef, newClient)
-        .then(() => {
-          toast({ title: "Cliente Cadastrado" })
-          setIsDialogOpen(false)
-        })
-        .catch(async (error) => {
-          errorEmitter.emit('permission-error', new FirestorePermissionError({
-            path: clientsRef.path,
-            operation: 'create',
-            requestResourceData: newClient,
-          }))
-        })
-        .finally(() => setIsSaving(false))
+      if (clientsRef) {
+        addDoc(clientsRef, newClient)
+          .then(() => {
+            toast({ title: "Cliente Cadastrado" })
+            setIsDialogOpen(false)
+          })
+          .catch(async (error) => {
+            errorEmitter.emit('permission-error', new FirestorePermissionError({
+              path: clientsRef.path,
+              operation: 'create',
+              requestResourceData: newClient,
+            }))
+          })
+          .finally(() => setIsSaving(false))
+      }
     }
   }
 

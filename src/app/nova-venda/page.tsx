@@ -43,7 +43,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
-import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
+import { useFirestore, useCollection, useMemoFirebase, useUser } from "@/firebase"
 import { collection, addDoc, serverTimestamp } from "firebase/firestore"
 import { 
   Dialog, 
@@ -77,6 +77,7 @@ interface CartItem {
 }
 
 export default function NewSalePage() {
+  const { user } = useUser()
   const [items, setItems] = useState<CartItem[]>([])
   const [paymentMethod, setPaymentMethod] = useState<string>("")
   const [selectedClientId, setSelectedClientId] = useState<string>("")
@@ -91,8 +92,15 @@ export default function NewSalePage() {
   const router = useRouter()
   const db = useFirestore()
 
-  const productsRef = useMemoFirebase(() => collection(db, "products"), [db])
-  const clientsRef = useMemoFirebase(() => collection(db, "clients"), [db])
+  const productsRef = useMemoFirebase(() => {
+    if (!user) return null
+    return collection(db, "products")
+  }, [db, user])
+  
+  const clientsRef = useMemoFirebase(() => {
+    if (!user) return null
+    return collection(db, "clients")
+  }, [db, user])
   
   const { data: dbProducts, isLoading: loadingProducts } = useCollection(productsRef)
   const { data: dbClients, isLoading: loadingClients } = useCollection(clientsRef)
