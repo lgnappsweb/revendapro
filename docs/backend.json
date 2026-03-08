@@ -92,6 +92,17 @@
         "subtotal": { "type": "number" }
       },
       "required": ["id", "orderId", "productId", "quantity", "unitPrice", "subtotal"]
+    },
+    "AppSettings": {
+      "title": "AppSettings",
+      "description": "Configurações globais do aplicativo.",
+      "type": "object",
+      "properties": {
+        "appName": { "type": "string" },
+        "themeId": { "type": "string" },
+        "darkMode": { "type": "boolean" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
     }
   },
   "auth": {
@@ -125,6 +136,10 @@
     "/order_items/{itemId}": {
       "schema": "OrderItem",
       "description": "Itens detalhados das vendas."
+    },
+    "/settings/{id}": {
+      "schema": "AppSettings",
+      "description": "Configurações globais do app."
     }
   }
 }

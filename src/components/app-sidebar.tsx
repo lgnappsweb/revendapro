@@ -55,6 +55,9 @@ export function AppSidebar() {
     return doc(db, "users", user.uid)
   }, [user, db])
 
+  const settingsRef = useMemoFirebase(() => doc(db, "settings", "global"), [db])
+  const { data: settings } = useDoc(settingsRef)
+
   const { data: userProfile } = useDoc(userDocRef)
 
   const handleLogout = async () => {
@@ -66,6 +69,8 @@ export function AppSidebar() {
     }
   }
 
+  const appName = settings?.appName || "RevendaPro"
+
   return (
     <Sidebar collapsible="icon" className="border-r-0">
       <SidebarHeader className="p-4">
@@ -73,9 +78,13 @@ export function AppSidebar() {
           <div className="flex h-10 w-10 items-center justify-center rounded-xl primary-gradient text-white">
             <Sparkles className="h-6 w-6" />
           </div>
-          <div className="flex flex-col gap-0.5 group-data-[collapsible=icon]:hidden">
-            <span className="text-lg font-bold tracking-tight text-primary">RevendaPro</span>
-            <span className="text-xs font-medium text-muted-foreground">Gestão Consultora</span>
+          <div className="flex flex-col gap-0.5 group-data-[collapsible=icon]:hidden min-w-0">
+            <span className="text-lg font-bold tracking-tight text-primary truncate leading-tight">
+              {appName}
+            </span>
+            <span className="text-xs font-medium text-muted-foreground truncate uppercase tracking-widest text-[9px]">
+              Gestão Consultora
+            </span>
           </div>
         </div>
       </SidebarHeader>
