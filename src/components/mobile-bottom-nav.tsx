@@ -42,7 +42,7 @@ export function MobileBottomNav() {
 
   return (
     <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-md">
-      <nav className="bg-white/90 backdrop-blur-lg border border-white/20 shadow-2xl rounded-3xl h-16 flex items-center justify-around px-4">
+      <nav className="bg-card/95 backdrop-blur-lg border border-primary/20 shadow-2xl rounded-3xl h-16 flex items-center justify-around px-4">
         {mainItems.map((item) => (
           <Link
             key={item.href}
@@ -68,7 +68,7 @@ export function MobileBottomNav() {
               <span className="text-[10px] font-bold uppercase tracking-tighter">Mais</span>
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56 rounded-2xl mb-4 p-2 shadow-xl border-none bg-white/95 backdrop-blur-md">
+          <DropdownMenuContent align="end" className="w-56 rounded-2xl mb-4 p-2 shadow-xl border border-primary/20 bg-card/95 backdrop-blur-md">
             {moreItems.map((item) => (
               <DropdownMenuItem key={item.href} asChild>
                 <Link
