@@ -150,7 +150,7 @@ export default function ClientsPage() {
     <LayoutWrapper>
       <div className="flex flex-col gap-8">
         {/* Header Section */}
-        <div className="flex flex-col items-center text-center gap-6 py-4">
+        <div className="flex flex-col gap-6 py-4">
           <div className="space-y-2 w-full text-center flex flex-col items-center">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-primary lg:whitespace-nowrap">
               Meus Clientes
@@ -160,7 +160,7 @@ export default function ClientsPage() {
           
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="w-full sm:max-w-xs rounded-2xl font-bold bg-primary hover:bg-primary/90 shadow-lg h-14 text-lg">
+              <Button className="w-full rounded-2xl font-bold bg-primary hover:bg-primary/90 shadow-lg h-14 text-lg">
                 <UserPlus className="mr-2 h-6 w-6" /> Adicionar Cliente
               </Button>
             </DialogTrigger>

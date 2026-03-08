@@ -244,7 +244,7 @@ export default function ProductsPage() {
   return (
     <LayoutWrapper>
       <div className="flex flex-col gap-10">
-        <div className="flex flex-col items-center text-center gap-6 py-4">
+        <div className="flex flex-col gap-6 py-4">
           <div className="space-y-2 w-full text-center flex flex-col items-center">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-primary text-center lg:whitespace-nowrap">
               Catálogo de Produtos
