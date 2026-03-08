@@ -14,13 +14,16 @@ import {
   Loader2,
   CalendarDays,
   FileText,
-  BarChart3
+  BarChart3,
+  MessageCircle,
+  Share2,
+  ChevronDown
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
 import { collection, query, orderBy } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
-import { format, isSameDay, isSameMonth, isSameYear, startOfMonth, endOfMonth, eachDayOfInterval, isWithinInterval } from "date-fns"
+import { format, isSameDay, isSameMonth, isSameYear, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { 
   Select,
@@ -38,6 +41,12 @@ import {
   Tooltip,
   Cell
 } from "recharts"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import jsPDF from "jspdf"
 import "jspdf-autotable"
 
@@ -95,7 +104,6 @@ export default function FinancePage() {
   const chartData = useMemo(() => {
     if (!currentDate || !orders) return []
     
-    // Gráfico dos últimos 7 dias ou do mês atual? Vamos fazer do mês atual se for "mes"
     if (selectedPeriod === "mes") {
       const start = startOfMonth(currentDate)
       const end = endOfMonth(currentDate)
@@ -130,35 +138,77 @@ export default function FinancePage() {
       const doc = new jsPDF()
       const title = `Relatorio_Financeiro_${selectedPeriod}_${format(new Date(), 'dd-MM-yyyy')}`
       
-      doc.setFontSize(18)
-      doc.text("RevendaPro - Relatório Financeiro", 14, 20)
-      doc.setFontSize(11)
-      doc.text(`Período: ${selectedPeriod === 'hoje' ? todayLabel : selectedPeriod === 'mes' ? monthLabel : 'Todo o Período'}`, 14, 30)
-      doc.text(`Gerado em: ${format(new Date(), 'dd/MM/yyyy HH:mm')}`, 14, 37)
+      // Estilização Profissional
+      doc.setFillColor(194, 24, 91) // Cor primária
+      doc.rect(0, 0, 210, 40, 'F')
+      
+      doc.setTextColor(255, 255, 255)
+      doc.setFontSize(22)
+      doc.setFont('helvetica', 'bold')
+      doc.text("REVENDAPRO", 14, 25)
+      
+      doc.setFontSize(10)
+      doc.setFont('helvetica', 'normal')
+      doc.text("GESTÃO PROFISSIONAL DE VENDAS", 14, 32)
+      
+      doc.setTextColor(80, 80, 80)
+      doc.setFontSize(14)
+      doc.text("RELATÓRIO FINANCEIRO DETALHADO", 14, 55)
+      
+      doc.setFontSize(10)
+      const periodLabel = selectedPeriod === 'hoje' ? todayLabel : selectedPeriod === 'mes' ? monthLabel : 'Todo o Período'
+      doc.text(`Período: ${periodLabel}`, 14, 65)
+      doc.text(`Gerado em: ${format(new Date(), 'dd/MM/yyyy HH:mm')}`, 14, 70)
 
       const tableData = filteredOrdersByPeriod.map(order => [
         format(order.createdAt?.seconds ? new Date(order.createdAt.seconds * 1000) : new Date(order.createdAt), 'dd/MM/yy'),
         order.clientName,
         order.paymentMethod?.toUpperCase() || 'S/ INFO',
-        order.paymentStatus,
+        order.paymentStatus === 'Pago' ? 'PAGO' : 'PENDENTE',
         `R$ ${order.finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
       ])
 
       // @ts-ignore
       doc.autoTable({
-        startY: 45,
-        head: [['Data', 'Cliente', 'Pagamento', 'Status', 'Valor']],
+        startY: 80,
+        head: [['DATA', 'CLIENTE', 'PAGAMENTO', 'STATUS', 'VALOR']],
         body: tableData,
-        theme: 'striped',
-        headStyles: { fillColor: [194, 24, 91] }
+        theme: 'grid',
+        headStyles: { 
+          fillColor: [194, 24, 91],
+          textColor: [255, 255, 255],
+          fontStyle: 'bold',
+          halign: 'center'
+        },
+        columnStyles: {
+          4: { halign: 'right' }
+        },
+        styles: { fontSize: 9 }
       })
 
       const finalY = (doc as any).lastAutoTable.finalY || 150
+      
+      // Card de Resumo no PDF
+      doc.setDrawColor(194, 24, 91)
+      doc.setLineWidth(0.5)
+      doc.line(14, finalY + 10, 196, finalY + 10)
+      
       doc.setFontSize(12)
-      doc.text(`Resumo Financeiro:`, 14, finalY + 15)
-      doc.text(`Total Recebido: R$ ${totalReceived.toLocaleString('pt-BR')}`, 14, finalY + 25)
-      doc.text(`Total Pendente: R$ ${totalPending.toLocaleString('pt-BR')}`, 14, finalY + 32)
-      doc.text(`Total Geral: R$ ${(totalReceived + totalPending).toLocaleString('pt-BR')}`, 14, finalY + 39)
+      doc.setFont('helvetica', 'bold')
+      doc.text(`RESUMO DO PERÍODO:`, 14, finalY + 20)
+      
+      doc.setFontSize(10)
+      doc.setFont('helvetica', 'normal')
+      doc.text(`Total Recebido:`, 14, finalY + 30)
+      doc.text(`R$ ${totalReceived.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 196, finalY + 30, { align: 'right' })
+      
+      doc.text(`Total Pendente:`, 14, finalY + 37)
+      doc.text(`R$ ${totalPending.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 196, finalY + 37, { align: 'right' })
+      
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(194, 24, 91)
+      doc.text(`BALANÇO GERAL:`, 14, finalY + 47)
+      doc.text(`R$ ${(totalReceived + totalPending).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 196, finalY + 47, { align: 'right' })
 
       doc.save(`${title}.pdf`)
       toast({ title: "PDF Gerado!", description: "O relatório foi baixado com sucesso." })
@@ -167,6 +217,38 @@ export default function FinancePage() {
     } finally {
       setIsExporting(false)
     }
+  }
+
+  const handleExportWhatsApp = () => {
+    if (!filteredOrdersByPeriod.length) return
+    
+    const periodLabel = selectedPeriod === 'hoje' ? todayLabel : selectedPeriod === 'mes' ? monthLabel : 'Todo o Período'
+    
+    let message = `*📊 RELATÓRIO FINANCEIRO - REVENDAPRO*\n`
+    message += `*Período:* ${periodLabel}\n`
+    message += `----------------------------------\n\n`
+    
+    message += `*💰 RESUMO FINANCEIRO*\n`
+    message += `✅ Recebido: R$ ${totalReceived.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}\n`
+    message += `⏳ Pendente: R$ ${totalPending.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}\n`
+    message += `📈 Total Geral: R$ ${(totalReceived + totalPending).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}\n\n`
+    
+    message += `*📝 ÚLTIMAS TRANSAÇÕES*\n`
+    filteredOrdersByPeriod.slice(0, 15).forEach(order => {
+      const date = format(order.createdAt?.seconds ? new Date(order.createdAt.seconds * 1000) : new Date(order.createdAt), 'dd/MM')
+      const status = order.paymentStatus === 'Pago' ? '✅' : '⏳'
+      message += `• ${date} | ${order.clientName} | R$ ${order.finalTotal.toLocaleString('pt-BR')} ${status}\n`
+    })
+
+    if (filteredOrdersByPeriod.length > 15) {
+      message += `\n_...e mais ${filteredOrdersByPeriod.length - 15} vendas no período._`
+    }
+    
+    message += `\n\n*Gerado em:* ${format(new Date(), 'dd/MM/yyyy HH:mm')}`
+    
+    const encodedMessage = encodeURIComponent(message)
+    window.open(`https://wa.me/?text=${encodedMessage}`, '_blank')
+    toast({ title: "WhatsApp Aberto", description: "O resumo foi copiado para a mensagem." })
   }
 
   return (
@@ -191,14 +273,38 @@ export default function FinancePage() {
                   <SelectItem value="todos">Todo o Período</SelectItem>
                 </SelectContent>
               </Select>
-              <Button 
-                onClick={handleExportPDF} 
-                disabled={isExporting || filteredOrdersByPeriod.length === 0}
-                className="w-full sm:w-auto rounded-2xl font-black bg-primary hover:bg-primary/90 shadow-lg h-14 px-8 text-lg flex items-center gap-2"
-              >
-                {isExporting ? <Loader2 className="h-6 w-6 animate-spin" /> : <Download className="h-6 w-6" />}
-                EXPORTAR PDF
-              </Button>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    disabled={isExporting || filteredOrdersByPeriod.length === 0}
+                    className="w-full sm:w-auto rounded-2xl font-black bg-primary hover:bg-primary/90 shadow-lg h-14 px-8 text-lg flex items-center gap-2"
+                  >
+                    {isExporting ? <Loader2 className="h-6 w-6 animate-spin" /> : <Share2 className="h-6 w-6" />}
+                    EXPORTAR <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="rounded-2xl p-2 w-56 border-2 border-primary/10 shadow-2xl">
+                  <DropdownMenuItem 
+                    onClick={handleExportPDF}
+                    className="rounded-xl font-bold py-3 px-4 cursor-pointer hover:bg-primary/5 gap-3"
+                  >
+                    <div className="p-2 bg-rose-100 rounded-lg text-rose-600">
+                      <Download className="h-4 w-4" />
+                    </div>
+                    Exportar PDF
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={handleExportWhatsApp}
+                    className="rounded-xl font-bold py-3 px-4 cursor-pointer hover:bg-primary/5 gap-3"
+                  >
+                    <div className="p-2 bg-emerald-100 rounded-lg text-emerald-600">
+                      <MessageCircle className="h-4 w-4" />
+                    </div>
+                    Enviar p/ WhatsApp
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
           </div>
         </div>
 
