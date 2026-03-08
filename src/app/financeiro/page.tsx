@@ -51,7 +51,7 @@ import jsPDF from "jspdf"
 import "jspdf-autotable"
 
 export default function FinancePage() {
-  const [selectedPeriod, setSelectedPeriod] = useState("mes")
+  const [selectedPeriod, setSelectedPeriod] = useState("hoje")
   const [currentDate, setCurrentDate] = useState<Date | null>(null)
   const [isExporting, setIsExporting] = useState(false)
   const { toast } = useToast()
@@ -138,8 +138,7 @@ export default function FinancePage() {
       const doc = new jsPDF()
       const title = `Relatorio_Financeiro_${selectedPeriod}_${format(new Date(), 'dd-MM-yyyy')}`
       
-      // Estilização Profissional
-      doc.setFillColor(194, 24, 91) // Cor primária
+      doc.setFillColor(194, 24, 91)
       doc.rect(0, 0, 210, 40, 'F')
       
       doc.setTextColor(255, 255, 255)
@@ -188,7 +187,6 @@ export default function FinancePage() {
 
       const finalY = (doc as any).lastAutoTable.finalY || 150
       
-      // Card de Resumo no PDF
       doc.setDrawColor(194, 24, 91)
       doc.setLineWidth(0.5)
       doc.line(14, finalY + 10, 196, finalY + 10)
@@ -265,7 +263,7 @@ export default function FinancePage() {
              <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
                 <SelectTrigger className="w-full sm:flex-1 rounded-2xl font-bold border-primary/20 bg-card h-14 shadow-sm text-lg">
                   <CalendarDays className="mr-2 h-5 w-5 text-primary" />
-                  <SelectValue placeholder="Período" />
+                  <SelectValue placeholder="Hoje" />
                 </SelectTrigger>
                 <SelectContent className="rounded-2xl font-bold">
                   <SelectItem value="hoje">Hoje ({todayLabel})</SelectItem>
