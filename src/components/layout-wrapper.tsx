@@ -3,7 +3,8 @@
 
 import { useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
-import { useUser } from "@/firebase"
+import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase"
+import { doc } from "firebase/firestore"
 import { AppSidebar } from "./app-sidebar"
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { Search, Bell, Loader2 } from "lucide-react"
@@ -13,10 +14,19 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading } = useUser()
+  const db = useFirestore()
   const router = useRouter()
   const pathname = usePathname()
 
   const isPublicPage = pathname === "/login" || pathname === "/register"
+
+  // Sincronização em tempo real do perfil do usuário para múltiplos dispositivos
+  const userDocRef = useMemoFirebase(() => {
+    if (!user) return null
+    return doc(db, "users", user.uid)
+  }, [user, db])
+
+  const { data: userProfile, isLoading: isProfileLoading } = useDoc(userDocRef)
 
   useEffect(() => {
     if (!isUserLoading && !user && !isPublicPage) {
@@ -69,13 +79,17 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
             <div className="h-8 w-px bg-border mx-1" />
             <div className="flex items-center gap-3 pl-2 cursor-pointer hover:bg-white/50 p-1 rounded-full transition-colors">
               <div className="hidden flex-col items-end text-right md:flex">
-                <span className="text-sm font-semibold leading-none">{user?.displayName || "Administradora"}</span>
-                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mt-0.5">Administradora</span>
+                <span className="text-sm font-semibold leading-none">
+                  {userProfile?.name || user?.displayName || "Administradora"}
+                </span>
+                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mt-0.5">
+                  Administradora
+                </span>
               </div>
               <Avatar className="h-9 w-9 border-2 border-primary/10">
                 <AvatarImage src={user?.photoURL || "https://picsum.photos/seed/user/100/100"} />
                 <AvatarFallback className="bg-primary text-white">
-                  {user?.displayName?.substring(0, 2).toUpperCase() || "AD"}
+                  {(userProfile?.name || user?.displayName || "AD").substring(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
             </div>
