@@ -22,7 +22,8 @@ import {
   Loader2,
   UserPlus,
   Trash2,
-  MapPinned
+  Pencil,
+  ExternalLink
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -33,6 +34,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -45,14 +56,16 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
-import { collection, addDoc, serverTimestamp, deleteDoc, doc } from "firebase/firestore"
+import { collection, addDoc, serverTimestamp, deleteDoc, doc, updateDoc } from "firebase/firestore"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 
 export default function ClientsPage() {
   const [searchTerm, setSearchTerm] = useState("")
-  const [isAddingClient, setIsAddingClient] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [editingClient, setEditingClient] = useState<any>(null)
+  const [clientToDelete, setClientToDelete] = useState<any>(null)
   const { toast } = useToast()
   const db = useFirestore()
 
@@ -87,6 +100,24 @@ export default function ClientsPage() {
     setFormData({ ...formData, phone: formatted });
   };
 
+  const handleOpenAdd = () => {
+    setEditingClient(null)
+    setFormData({ name: "", phone: "", city: "", neighborhood: "", notes: "" })
+    setIsDialogOpen(true)
+  }
+
+  const handleOpenEdit = (client: any) => {
+    setEditingClient(client)
+    setFormData({
+      name: client.name || "",
+      phone: client.phone || "",
+      city: client.city || "",
+      neighborhood: client.neighborhood || "",
+      notes: client.notes || ""
+    })
+    setIsDialogOpen(true)
+  }
+
   const handleSaveClient = (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData.name || !formData.phone) {
@@ -98,46 +129,61 @@ export default function ClientsPage() {
       return
     }
 
-    setIsAddingClient(true)
-    const newClient = {
+    setIsSaving(true)
+    const clientData = {
       ...formData,
-      createdAt: serverTimestamp()
+      updatedAt: serverTimestamp()
     }
 
-    addDoc(clientsRef, newClient)
-      .then(() => {
-        toast({
-          title: "Cliente Cadastrado",
-          description: `${formData.name} foi adicionado à sua lista.`
+    if (editingClient) {
+      const clientDocRef = doc(db, "clients", editingClient.id)
+      updateDoc(clientDocRef, clientData)
+        .then(() => {
+          toast({ title: "Cliente Atualizado" })
+          setIsDialogOpen(false)
         })
-        setFormData({ name: "", phone: "", city: "", neighborhood: "", notes: "" })
-        setIsDialogOpen(false)
-      })
-      .catch(async (error) => {
-        const permissionError = new FirestorePermissionError({
-          path: clientsRef.path,
-          operation: 'create',
-          requestResourceData: newClient,
+        .catch(async (error) => {
+          errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: clientDocRef.path,
+            operation: 'update',
+            requestResourceData: clientData,
+          }))
         })
-        errorEmitter.emit('permission-error', permissionError)
-      })
-      .finally(() => {
-        setIsAddingClient(false)
-      })
+        .finally(() => setIsSaving(false))
+    } else {
+      const newClient = {
+        ...clientData,
+        createdAt: serverTimestamp()
+      }
+      addDoc(clientsRef, newClient)
+        .then(() => {
+          toast({ title: "Cliente Cadastrado" })
+          setIsDialogOpen(false)
+        })
+        .catch(async (error) => {
+          errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: clientsRef.path,
+            operation: 'create',
+            requestResourceData: newClient,
+          }))
+        })
+        .finally(() => setIsSaving(false))
+    }
   }
 
-  const handleDeleteClient = (id: string) => {
-    const clientDocRef = doc(db, "clients", id)
+  const handleDeleteClient = () => {
+    if (!clientToDelete) return
+    const clientDocRef = doc(db, "clients", clientToDelete.id)
     deleteDoc(clientDocRef)
       .then(() => {
         toast({ title: "Cliente removido" })
+        setClientToDelete(null)
       })
       .catch(async (error) => {
-        const permissionError = new FirestorePermissionError({
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
           path: clientDocRef.path,
           operation: 'delete',
-        })
-        errorEmitter.emit('permission-error', permissionError)
+        }))
       })
   }
 
@@ -146,33 +192,38 @@ export default function ClientsPage() {
     c.phone.includes(searchTerm)
   ) || []
 
+  const openWhatsApp = (phone: string) => {
+    const cleanPhone = phone.replace(/\D/g, '')
+    window.open(`https://wa.me/55${cleanPhone}`, '_blank')
+  }
+
+  const openDialer = (phone: string) => {
+    const cleanPhone = phone.replace(/\D/g, '')
+    window.open(`tel:${cleanPhone}`)
+  }
+
   return (
     <LayoutWrapper>
       <div className="flex flex-col gap-8">
-        {/* Header Section */}
         <div className="flex flex-col gap-6 py-4">
           <div className="space-y-2 w-full text-center flex flex-col items-center">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-primary lg:whitespace-nowrap">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-primary">
               Meus Clientes
             </h1>
             <p className="text-muted-foreground font-medium text-lg">Gerencie sua rede de contatos e vendas.</p>
           </div>
           
+          <Button onClick={handleOpenAdd} className="w-full rounded-2xl font-bold bg-primary hover:bg-primary/90 shadow-lg h-14 text-lg">
+            <UserPlus className="mr-2 h-6 w-6" /> Adicionar Cliente
+          </Button>
+
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="w-full rounded-2xl font-bold bg-primary hover:bg-primary/90 shadow-lg h-14 text-lg">
-                <UserPlus className="mr-2 h-6 w-6" /> Adicionar Cliente
-              </Button>
-            </DialogTrigger>
             <DialogContent className="sm:max-w-[500px] w-[95vw] rounded-3xl border-primary max-h-[90vh] flex flex-col p-0 overflow-hidden">
               <div className="p-8 border-b bg-white">
                 <DialogHeader>
                   <DialogTitle className="text-3xl font-black text-primary text-center uppercase tracking-tight">
-                    Novo Cliente
+                    {editingClient ? "Editar Cliente" : "Novo Cliente"}
                   </DialogTitle>
-                  <DialogDescription className="font-bold text-muted-foreground text-center text-lg mt-1">
-                    Cadastre os dados básicos para iniciar.
-                  </DialogDescription>
                 </DialogHeader>
               </div>
               
@@ -230,8 +281,8 @@ export default function ClientsPage() {
                   </div>
                   
                   <div className="pt-2 pb-6">
-                    <Button type="submit" disabled={isAddingClient} className="w-full rounded-xl font-bold h-14 text-lg primary-gradient shadow-lg">
-                      {isAddingClient ? <Loader2 className="h-5 w-5 animate-spin" /> : "Salvar Cliente"}
+                    <Button type="submit" disabled={isSaving} className="w-full rounded-xl font-bold h-14 text-lg primary-gradient shadow-lg">
+                      {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : "Salvar Cliente"}
                     </Button>
                   </div>
                 </form>
@@ -240,7 +291,6 @@ export default function ClientsPage() {
           </Dialog>
         </div>
 
-        {/* Search Section */}
         <div className="relative max-w-2xl mx-auto w-full">
           <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <Input 
@@ -251,7 +301,6 @@ export default function ClientsPage() {
           />
         </div>
 
-        {/* Clients List */}
         <div className="w-full">
           {isLoading ? (
             <div className="flex justify-center py-20">
@@ -268,55 +317,45 @@ export default function ClientsPage() {
                         <div className="flex items-center gap-3 min-w-0">
                           <Avatar className="h-12 w-12 border-2 border-primary/10 shrink-0">
                             <AvatarFallback className="bg-secondary text-primary font-black text-lg">
-                              {client.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()}
+                              {client.name.substring(0, 2).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex flex-col min-w-0">
                             <span className="font-bold text-lg text-foreground leading-tight truncate">
                               {client.name}
                             </span>
-                            <span className="text-sm text-muted-foreground font-medium flex items-center gap-1 mt-1 truncate">
-                              <Phone className="h-3.5 w-3.5 text-primary shrink-0" /> {client.phone}
+                            <span className="text-sm text-muted-foreground font-medium mt-1 truncate">
+                              {client.phone}
                             </span>
+                            <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground font-semibold">
+                              <MapPin className="h-3 w-3 text-primary shrink-0" />
+                              <span className="truncate">{client.neighborhood}{client.neighborhood && client.city ? ', ' : ''}{client.city}</span>
+                            </div>
                           </div>
                         </div>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="rounded-full h-10 w-10 shrink-0">
-                              <MoreVertical className="h-5 w-5" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="rounded-xl">
-                            <DropdownMenuItem className="font-bold gap-2" onClick={() => window.open(`tel:${client.phone.replace(/\D/g, '')}`)}>
-                              <Phone className="h-4 w-4" /> Ligar
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="font-bold gap-2" onClick={() => window.open(`https://wa.me/${client.phone.replace(/\D/g, '')}`, '_blank')}>
-                              <MessageSquare className="h-4 w-4 text-emerald-600" /> WhatsApp
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="font-bold gap-2 text-rose-600" onClick={() => handleDeleteClient(client.id)}>
-                              <Trash2 className="h-4 w-4" /> Excluir
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-
-                      <div className="mt-4 grid grid-cols-2 gap-2 border-t pt-4 border-primary/5">
-                        <div className="flex flex-col gap-0.5 min-w-0">
-                          <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Localização</span>
-                          <span className="text-sm font-semibold truncate flex items-center gap-1">
-                            <MapPin className="h-3 w-3 text-primary shrink-0" /> {client.neighborhood || "N/A"}
-                          </span>
+                        <div className="flex items-center gap-1">
+                          <Button variant="ghost" size="icon" onClick={() => openDialer(client.phone)} className="rounded-full h-10 w-10 text-primary hover:bg-primary/10">
+                            <Phone className="h-5 w-5" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => openWhatsApp(client.phone)} className="rounded-full h-10 w-10 text-emerald-600 hover:bg-emerald-50">
+                            <MessageSquare className="h-5 w-5" />
+                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="rounded-full h-10 w-10">
+                                <MoreVertical className="h-5 w-5" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="rounded-xl">
+                              <DropdownMenuItem className="font-bold gap-2" onClick={() => handleOpenEdit(client)}>
+                                <Pencil className="h-4 w-4 text-blue-500" /> Editar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="font-bold gap-2 text-rose-600" onClick={() => setClientToDelete(client)}>
+                                <Trash2 className="h-4 w-4" /> Excluir
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
-                        <div className="flex flex-col gap-0.5 text-right min-w-0">
-                          <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Cidade</span>
-                          <span className="text-sm font-semibold truncate">{client.city || "N/A"}</span>
-                        </div>
-                      </div>
-
-                      <div className="mt-4 flex items-center justify-between gap-3">
-                        <Badge variant="secondary" className="rounded-lg font-black bg-pink-100 text-primary border-none px-3 py-1 uppercase text-[10px]">
-                          CLIENTE ATIVO
-                        </Badge>
                       </div>
                     </CardContent>
                   </Card>
@@ -329,60 +368,57 @@ export default function ClientsPage() {
                   <TableHeader className="bg-muted/30">
                     <TableRow className="hover:bg-transparent border-none h-14">
                       <TableHead className="px-6 font-black text-muted-foreground uppercase tracking-widest text-xs">Cliente</TableHead>
-                      <TableHead className="font-black text-muted-foreground uppercase tracking-widest text-xs">Localização</TableHead>
-                      <TableHead className="font-black text-muted-foreground uppercase tracking-widest text-xs">Bairro</TableHead>
-                      <TableHead className="font-black text-muted-foreground uppercase tracking-widest text-xs text-center">Status</TableHead>
-                      <TableHead className="px-6 text-right"></TableHead>
+                      <TableHead className="font-black text-muted-foreground uppercase tracking-widest text-xs">Telefone</TableHead>
+                      <TableHead className="font-black text-muted-foreground uppercase tracking-widest text-xs">Status</TableHead>
+                      <TableHead className="px-6 text-right font-black text-muted-foreground uppercase tracking-widest text-xs">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredClients.map((client) => (
-                      <TableRow key={client.id} className="group hover:bg-secondary/10 transition-colors border-b last:border-0 border-primary/5 h-20">
+                      <TableRow key={client.id} className="group hover:bg-secondary/10 transition-colors border-b last:border-0 border-primary/5 h-24">
                         <TableCell className="px-6">
                           <div className="flex items-center gap-3">
                             <Avatar className="h-10 w-10 border-2 border-primary/10">
                               <AvatarFallback className="bg-secondary text-primary font-bold">
-                                {client.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()}
+                                {client.name.substring(0, 2).toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex flex-col">
                               <span className="font-bold text-foreground group-hover:text-primary transition-colors truncate max-w-[200px]">{client.name}</span>
-                              <span className="text-xs text-muted-foreground font-medium mt-0.5">{client.phone}</span>
+                              <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-black uppercase tracking-wider mt-0.5">
+                                <MapPin className="h-3 w-3 text-primary/60" />
+                                {client.neighborhood || 'S/ Bairro'}{client.city ? `, ${client.city}` : ''}
+                              </div>
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col">
-                            <span className="font-bold text-sm truncate max-w-[150px]">{client.city || "Não inf."}</span>
-                            <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Cidade</span>
-                          </div>
+                        <TableCell className="font-semibold text-muted-foreground">
+                          {client.phone}
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-                            <MapPinned className="h-4 w-4 text-primary/60" /> {client.neighborhood || "Não inf."}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center">
                           <Badge variant="secondary" className="rounded-lg font-black bg-pink-100 text-primary border-none text-[10px] uppercase">
                             CLIENTE ATIVO
                           </Badge>
                         </TableCell>
                         <TableCell className="px-6 text-right">
                           <div className="flex items-center justify-end gap-2">
+                            <Button variant="outline" size="sm" onClick={() => openDialer(client.phone)} className="rounded-xl font-bold border-primary text-primary hover:bg-primary hover:text-white h-9 px-3">
+                              <Phone className="h-4 w-4 mr-2" /> Ligar
+                            </Button>
+                            <Button variant="outline" size="sm" onClick={() => openWhatsApp(client.phone)} className="rounded-xl font-bold border-emerald-500 text-emerald-600 hover:bg-emerald-500 hover:text-white h-9 px-3">
+                              <MessageSquare className="h-4 w-4 mr-2" /> WhatsApp
+                            </Button>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button size="icon" variant="ghost" className="rounded-full h-10 w-10">
+                                <Button size="icon" variant="ghost" className="rounded-full h-9 w-9">
                                   <MoreVertical className="h-5 w-5" />
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="rounded-xl">
-                                <DropdownMenuItem className="font-bold gap-2" onClick={() => window.open(`tel:${client.phone.replace(/\D/g, '')}`)}>
-                                  <Phone className="h-4 w-4 text-primary" /> Ligar
+                                <DropdownMenuItem className="font-bold gap-2" onClick={() => handleOpenEdit(client)}>
+                                  <Pencil className="h-4 w-4 text-blue-500" /> Editar
                                 </DropdownMenuItem>
-                                <DropdownMenuItem className="font-bold gap-2" onClick={() => window.open(`https://wa.me/${client.phone.replace(/\D/g, '')}`, '_blank')}>
-                                  <MessageSquare className="h-4 w-4 text-emerald-600" /> WhatsApp
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="font-bold gap-2 text-rose-600" onClick={() => handleDeleteClient(client.id)}>
+                                <DropdownMenuItem className="font-bold gap-2 text-rose-600" onClick={() => setClientToDelete(client)}>
                                   <Trash2 className="h-4 w-4" /> Excluir
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
@@ -396,18 +432,25 @@ export default function ClientsPage() {
               </div>
             </>
           )}
-
-          {!isLoading && filteredClients.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-white rounded-3xl border border-dashed border-primary/20">
-              <UserPlus className="h-16 w-16 text-primary/20 mb-4" />
-              <h3 className="text-xl font-bold text-foreground">Nenhum cliente encontrado</h3>
-              <p className="text-muted-foreground font-medium max-w-xs mt-2">
-                Busque por outro termo ou adicione um novo cliente.
-              </p>
-            </div>
-          )}
         </div>
       </div>
+
+      <AlertDialog open={!!clientToDelete} onOpenChange={(o) => !o && setClientToDelete(null)}>
+        <AlertDialogContent className="rounded-3xl border-primary">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-2xl font-black text-primary">Excluir Cliente?</AlertDialogTitle>
+            <AlertDialogDescription className="font-medium text-lg text-muted-foreground">
+              Tem certeza que deseja remover <b className="text-foreground">{clientToDelete?.name}</b>? Esta ação é irreversível.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl font-bold">Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteClient} className="rounded-xl font-bold bg-rose-600 hover:bg-rose-700">
+              Confirmar Exclusão
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </LayoutWrapper>
   )
 }
