@@ -16,7 +16,9 @@ import {
   DollarSign,
   Info,
   Layers,
-  ShoppingBag
+  ShoppingBag,
+  Pencil,
+  Trash2
 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -29,6 +31,22 @@ import {
   DialogTitle, 
   DialogTrigger 
 } from "@/components/ui/dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { 
@@ -39,7 +57,7 @@ import {
   SelectValue 
 } from "@/components/ui/select"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
-import { collection, serverTimestamp, addDoc } from "firebase/firestore"
+import { collection, serverTimestamp, addDoc, doc, updateDoc, deleteDoc } from "firebase/firestore"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 import { useToast } from "@/hooks/use-toast"
@@ -66,6 +84,9 @@ export default function ProductsPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<any>(null)
+  const [productToDelete, setProductToDelete] = useState<any>(null)
+  const [editingProductId, setEditingProductId] = useState<string | null>(null)
+  
   const db = useFirestore()
   const { toast } = useToast()
 
@@ -97,6 +118,56 @@ export default function ProductsPage() {
     setFormData({ ...formData, [field]: formatted });
   }
 
+  const handleOpenNewProduct = () => {
+    setEditingProductId(null)
+    setFormData({
+      name: "",
+      brand: "Natura",
+      category: "",
+      price: "",
+      cost: "",
+      code: "",
+      description: ""
+    })
+    setIsDialogOpen(true)
+  }
+
+  const handleEditProduct = (product: any) => {
+    setEditingProductId(product.id)
+    setFormData({
+      name: product.name || "",
+      brand: product.brand || "Natura",
+      category: product.category || "",
+      price: product.price ? product.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : "",
+      cost: product.cost ? product.cost.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : "",
+      code: product.code || "",
+      description: product.description || ""
+    })
+    setIsDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = () => {
+    if (!productToDelete) return
+
+    const docRef = doc(db, "products", productToDelete.id)
+    deleteDoc(docRef)
+      .then(() => {
+        toast({
+          title: "Produto removido",
+          description: "O produto foi excluído com sucesso."
+        })
+      })
+      .catch(async (error) => {
+        const permissionError = new FirestorePermissionError({
+          path: docRef.path,
+          operation: 'delete',
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      })
+    
+    setProductToDelete(null)
+  }
+
   const handleSaveProduct = () => {
     if (!formData.name || !formData.price || !formData.category) {
       toast({
@@ -112,39 +183,53 @@ export default function ProductsPage() {
       return parseFloat(val.replace(/\./g, '').replace(',', '.'));
     }
 
-    const newProduct = {
+    const productData = {
       ...formData,
       price: parseCurrencyToNumber(formData.price),
       cost: formData.cost ? parseCurrencyToNumber(formData.cost) : 0,
       image: "", 
-      createdAt: serverTimestamp()
+      updatedAt: serverTimestamp()
     }
 
-    addDoc(productsRef, newProduct)
-      .catch(async (error) => {
-        const permissionError = new FirestorePermissionError({
-          path: productsRef.path,
-          operation: 'create',
-          requestResourceData: newProduct,
+    if (editingProductId) {
+      const docRef = doc(db, "products", editingProductId)
+      updateDoc(docRef, productData)
+        .then(() => {
+          toast({
+            title: "Produto Atualizado!",
+            description: `${formData.name} foi atualizado com sucesso.`
+          })
+        })
+        .catch(async (error) => {
+          const permissionError = new FirestorePermissionError({
+            path: docRef.path,
+            operation: 'update',
+            requestResourceData: productData,
+          });
+          errorEmitter.emit('permission-error', permissionError);
         });
-        errorEmitter.emit('permission-error', permissionError);
-      });
-    
-    toast({
-      title: "Produto Salvo!",
-      description: `${formData.name} foi adicionado ao catálogo.`
-    })
+    } else {
+      const newProduct = {
+        ...productData,
+        createdAt: serverTimestamp()
+      }
+      addDoc(productsRef, newProduct)
+        .catch(async (error) => {
+          const permissionError = new FirestorePermissionError({
+            path: productsRef.path,
+            operation: 'create',
+            requestResourceData: newProduct,
+          });
+          errorEmitter.emit('permission-error', permissionError);
+        });
+      
+      toast({
+        title: "Produto Salvo!",
+        description: `${formData.name} foi adicionado ao catálogo.`
+      })
+    }
     
     setIsDialogOpen(false)
-    setFormData({
-      name: "",
-      brand: "Natura",
-      category: "",
-      price: "",
-      cost: "",
-      code: "",
-      description: ""
-    })
   }
 
   const filteredProducts = products?.filter(p => {
@@ -168,24 +253,25 @@ export default function ProductsPage() {
             <p className="text-muted-foreground font-medium text-lg">Controle seu estoque e preços de venda.</p>
           </div>
           
+          <Button onClick={handleOpenNewProduct} className="w-full rounded-2xl font-bold bg-primary hover:bg-primary/90 shadow-lg h-14 text-lg">
+            <Plus className="mr-2 h-6 w-6" /> Novo Produto
+          </Button>
+
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="w-full rounded-2xl font-bold bg-primary hover:bg-primary/90 shadow-lg h-14 text-lg">
-                <Plus className="mr-2 h-6 w-6" /> Novo Produto
-              </Button>
-            </DialogTrigger>
             <DialogContent className="sm:max-w-[500px] w-[95vw] rounded-2xl border-primary max-h-[90vh] flex flex-col p-0 overflow-hidden">
               <div className="p-8 pb-4 border-b bg-white">
                 <DialogHeader>
-                  <DialogTitle className="text-3xl font-black text-primary text-center uppercase tracking-tight">Cadastrar Produto</DialogTitle>
+                  <DialogTitle className="text-3xl font-black text-primary text-center uppercase tracking-tight">
+                    {editingProductId ? "Editar Produto" : "Cadastrar Produto"}
+                  </DialogTitle>
                   <DialogDescription className="font-bold text-muted-foreground text-center text-lg mt-1">
-                    Adicione um novo item ao seu catálogo de revenda.
+                    {editingProductId ? "Atualize as informações do item selecionado." : "Adicione um novo item ao seu catálogo de revenda."}
                   </DialogDescription>
                 </DialogHeader>
               </div>
               
               <div className="flex-1 overflow-y-auto px-6 py-6 bg-[#FDFBFB]">
-                <div className="grid gap-6 pb-24">
+                <div className="grid gap-6">
                   <div className="grid gap-2">
                     <Label htmlFor="name" className="font-bold text-muted-foreground text-base">Nome do Produto</Label>
                     <Input 
@@ -256,7 +342,7 @@ export default function ProductsPage() {
                       className="rounded-xl border-primary/30 h-11 bg-white" 
                     />
                   </div>
-                  <div className="grid gap-2">
+                  <div className="grid gap-2 pb-6">
                     <Label htmlFor="description" className="font-bold text-muted-foreground text-base">Descrição (Opcional)</Label>
                     <Textarea 
                       id="description" 
@@ -267,9 +353,9 @@ export default function ProductsPage() {
                     />
                   </div>
                   
-                  <div className="pt-4">
+                  <div className="pt-2 pb-10">
                     <Button onClick={handleSaveProduct} className="w-full rounded-xl font-bold h-14 text-lg primary-gradient shadow-lg">
-                      Salvar Produto
+                      {editingProductId ? "Salvar Alterações" : "Salvar Produto"}
                     </Button>
                   </div>
                 </div>
@@ -312,7 +398,7 @@ export default function ProductsPage() {
             <Button 
               variant="outline" 
               className="mt-6 rounded-xl border-primary text-primary font-bold hover:bg-primary/5"
-              onClick={() => setIsDialogOpen(true)}
+              onClick={handleOpenNewProduct}
             >
               Adicionar Primeiro Produto
             </Button>
@@ -364,9 +450,22 @@ export default function ProductsPage() {
                       >
                         Detalhes <ChevronRight className="ml-1 h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="rounded-full h-10 w-10 shrink-0">
-                        <MoreVertical className="h-5 w-5" />
-                      </Button>
+                      
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="rounded-full h-10 w-10 shrink-0">
+                            <MoreVertical className="h-5 w-5" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="rounded-xl p-2 w-40">
+                          <DropdownMenuItem onClick={() => handleEditProduct(product)} className="rounded-lg font-bold gap-2 cursor-pointer">
+                            <Pencil className="h-4 w-4 text-blue-500" /> Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setProductToDelete(product)} className="rounded-lg font-bold gap-2 text-rose-600 cursor-pointer">
+                            <Trash2 className="h-4 w-4" /> Excluir
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                 </CardContent>
@@ -375,6 +474,23 @@ export default function ProductsPage() {
           </div>
         )}
       </div>
+
+      <AlertDialog open={!!productToDelete} onOpenChange={(open) => !open && setProductToDelete(null)}>
+        <AlertDialogContent className="rounded-3xl border-primary">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-2xl font-black text-primary">Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription className="font-medium text-lg">
+              Você tem certeza que deseja excluir o produto <b className="text-foreground">"{productToDelete?.name}"</b>? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 sm:gap-0">
+            <AlertDialogCancel className="rounded-xl font-bold h-12">Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="rounded-xl font-bold h-12 bg-rose-600 hover:bg-rose-700">
+              Sim, Excluir Produto
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Dialog open={!!selectedProduct} onOpenChange={(open) => !open && setSelectedProduct(null)}>
         <DialogContent className="sm:max-w-[600px] w-[95vw] rounded-3xl border-primary overflow-hidden p-0 flex flex-col max-h-[90vh]">
