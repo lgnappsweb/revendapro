@@ -1,3 +1,4 @@
+
 "use client"
 
 import { LayoutWrapper } from "@/components/layout-wrapper"
@@ -11,7 +12,8 @@ import {
   CheckCircle2,
   AlertCircle,
   Search,
-  Sparkles
+  Sparkles,
+  Loader2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -25,86 +27,73 @@ import {
 } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
-
-const stats = [
-  {
-    title: "Vendas do Mês",
-    value: "R$ 4.250,00",
-    change: "+12.5%",
-    trend: "up",
-    icon: TrendingUp,
-    color: "text-emerald-600",
-    bgColor: "bg-emerald-50",
-    href: "/financeiro"
-  },
-  {
-    title: "Recebido",
-    value: "R$ 3.100,00",
-    change: "72% do total",
-    trend: "neutral",
-    icon: CheckCircle2,
-    color: "text-blue-600",
-    bgColor: "bg-blue-50",
-    href: "/financeiro"
-  },
-  {
-    title: "Pendente (Fiado)",
-    value: "R$ 1.150,00",
-    change: "28% do total",
-    trend: "down",
-    icon: Clock,
-    color: "text-amber-600",
-    bgColor: "bg-amber-50",
-    href: "/financeiro"
-  },
-  {
-    title: "Total Clientes",
-    value: "42",
-    change: "+3 este mês",
-    trend: "up",
-    icon: Users,
-    color: "text-pink-600",
-    bgColor: "bg-pink-50",
-    href: "/clientes"
-  },
-]
-
-const recentOrders = [
-  {
-    id: "1234",
-    customer: "Maria Silva",
-    date: "12 Mar, 2024",
-    amount: "R$ 180,00",
-    status: "Pago",
-    method: "Pix",
-  },
-  {
-    id: "1235",
-    customer: "Ana Oliveira",
-    date: "11 Mar, 2024",
-    amount: "R$ 350,00",
-    status: "Pendente",
-    method: "Fiado",
-  },
-  {
-    id: "1236",
-    customer: "Juliana Costa",
-    date: "10 Mar, 2024",
-    amount: "R$ 95,50",
-    status: "Atrasado",
-    method: "Fiado",
-  },
-  {
-    id: "1237",
-    customer: "Fernanda Santos",
-    date: "09 Mar, 2024",
-    amount: "R$ 220,00",
-    status: "Pago",
-    method: "Dinheiro",
-  },
-]
+import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
+import { collection, query, orderBy, limit } from "firebase/firestore"
 
 export default function Dashboard() {
+  const db = useFirestore()
+
+  const ordersRef = useMemoFirebase(() => collection(db, "orders"), [db])
+  const { data: allOrders } = useCollection(ordersRef)
+
+  const recentOrdersRef = useMemoFirebase(() => 
+    query(collection(db, "orders"), orderBy("createdAt", "desc"), limit(5)), 
+    [db]
+  )
+  const { data: recentOrders, isLoading: loadingOrders } = useCollection(recentOrdersRef)
+
+  const clientsRef = useMemoFirebase(() => collection(db, "clients"), [db])
+  const { data: clients } = useCollection(clientsRef)
+
+  // Calculations
+  const totalSales = allOrders?.reduce((acc, o) => acc + (o.finalTotal || 0), 0) || 0
+  const totalReceived = allOrders?.filter(o => o.paymentStatus === 'Pago').reduce((acc, o) => acc + (o.finalTotal || 0), 0) || 0
+  const totalPending = allOrders?.filter(o => o.paymentStatus === 'Pendente').reduce((acc, o) => acc + (o.finalTotal || 0), 0) || 0
+  const clientsCount = clients?.length || 0
+
+  const stats = [
+    {
+      title: "Vendas Totais",
+      value: `R$ ${totalSales.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      change: "Faturamento Bruto",
+      trend: "up",
+      icon: TrendingUp,
+      color: "text-emerald-600",
+      bgColor: "bg-emerald-50",
+      href: "/pedidos"
+    },
+    {
+      title: "Recebido",
+      value: `R$ ${totalReceived.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      change: "Pagamentos Confirmados",
+      trend: "neutral",
+      icon: CheckCircle2,
+      color: "text-blue-600",
+      bgColor: "bg-blue-50",
+      href: "/financeiro"
+    },
+    {
+      title: "Pendente",
+      value: `R$ ${totalPending.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      change: "Vendas em Aberto",
+      trend: "down",
+      icon: Clock,
+      color: "text-amber-600",
+      bgColor: "bg-amber-50",
+      href: "/financeiro"
+    },
+    {
+      title: "Total Clientes",
+      value: clientsCount.toString(),
+      change: "Base de Contatos",
+      trend: "up",
+      icon: Users,
+      color: "text-pink-600",
+      bgColor: "bg-pink-50",
+      href: "/clientes"
+    },
+  ]
+
   return (
     <LayoutWrapper>
       <div className="flex flex-col gap-10 pt-12">
@@ -139,7 +128,7 @@ export default function Dashboard() {
                     </div>
                     {stat.trend === "up" && (
                       <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700 font-bold rounded-lg py-1 px-2">
-                        <ArrowUpRight className="h-3 w-3 mr-1" /> {stat.change}
+                        <ArrowUpRight className="h-3 w-3 mr-1" /> Ativo
                       </Badge>
                     )}
                   </div>
@@ -166,47 +155,64 @@ export default function Dashboard() {
               </Button>
             </CardHeader>
             <CardContent className="p-0">
-              <Table>
-                <TableHeader className="bg-muted/30">
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead className="px-6 font-bold text-muted-foreground">Cliente</TableHead>
-                    <TableHead className="font-bold text-muted-foreground">Data</TableHead>
-                    <TableHead className="font-bold text-muted-foreground text-right">Valor</TableHead>
-                    <TableHead className="font-bold text-muted-foreground">Status</TableHead>
-                    <TableHead className="px-6"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {recentOrders.map((order) => (
-                    <TableRow key={order.id} className="cursor-pointer group hover:bg-secondary/20 transition-colors">
-                      <TableCell className="px-6">
-                        <span className="font-semibold text-foreground group-hover:text-primary transition-colors">{order.customer}</span>
-                        <div className="text-[10px] text-muted-foreground mt-0.5">#{order.id}</div>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground font-medium">{order.date}</TableCell>
-                      <TableCell className="text-right font-bold text-foreground">{order.amount}</TableCell>
-                      <TableCell>
-                        <Badge 
-                          className={`rounded-lg font-bold px-2 py-1 ${
-                            order.status === "Pago" 
-                            ? "bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-200" 
-                            : order.status === "Atrasado"
-                            ? "bg-rose-100 text-rose-700 border-rose-200 hover:bg-rose-200"
-                            : "bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-200"
-                          }`}
-                        >
-                          {order.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="px-6 text-right">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
+              {loadingOrders ? (
+                <div className="flex justify-center py-10">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader className="bg-muted/30">
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead className="px-6 font-bold text-muted-foreground">Cliente</TableHead>
+                      <TableHead className="font-bold text-muted-foreground">Data</TableHead>
+                      <TableHead className="font-bold text-muted-foreground text-right">Valor</TableHead>
+                      <TableHead className="font-bold text-muted-foreground">Status</TableHead>
+                      <TableHead className="px-6"></TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {recentOrders?.map((order) => (
+                      <TableRow key={order.id} className="cursor-pointer group hover:bg-secondary/20 transition-colors">
+                        <TableCell className="px-6">
+                          <span className="font-semibold text-foreground group-hover:text-primary transition-colors">{order.clientName}</span>
+                          <div className="text-[10px] text-muted-foreground mt-0.5">#{order.id.slice(-6).toUpperCase()}</div>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground font-medium">
+                          {order.createdAt ? new Date(order.createdAt.seconds * 1000).toLocaleDateString('pt-BR') : 'Hoje'}
+                        </TableCell>
+                        <TableCell className="text-right font-bold text-foreground">
+                          R$ {order.finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </TableCell>
+                        <TableCell>
+                          <Badge 
+                            className={`rounded-lg font-bold px-2 py-1 ${
+                              order.paymentStatus === "Pago" 
+                              ? "bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-200" 
+                              : "bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-200"
+                            }`}
+                          >
+                            {order.paymentStatus}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="px-6 text-right">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" asChild>
+                            <Link href="/pedidos">
+                              <ChevronRight className="h-4 w-4" />
+                            </Link>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {(!recentOrders || recentOrders.length === 0) && (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center py-10 text-muted-foreground font-medium">
+                          Nenhum pedido registrado ainda.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
 
@@ -239,7 +245,7 @@ export default function Dashboard() {
                   </div>
                 ))}
                 <Button variant="outline" className="w-full rounded-xl border-dashed font-semibold mt-2 hover:bg-primary/5 hover:text-primary hover:border-primary" asChild>
-                  <Link href="/relatorios">Ver Relatório Completo</Link>
+                  <Link href="/pedidos">Ver Histórico Completo</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -251,9 +257,9 @@ export default function Dashboard() {
                 </div>
                 <div className="space-y-1">
                   <h4 className="font-bold text-rose-900">Alerta de Pagamento</h4>
-                  <p className="text-sm text-rose-800 leading-tight">Você tem <b>3 pagamentos</b> vencidos de clientes que precisam de atenção.</p>
+                  <p className="text-sm text-rose-800 leading-tight">Você pode acompanhar pagamentos pendentes no seu financeiro.</p>
                   <Button variant="link" className="p-0 h-auto text-rose-700 font-bold underline decoration-2" asChild>
-                    <Link href="/financeiro">Ver Detalhes</Link>
+                    <Link href="/financeiro">Ir para Financeiro</Link>
                   </Button>
                 </div>
               </CardContent>

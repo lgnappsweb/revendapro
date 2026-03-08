@@ -66,7 +66,6 @@ export default function NewSalePage() {
   const router = useRouter()
   const db = useFirestore()
 
-  // Fetch real products and clients from Firestore
   const productsRef = useMemoFirebase(() => collection(db, "products"), [db])
   const clientsRef = useMemoFirebase(() => collection(db, "clients"), [db])
   
@@ -138,7 +137,7 @@ export default function NewSalePage() {
           unitPrice: item.price,
           subtotal: item.price * item.qty
         })),
-        subtotal,
+        total: subtotal,
         discount,
         finalTotal: total,
         paymentMethod,
@@ -149,7 +148,7 @@ export default function NewSalePage() {
       await addDoc(collection(db, "orders"), saleData)
       
       toast({ title: "Venda Registrada!", description: "A venda foi salva com sucesso." })
-      router.push('/')
+      router.push('/pedidos')
     } catch (error) {
       toast({ 
         title: "Erro", 
