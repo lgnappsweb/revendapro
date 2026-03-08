@@ -93,16 +93,19 @@ export default function CategoriesPage() {
     setEditingCategoryId(category.id)
     setFormData({ name: category.name || "" })
     setAccordionValue("")
-    setTimeout(() => setIsDialogOpen(true), 150)
+    setIsDialogOpen(true)
   }
 
   const handleDeleteConfirm = () => {
     if (!categoryToDelete) return
-    const docRef = doc(db, "categories", categoryToDelete.id)
-    deleteDoc(docRef)
-      .then(() => toast({ title: "Categoria removida" }))
-      .catch(async () => errorEmitter.emit('permission-error', new FirestorePermissionError({ path: docRef.path, operation: 'delete' })))
+    const categoryId = categoryToDelete.id
+    const categoryName = categoryToDelete.name
     setCategoryToDelete(null)
+
+    const docRef = doc(db, "categories", categoryId)
+    deleteDoc(docRef)
+      .then(() => toast({ title: "Categoria removida", description: categoryName }))
+      .catch(async () => errorEmitter.emit('permission-error', new FirestorePermissionError({ path: docRef.path, operation: 'delete' })))
   }
 
   const handleSaveCategory = () => {
@@ -112,12 +115,29 @@ export default function CategoriesPage() {
     }
     setIsSaving(true)
     const categoryData = { name: formData.name, updatedAt: serverTimestamp() }
+    const currentEditingId = editingCategoryId
 
-    if (editingCategoryId) {
-      const docRef = doc(db, "categories", editingCategoryId)
-      updateDoc(docRef, categoryData).then(() => { toast({ title: "Atualizada!" }); setIsDialogOpen(false); }).finally(() => setIsSaving(false))
+    if (currentEditingId) {
+      const docRef = doc(db, "categories", currentEditingId)
+      updateDoc(docRef, categoryData)
+        .then(() => { 
+          toast({ title: "Atualizada!" }); 
+        })
+        .catch(async () => errorEmitter.emit('permission-error', new FirestorePermissionError({ path: docRef.path, operation: 'update', requestResourceData: categoryData })))
+        .finally(() => {
+          setIsSaving(false)
+          setIsDialogOpen(false)
+        })
     } else {
-      addDoc(collection(db, "categories"), { ...categoryData, createdAt: serverTimestamp() }).then(() => { toast({ title: "Salva!" }); setIsDialogOpen(false); }).finally(() => setIsSaving(false))
+      addDoc(collection(db, "categories"), { ...categoryData, createdAt: serverTimestamp() })
+        .then(() => { 
+          toast({ title: "Salva!" }); 
+        })
+        .catch(async () => errorEmitter.emit('permission-error', new FirestorePermissionError({ path: 'categories', operation: 'create', requestResourceData: categoryData })))
+        .finally(() => {
+          setIsSaving(false)
+          setIsDialogOpen(false)
+        })
     }
   }
 
@@ -182,10 +202,22 @@ export default function CategoriesPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="rounded-xl">
-                            <DropdownMenuItem className="font-bold gap-2" onSelect={() => handleEditCategory(category)}>
+                            <DropdownMenuItem 
+                              className="font-bold gap-2" 
+                              onSelect={(e) => {
+                                e.preventDefault()
+                                handleEditCategory(category)
+                              }}
+                            >
                               <Pencil className="h-4 w-4 text-blue-500" /> Editar
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="font-bold gap-2 text-rose-600" onSelect={() => setCategoryToDelete(category)}>
+                            <DropdownMenuItem 
+                              className="font-bold gap-2 text-rose-600" 
+                              onSelect={(e) => {
+                                e.preventDefault()
+                                setCategoryToDelete(category)
+                              }}
+                            >
                               <Trash2 className="h-4 w-4" /> Excluir
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -267,12 +299,6 @@ export default function CategoriesPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <Accordion type="single" collapsible className="w-full sm:hidden mb-4">
-              <AccordionItem value="item-1" className="border-none">
-                <AccordionTrigger className="text-xs font-bold text-muted-foreground hover:no-underline">Ver detalhes da categoria</AccordionTrigger>
-                <AccordionContent className="text-xs text-muted-foreground">A exclusão removerá apenas a categoria, os produtos vinculados precisarão ser re-categorizados.</AccordionContent>
-              </AccordionItem>
-            </Accordion>
             <AlertDialogCancel className="rounded-xl font-bold">Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteConfirm} className="rounded-xl font-bold bg-rose-600">
               Confirmar

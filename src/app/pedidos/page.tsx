@@ -123,8 +123,9 @@ export default function OrdersPage() {
     if (!editingOrder) return
     setIsSaving(true)
     
-    const docRef = doc(db, "orders", editingOrder.id)
-    const subtotal = editingOrder.total || 0
+    const currentOrder = editingOrder
+    const docRef = doc(db, "orders", currentOrder.id)
+    const subtotal = currentOrder.total || 0
     const newFinalTotal = Math.max(0, subtotal - Number(editFormData.discount))
 
     const updateData: any = {
@@ -143,7 +144,6 @@ export default function OrdersPage() {
     updateDoc(docRef, updateData)
       .then(() => {
         toast({ title: "Pedido atualizado!" })
-        setEditingOrder(null)
       })
       .catch(async (error: any) => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
@@ -154,6 +154,7 @@ export default function OrdersPage() {
       })
       .finally(() => {
         setIsSaving(false)
+        setEditingOrder(null)
       })
   }
 
@@ -161,11 +162,13 @@ export default function OrdersPage() {
     if (!orderToDelete) return
     setIsDeleting(true)
     
-    const docRef = doc(db, "orders", orderToDelete.id)
+    const orderId = orderToDelete.id
+    setOrderToDelete(null)
+
+    const docRef = doc(db, "orders", orderId)
     deleteDoc(docRef)
       .then(() => {
         toast({ title: "Pedido removido com sucesso" })
-        setOrderToDelete(null)
       })
       .catch(async (error: any) => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
@@ -257,7 +260,7 @@ export default function OrdersPage() {
                                   className="font-bold gap-2" 
                                   onSelect={(e) => {
                                     e.preventDefault();
-                                    setTimeout(() => setSelectedOrder(order), 100);
+                                    setSelectedOrder(order);
                                   }}
                                 >
                                   <Eye className="h-4 w-4 text-blue-500" /> Detalhes
@@ -266,7 +269,7 @@ export default function OrdersPage() {
                                   className="font-bold gap-2" 
                                   onSelect={(e) => {
                                     e.preventDefault();
-                                    setTimeout(() => handleOpenEdit(order), 100);
+                                    handleOpenEdit(order);
                                   }}
                                 >
                                   <Pencil className="h-4 w-4 text-amber-500" /> Editar
@@ -275,7 +278,7 @@ export default function OrdersPage() {
                                   className="font-bold gap-2 text-rose-600" 
                                   onSelect={(e) => {
                                     e.preventDefault();
-                                    setTimeout(() => setOrderToDelete(order), 100);
+                                    setOrderToDelete(order);
                                   }}
                                 >
                                   <Trash2 className="h-4 w-4" /> Excluir
@@ -343,7 +346,7 @@ export default function OrdersPage() {
                                     className="font-bold gap-2" 
                                     onSelect={(e) => {
                                       e.preventDefault();
-                                      setTimeout(() => setSelectedOrder(order), 100);
+                                      setSelectedOrder(order);
                                     }}
                                   >
                                     <Eye className="h-4 w-4 text-blue-500" /> Visualizar
@@ -352,7 +355,7 @@ export default function OrdersPage() {
                                     className="font-bold gap-2" 
                                     onSelect={(e) => {
                                       e.preventDefault();
-                                      setTimeout(() => handleOpenEdit(order), 100);
+                                      handleOpenEdit(order);
                                     }}
                                   >
                                     <Pencil className="h-4 w-4 text-amber-500" /> Editar
@@ -361,7 +364,7 @@ export default function OrdersPage() {
                                     className="font-bold gap-2 text-rose-600" 
                                     onSelect={(e) => {
                                       e.preventDefault();
-                                      setTimeout(() => setOrderToDelete(order), 100);
+                                      setOrderToDelete(order);
                                     }}
                                   >
                                     <Trash2 className="h-4 w-4" /> Excluir

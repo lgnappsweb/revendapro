@@ -146,12 +146,13 @@ export default function ClientsPage() {
       updatedAt: serverTimestamp()
     }
 
-    if (editingClient) {
-      const clientDocRef = doc(db, "clients", editingClient.id)
+    const currentEditingClient = editingClient
+
+    if (currentEditingClient) {
+      const clientDocRef = doc(db, "clients", currentEditingClient.id)
       updateDoc(clientDocRef, clientData)
         .then(() => {
           toast({ title: "Cliente Atualizado" })
-          setIsDialogOpen(false)
         })
         .catch(async (error) => {
           errorEmitter.emit('permission-error', new FirestorePermissionError({
@@ -160,7 +161,10 @@ export default function ClientsPage() {
             requestResourceData: clientData,
           }))
         })
-        .finally(() => setIsSaving(false))
+        .finally(() => {
+          setIsSaving(false)
+          setIsDialogOpen(false)
+        })
     } else {
       const newClient = {
         ...clientData,
@@ -170,27 +174,31 @@ export default function ClientsPage() {
         addDoc(clientsRef, newClient)
           .then(() => {
             toast({ title: "Cliente Cadastrado" })
-            setIsDialogOpen(false)
           })
           .catch(async (error) => {
             errorEmitter.emit('permission-error', new FirestorePermissionError({
-              path: clientsRef.path,
+              path: 'clients',
               operation: 'create',
               requestResourceData: newClient,
             }))
           })
-          .finally(() => setIsSaving(false))
+          .finally(() => {
+            setIsSaving(false)
+            setIsDialogOpen(false)
+          })
       }
     }
   }
 
   const handleDeleteClient = () => {
     if (!clientToDelete) return
-    const clientDocRef = doc(db, "clients", clientToDelete.id)
+    const clientId = clientToDelete.id
+    setClientToDelete(null)
+
+    const clientDocRef = doc(db, "clients", clientId)
     deleteDoc(clientDocRef)
       .then(() => {
         toast({ title: "Cliente removido" })
-        setClientToDelete(null)
       })
       .catch(async (error) => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
@@ -208,11 +216,6 @@ export default function ClientsPage() {
   const openWhatsApp = (phone: string) => {
     const cleanPhone = phone.replace(/\D/g, '')
     window.open(`https://wa.me/55${cleanPhone}`, '_blank')
-  }
-
-  const openDialer = (phone: string) => {
-    const cleanPhone = phone.replace(/\D/g, '')
-    window.open(`tel:${cleanPhone}`)
   }
 
   return (
@@ -359,7 +362,7 @@ export default function ClientsPage() {
                                 className="font-bold gap-2" 
                                 onSelect={(e) => {
                                   e.preventDefault();
-                                  setTimeout(() => handleOpenEdit(client), 100);
+                                  handleOpenEdit(client);
                                 }}
                               >
                                 <Pencil className="h-4 w-4 text-blue-500" /> Editar
@@ -368,7 +371,7 @@ export default function ClientsPage() {
                                 className="font-bold gap-2 text-rose-600" 
                                 onSelect={(e) => {
                                   e.preventDefault();
-                                  setTimeout(() => setClientToDelete(client), 100);
+                                  setClientToDelete(client);
                                 }}
                               >
                                 <Trash2 className="h-4 w-4" /> Excluir
@@ -385,14 +388,6 @@ export default function ClientsPage() {
                         </div>
 
                         <div className="flex flex-wrap gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={() => openDialer(client.phone)} 
-                            className="flex-1 rounded-xl font-bold border-primary/20 text-primary hover:bg-primary/5 h-10"
-                          >
-                            <Phone className="h-4 w-4" />
-                          </Button>
                           <Button 
                             variant="outline" 
                             size="sm" 
@@ -481,7 +476,7 @@ export default function ClientsPage() {
                                     className="font-bold gap-2" 
                                     onSelect={(e) => {
                                       e.preventDefault();
-                                      setTimeout(() => handleOpenEdit(client), 100);
+                                      handleOpenEdit(client);
                                     }}
                                   >
                                     <Pencil className="h-4 w-4 text-blue-500" /> Editar
@@ -490,7 +485,7 @@ export default function ClientsPage() {
                                     className="font-bold gap-2 text-rose-600" 
                                     onSelect={(e) => {
                                       e.preventDefault();
-                                      setTimeout(() => setClientToDelete(client), 100);
+                                      setClientToDelete(client);
                                     }}
                                   >
                                     <Trash2 className="h-4 w-4" /> Excluir

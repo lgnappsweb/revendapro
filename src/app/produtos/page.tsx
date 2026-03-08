@@ -148,16 +148,18 @@ export default function ProductsPage() {
       description: product.description || ""
     })
     setSelectedProduct(null)
-    setTimeout(() => setIsDialogOpen(true), 150)
+    setIsDialogOpen(true)
   }
 
   const handleDeleteConfirm = () => {
     if (!productToDelete) return
-    const docRef = doc(db, "products", productToDelete.id)
+    const productId = productToDelete.id
+    setProductToDelete(null)
+
+    const docRef = doc(db, "products", productId)
     deleteDoc(docRef)
       .then(() => {
         toast({ title: "Produto removido!" })
-        setProductToDelete(null)
       })
       .catch(async () => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
@@ -182,12 +184,26 @@ export default function ProductsPage() {
       updatedAt: serverTimestamp() 
     }
 
-    if (editingProductId) {
-      const docRef = doc(db, "products", editingProductId)
-      updateDoc(docRef, productData).then(() => { toast({ title: "Atualizado!" }); setIsDialogOpen(false); }).finally(() => setIsSaving(false))
+    const currentEditingId = editingProductId
+
+    if (currentEditingId) {
+      const docRef = doc(db, "products", currentEditingId)
+      updateDoc(docRef, productData)
+        .then(() => { toast({ title: "Atualizado!" }); })
+        .catch(async () => errorEmitter.emit('permission-error', new FirestorePermissionError({ path: docRef.path, operation: 'update', requestResourceData: productData })))
+        .finally(() => {
+          setIsSaving(false)
+          setIsDialogOpen(false)
+        })
     } else {
       if (productsRef) {
-        addDoc(productsRef, { ...productData, createdAt: serverTimestamp() }).then(() => { toast({ title: "Salvo!" }); setIsDialogOpen(false); }).finally(() => setIsSaving(false))
+        addDoc(productsRef, { ...productData, createdAt: serverTimestamp() })
+          .then(() => { toast({ title: "Salvo!" }); })
+          .catch(async () => errorEmitter.emit('permission-error', new FirestorePermissionError({ path: 'products', operation: 'create', requestResourceData: productData })))
+          .finally(() => {
+            setIsSaving(false)
+            setIsDialogOpen(false)
+          })
       }
     }
   }
@@ -223,7 +239,7 @@ export default function ProductsPage() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <Tabs defaultValue="todos" className="w-full md:w-auto" onValueChange={setActiveTab}>
+          <Tabs value={activeTab} className="w-full md:w-auto" onValueChange={setActiveTab}>
             <TabsList className="h-12 p-1.5 bg-card shadow-sm border border-primary/30 rounded-2xl w-full overflow-x-auto scrollbar-hide">
               <TabsTrigger value="todos" className="flex-1 rounded-xl font-bold px-2">Todos</TabsTrigger>
               <TabsTrigger value="natura" className="flex-1 rounded-xl font-bold px-2">Natura</TabsTrigger>
@@ -258,10 +274,22 @@ export default function ProductsPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="rounded-xl border-primary/20">
-                            <DropdownMenuItem className="font-bold gap-2 cursor-pointer" onSelect={() => handleEditProduct(product)}>
+                            <DropdownMenuItem 
+                              className="font-bold gap-2 cursor-pointer" 
+                              onSelect={(e) => {
+                                e.preventDefault();
+                                handleEditProduct(product);
+                              }}
+                            >
                               <Pencil className="h-4 w-4 text-amber-500" /> Editar Produto
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="font-bold gap-2 text-rose-600 cursor-pointer" onSelect={() => setProductToDelete(product)}>
+                            <DropdownMenuItem 
+                              className="font-bold gap-2 text-rose-600 cursor-pointer" 
+                              onSelect={(e) => {
+                                e.preventDefault();
+                                setProductToDelete(product);
+                              }}
+                            >
                               <Trash2 className="h-4 w-4" /> Excluir do Catálogo
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -281,9 +309,7 @@ export default function ProductsPage() {
                       <Button 
                         variant="secondary" 
                         size="sm" 
-                        onClick={() => {
-                          setTimeout(() => setSelectedProduct(product), 150);
-                        }} 
+                        onClick={() => setSelectedProduct(product)} 
                         className="rounded-xl font-bold bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all"
                       >
                         Ver Detalhes
