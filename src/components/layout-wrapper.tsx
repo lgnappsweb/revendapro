@@ -118,7 +118,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
 
   if (isUserLoading || (user && isAdminLoading && !adminRecord && !isPublicPage)) {
     return (
-      <div className="flex h-screen w-screen flex-col items-center justify-center bg-background gap-4">
+      <div className="flex h-svh w-screen flex-col items-center justify-center bg-background gap-4">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
         <p className="font-black text-muted-foreground animate-pulse uppercase tracking-widest text-xs">RevendaPro</p>
       </div>
@@ -129,7 +129,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
 
   if (isPublicPage) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="min-h-svh bg-background flex items-center justify-center p-4">
         <div className="w-full flex justify-center max-w-md">
           {children}
         </div>
@@ -138,13 +138,13 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex h-screen bg-background transition-colors duration-500 overflow-hidden">
-      <div className="hidden md:block shrink-0">
+    <div className="flex h-svh w-screen bg-background transition-colors duration-500 overflow-hidden">
+      <div className="hidden md:block shrink-0 h-full">
         <AppSidebar />
       </div>
-      <SidebarInset className="bg-transparent flex-1 w-full overflow-hidden flex flex-col">
+      <SidebarInset className="bg-transparent flex-1 w-full overflow-hidden flex flex-col h-full">
         {pathname !== "/" && (
-          <header className="sticky top-0 z-[100] w-full p-4 sm:px-8 bg-card/95 backdrop-blur-md border-b border-primary/10 flex items-center h-20 shrink-0 shadow-sm">
+          <header className="w-full p-4 sm:px-8 bg-card/95 backdrop-blur-md border-b border-primary/10 flex items-center h-20 shrink-0 shadow-sm z-[50]">
             <Button
               variant="outline"
               size="sm"
