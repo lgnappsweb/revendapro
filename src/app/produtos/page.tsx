@@ -24,6 +24,7 @@ import {
   DialogTitle 
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import { 
   Select, 
   SelectContent, 
@@ -32,9 +33,7 @@ import {
   SelectValue 
 } from "@/components/ui/select"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
-import { collection, serverTimestamp, addDoc, doc, updateDoc, deleteDoc, query, orderBy } from "firebase/firestore"
-import { errorEmitter } from "@/firebase/error-emitter"
-import { FirestorePermissionError } from "@/firebase/errors"
+import { collection, serverTimestamp, addDoc, doc, updateDoc, query, orderBy } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 
 export default function ProductsPage() {
@@ -157,14 +156,14 @@ export default function ProductsPage() {
           {isLoadingProducts ? (
             <div className="flex justify-center py-20"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>
           ) : filteredProducts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center bg-card rounded-3xl border border-dashed border-primary/30">
+            <div className="flex flex-col items-center justify-center py-20 text-center bg-card rounded-[2.5rem] border border-dashed border-primary/30">
               <PackageSearch className="h-16 w-16 text-primary/20 mb-4" />
               <p className="text-muted-foreground font-medium">Nenhum produto encontrado.</p>
             </div>
           ) : (
             <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pb-10">
               {filteredProducts.map((product) => (
-                <Card key={product.id} className="group overflow-hidden rounded-[2rem] border-primary/20 shadow-sm hover:border-primary transition-all">
+                <Card key={product.id} className="group overflow-hidden rounded-[2.5rem] border-primary/20 shadow-sm hover:border-primary transition-all">
                   <CardHeader className="bg-primary/5 border-b p-4">
                      <div className="flex justify-between items-center gap-2">
                         <Badge className={`rounded-lg font-bold py-1 border-none ${product.brand === 'Natura' ? 'bg-[#FF6A13]' : 'bg-[#622D91]'}`}>{product.brand}</Badge>
