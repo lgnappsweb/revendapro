@@ -12,7 +12,6 @@ import {
   Download,
   ArrowUpRight,
   Loader2,
-  Sparkles,
   CalendarDays,
   MessageSquare,
   FileText
@@ -343,23 +342,6 @@ export default function FinancePage() {
                     R$ {totalReceived.toLocaleString('pt-BR')} recebidos de R$ {(totalReceived + totalPending).toLocaleString('pt-BR')}
                   </p>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card className="primary-gradient rounded-[2.5rem] overflow-hidden border-none text-white shadow-xl">
-              <CardContent className="p-8 space-y-4">
-                <h4 className="font-black flex items-center gap-2 uppercase tracking-tighter text-xl">
-                  <Sparkles className="h-6 w-6" />
-                  Insight do RevendaPro
-                </h4>
-                <p className="text-sm text-white/90 leading-relaxed font-medium">
-                  {totalPending > 0 ? (
-                    `Você tem R$ ${totalPending.toLocaleString('pt-BR')} em aberto neste período. Cobrar seus clientes hoje pode ser uma ótima ideia!`
-                  ) : (
-                    "Incrível! Todos os seus clientes estão em dia neste período. Que tal registrar novas vendas hoje?"
-                  )}
-                </p>
-                <Button className="w-full rounded-2xl font-bold bg-white text-primary hover:bg-white/90 shadow-lg h-12">Analisar Tendências</Button>
               </CardContent>
             </Card>
           </div>
