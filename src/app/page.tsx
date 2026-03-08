@@ -1,6 +1,7 @@
 
 "use client"
 
+import { useMemo } from "react"
 import { LayoutWrapper } from "@/components/layout-wrapper"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { 
@@ -9,11 +10,11 @@ import {
   Clock, 
   ArrowUpRight, 
   CheckCircle2,
-  AlertCircle,
   Search,
   Loader2,
   ChevronRight,
-  Package
+  Package,
+  ShoppingBag
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -49,6 +50,23 @@ export default function Dashboard() {
   const totalReceived = allOrders?.filter(o => o.paymentStatus === 'Pago').reduce((acc, o) => acc + (o.finalTotal || 0), 0) || 0
   const totalPending = allOrders?.filter(o => o.paymentStatus === 'Pendente').reduce((acc, o) => acc + (o.finalTotal || 0), 0) || 0
   const clientsCount = clients?.length || 0
+
+  // Cálculo de dados reais para os Mais Vendidos
+  const topProducts = useMemo(() => {
+    if (!allOrders) return [];
+    const stats: Record<string, { name: string; count: number; value: number }> = {};
+    allOrders.forEach(order => {
+      order.items?.forEach((item: any) => {
+        const name = item.productName || "Produto";
+        if (!stats[name]) stats[name] = { name, count: 0, value: 0 };
+        stats[name].count += (item.quantity || 0);
+        stats[name].value += (item.subtotal || 0);
+      });
+    });
+    return Object.values(stats)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 3);
+  }, [allOrders]);
 
   const stats = [
     {
@@ -139,7 +157,7 @@ export default function Dashboard() {
 
         <div className="grid gap-6 lg:grid-cols-3 px-1">
           <Card className="lg:col-span-2 shadow-sm rounded-[2.5rem] overflow-hidden border-primary/10">
-            <CardHeader className="flex flex-row items-center justify-between border-b bg-primary/5 px-8 py-6 gap-4">
+            <CardHeader className="bg-primary/5 border-b px-8 py-6 flex flex-row items-center justify-between gap-4">
               <div className="space-y-1">
                 <CardTitle className="text-xl text-primary font-black uppercase tracking-tight">Pedidos Recentes</CardTitle>
                 <CardDescription>Acompanhe suas últimas vendas realizadas.</CardDescription>
@@ -241,30 +259,34 @@ export default function Dashboard() {
             <Card className="shadow-sm rounded-[2.5rem] overflow-hidden border-primary/10">
               <CardHeader className="bg-primary/5 border-b px-8 py-6">
                 <CardTitle className="text-lg text-primary font-black flex items-center gap-2 uppercase tracking-tight">
-                  <TrendingUp className="h-5 w-5" />
+                  <ShoppingBag className="h-5 w-5" />
                   Mais Vendidos
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-5 p-8">
-                {[
-                  { name: "Kaiak Aventura", brand: "Natura", count: 12, value: "R$ 1.200" },
-                  { name: "Batom Matte Avon", brand: "Avon", count: 8, value: "R$ 240" },
-                  { name: "Creme Tododia", brand: "Natura", count: 6, value: "R$ 300" },
-                ].map((item, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-muted/20 text-primary font-black">
-                      {i + 1}
-                    </div>
-                    <div className="flex flex-1 flex-col min-w-0">
-                      <span className="text-sm font-black truncate">{item.name}</span>
-                      <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">{item.brand}</span>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <span className="text-sm font-black text-foreground">{item.count} un</span>
-                      <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-tighter">{item.value}</div>
-                    </div>
+                {topProducts.length === 0 ? (
+                  <div className="text-center py-4">
+                    <p className="text-xs text-muted-foreground font-bold uppercase">Aguardando vendas...</p>
                   </div>
-                ))}
+                ) : (
+                  topProducts.map((item, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-muted/20 text-primary font-black">
+                        {i + 1}
+                      </div>
+                      <div className="flex flex-1 flex-col min-w-0">
+                        <span className="text-sm font-black truncate">{item.name}</span>
+                        <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">REAL DATA</span>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className="text-sm font-black text-foreground">{item.count} un</span>
+                        <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-tighter">
+                          R$ {item.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
                 <Button variant="outline" className="w-full rounded-2xl border-dashed font-black uppercase text-xs mt-2 hover:bg-primary/5 hover:text-primary hover:border-primary h-12" asChild>
                   <Link href="/pedidos">Ver Histórico</Link>
                 </Button>
@@ -291,3 +313,5 @@ export default function Dashboard() {
     </LayoutWrapper>
   )
 }
+import { AlertCircle } from "lucide-react"
+
