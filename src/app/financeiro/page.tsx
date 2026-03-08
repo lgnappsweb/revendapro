@@ -1,6 +1,7 @@
+
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { LayoutWrapper } from "@/components/layout-wrapper"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { 
@@ -16,7 +17,8 @@ import {
   CheckCircle2,
   Search,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  CalendarDays
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -34,13 +36,21 @@ import {
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useToast } from "@/hooks/use-toast"
-import { format } from "date-fns"
+import { format, isSameDay, isSameMonth, isSameYear } from "date-fns"
 import { ptBR } from "date-fns/locale"
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 export default function FinancePage() {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
+  const [selectedPeriod, setSelectedPeriod] = useState("mes")
   const { toast } = useToast()
   const db = useFirestore()
 
@@ -50,13 +60,33 @@ export default function FinancePage() {
   )
   const { data: orders, isLoading } = useCollection(ordersRef)
 
-  // Cálculos financeiros
+  // Filtro de ordens pelo período selecionado
+  const filteredOrdersByPeriod = useMemo(() => {
+    if (!orders) return []
+    const now = new Date()
+    
+    return orders.filter(order => {
+      const orderDate = order.createdAt?.seconds 
+        ? new Date(order.createdAt.seconds * 1000) 
+        : new Date(order.createdAt)
+      
+      if (selectedPeriod === "hoje") {
+        return isSameDay(orderDate, now)
+      }
+      if (selectedPeriod === "mes") {
+        return isSameMonth(orderDate, now) && isSameYear(orderDate, now)
+      }
+      return true // "todos"
+    })
+  }, [orders, selectedPeriod])
+
+  // Cálculos financeiros baseados no período filtrado
   const now = new Date()
   
-  const totalReceived = orders?.filter(o => o.paymentStatus === 'Pago')
+  const totalReceived = filteredOrdersByPeriod?.filter(o => o.paymentStatus === 'Pago')
     .reduce((acc, o) => acc + (o.finalTotal || 0), 0) || 0
 
-  const pendingOrders = orders?.filter(o => o.paymentStatus === 'Pendente') || []
+  const pendingOrders = filteredOrdersByPeriod?.filter(o => o.paymentStatus === 'Pendente') || []
   
   const totalPending = pendingOrders.reduce((acc, o) => acc + (o.finalTotal || 0), 0) || 0
 
@@ -67,10 +97,10 @@ export default function FinancePage() {
   }).reduce((acc, o) => acc + (o.finalTotal || 0), 0) || 0
 
   // Filtro para o diálogo de registrar entrada
-  const ordersToReceive = pendingOrders.filter(o => 
+  const ordersToReceive = orders?.filter(o => o.paymentStatus === 'Pendente' && (
     o.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     o.id.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  )) || []
 
   const handleReceivePayment = async (order: any) => {
     setIsUpdating(true)
@@ -104,10 +134,10 @@ export default function FinancePage() {
   }
 
   const stats = [
-    { title: "Saldo Disponível", value: totalReceived, color: "text-emerald-600", bg: "bg-emerald-50", icon: DollarSign, sub: "Recebimentos confirmados" },
-    { title: "Contas a Receber", value: totalPending, color: "text-amber-600", bg: "bg-amber-50", icon: Clock, sub: "Aguardando pagamento" },
-    { title: "Total Vencido", value: totalOverdue, color: "text-rose-600", bg: "bg-rose-50", icon: AlertCircle, sub: "Pagamentos em atraso" },
-    { title: "Faturamento Total", value: totalReceived + totalPending, color: "text-primary", bg: "bg-primary/5", icon: TrendingUp, sub: "Vendas brutas" },
+    { title: "Saldo Recebido", value: totalReceived, color: "text-emerald-600", bg: "bg-emerald-50", icon: DollarSign, sub: "Confirmados no período" },
+    { title: "Contas a Receber", value: totalPending, color: "text-amber-600", bg: "bg-amber-50", icon: Clock, sub: "Aguardando no período" },
+    { title: "Total Vencido", value: totalOverdue, color: "text-rose-600", bg: "bg-rose-50", icon: AlertCircle, sub: "Vencidos no período" },
+    { title: "Faturamento", value: totalReceived + totalPending, color: "text-primary", bg: "bg-primary/5", icon: TrendingUp, sub: "Total bruto no período" },
   ]
 
   return (
@@ -121,65 +151,79 @@ export default function FinancePage() {
             <p className="text-muted-foreground font-medium text-lg text-center">Controle total de entradas, pendentes e lucros.</p>
           </div>
           
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            <Button onClick={exportData} variant="outline" className="rounded-xl font-bold h-12 border-primary text-primary hover:bg-primary/5 transition-all">
-              <Download className="mr-2 h-5 w-5" /> Exportar Relatório
-            </Button>
-            
-            <Dialog open={isRegisterOpen} onOpenChange={setIsRegisterOpen}>
-              <DialogTrigger asChild>
-                <Button className="rounded-xl font-bold primary-gradient hover:opacity-90 h-12 px-8 shadow-lg transition-all active:scale-95">
-                  <Plus className="mr-2 h-5 w-5" /> Registrar Entrada
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px] w-[95vw] rounded-3xl border-primary overflow-hidden p-0 flex flex-col max-h-[85vh]">
-                <DialogHeader className="p-8 pb-4 bg-white">
-                  <DialogTitle className="text-2xl font-black text-primary uppercase text-center">Confirmar Pagamento</DialogTitle>
-                </DialogHeader>
-                
-                <div className="px-8 pb-4">
-                  <div className="relative mb-4">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                      placeholder="Pesquisar cliente ou pedido..." 
-                      className="pl-10 rounded-xl border-primary/20 bg-muted/30"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                  </div>
-                </div>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-2xl px-4">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <CalendarDays className="h-5 w-5 text-primary" />
+              <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+                <SelectTrigger className="w-full sm:w-[200px] rounded-xl font-bold border-primary/20 bg-white">
+                  <SelectValue placeholder="Período" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl font-bold">
+                  <SelectItem value="hoje">Hoje ({format(new Date(), 'dd/MM')})</SelectItem>
+                  <SelectItem value="mes">Este Mês</SelectItem>
+                  <SelectItem value="todos">Todo o Período</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-                <ScrollArea className="flex-1 px-8 pb-8 bg-[#FDFBFB]">
-                  <div className="space-y-3">
-                    {pendingOrders.length === 0 ? (
-                      <div className="text-center py-10">
-                        <CheckCircle2 className="h-12 w-12 text-emerald-500/30 mx-auto mb-2" />
-                        <p className="text-sm font-bold text-muted-foreground">Todos os pagamentos estão em dia!</p>
-                      </div>
-                    ) : ordersToReceive.length === 0 ? (
-                      <div className="text-center py-10 text-muted-foreground">Nenhum resultado encontrado.</div>
-                    ) : (
-                      ordersToReceive.map((order) => (
-                        <div key={order.id} className="p-4 rounded-2xl bg-white border border-primary/10 hover:border-primary transition-all group flex items-center justify-between">
-                          <div className="flex flex-col min-w-0">
-                            <span className="font-bold text-foreground truncate">{order.clientName}</span>
-                            <span className="text-[10px] font-black text-primary uppercase">R$ {order.finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                          </div>
-                          <Button 
-                            size="sm" 
-                            disabled={isUpdating}
-                            onClick={() => handleReceivePayment(order)}
-                            className="rounded-lg font-bold bg-emerald-500 hover:bg-emerald-600 h-9"
-                          >
-                            {isUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirmar"}
-                          </Button>
-                        </div>
-                      ))
-                    )}
+            <div className="flex items-center gap-4 w-full sm:w-auto justify-center">
+              <Button onClick={exportData} variant="outline" className="rounded-xl font-bold h-12 border-primary text-primary hover:bg-primary/5 transition-all px-6">
+                <Download className="mr-2 h-5 w-5" /> Exportar
+              </Button>
+              
+              <Dialog open={isRegisterOpen} onOpenChange={setIsRegisterOpen}>
+                <DialogTrigger asChild>
+                  <Button className="rounded-xl font-bold primary-gradient hover:opacity-90 h-12 px-8 shadow-lg transition-all active:scale-95">
+                    <Plus className="mr-2 h-5 w-5" /> Registrar Entrada
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[500px] w-[95vw] rounded-3xl border-primary overflow-hidden p-0 flex flex-col max-h-[85vh]">
+                  <DialogHeader className="p-8 pb-4 bg-white">
+                    <DialogTitle className="text-2xl font-black text-primary uppercase text-center">Confirmar Pagamento</DialogTitle>
+                  </DialogHeader>
+                  
+                  <div className="px-8 pb-4">
+                    <div className="relative mb-4">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        placeholder="Pesquisar cliente ou pedido..." 
+                        className="pl-10 rounded-xl border-primary/20 bg-muted/30"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                    </div>
                   </div>
-                </ScrollArea>
-              </DialogContent>
-            </Dialog>
+
+                  <ScrollArea className="flex-1 px-8 pb-8 bg-[#FDFBFB]">
+                    <div className="space-y-3">
+                      {ordersToReceive.length === 0 ? (
+                        <div className="text-center py-10">
+                          <CheckCircle2 className="h-12 w-12 text-emerald-500/30 mx-auto mb-2" />
+                          <p className="text-sm font-bold text-muted-foreground">Nenhum pagamento pendente encontrado.</p>
+                        </div>
+                      ) : (
+                        ordersToReceive.map((order) => (
+                          <div key={order.id} className="p-4 rounded-2xl bg-white border border-primary/10 hover:border-primary transition-all group flex items-center justify-between">
+                            <div className="flex flex-col min-w-0">
+                              <span className="font-bold text-foreground truncate">{order.clientName}</span>
+                              <span className="text-[10px] font-black text-primary uppercase">R$ {order.finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                            </div>
+                            <Button 
+                              size="sm" 
+                              disabled={isUpdating}
+                              onClick={() => handleReceivePayment(order)}
+                              className="rounded-lg font-bold bg-emerald-500 hover:bg-emerald-600 h-9"
+                            >
+                              {isUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirmar"}
+                            </Button>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </ScrollArea>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
         </div>
 
@@ -220,13 +264,13 @@ export default function FinancePage() {
                 ) : (
                   <>
                     <TabsContent value="todos" className="m-0">
-                      <TransactionList transactions={orders || []} />
+                      <TransactionList transactions={filteredOrdersByPeriod} />
                     </TabsContent>
                     <TabsContent value="pagos" className="m-0">
-                      <TransactionList transactions={orders?.filter(o => o.paymentStatus === 'Pago') || []} />
+                      <TransactionList transactions={filteredOrdersByPeriod.filter(o => o.paymentStatus === 'Pago')} />
                     </TabsContent>
                     <TabsContent value="pendentes" className="m-0">
-                      <TransactionList transactions={orders?.filter(o => o.paymentStatus === 'Pendente') || []} />
+                      <TransactionList transactions={filteredOrdersByPeriod.filter(o => o.paymentStatus === 'Pendente')} />
                     </TabsContent>
                   </>
                 )}
@@ -259,11 +303,11 @@ export default function FinancePage() {
                   <div className="flex justify-between text-xs font-black uppercase tracking-wider">
                     <span>Eficiência de Cobrança</span>
                     <span className="text-emerald-600">
-                      {orders?.length ? Math.round((totalReceived / (totalReceived + totalPending)) * 100) : 0}% Recebido
+                      {filteredOrdersByPeriod.length ? Math.round((totalReceived / (totalReceived + totalPending)) * 100) : 0}% Recebido
                     </span>
                   </div>
                   <Progress 
-                    value={orders?.length ? (totalReceived / (totalReceived + totalPending)) * 100 : 0} 
+                    value={filteredOrdersByPeriod.length ? (totalReceived / (totalReceived + totalPending)) * 100 : 0} 
                     className="h-3 bg-emerald-50 [&>div]:bg-emerald-500" 
                   />
                   <p className="text-[10px] text-muted-foreground font-bold text-right italic">
@@ -281,9 +325,9 @@ export default function FinancePage() {
                 </h4>
                 <p className="text-sm text-white/90 leading-relaxed font-medium">
                   {totalPending > 0 ? (
-                    `Você tem R$ ${totalPending.toLocaleString('pt-BR')} em aberto. Cobrar seus clientes hoje pode aumentar seu saldo em até ${Math.round((totalPending/totalReceived)*100)}%!`
+                    `Você tem R$ ${totalPending.toLocaleString('pt-BR')} em aberto neste período. Cobrar seus clientes hoje pode ser uma ótima ideia!`
                   ) : (
-                    "Incrível! Todos os seus clientes estão em dia. Que tal registrar novas vendas hoje para manter o ritmo?"
+                    "Incrível! Todos os seus clientes estão em dia neste período. Que tal registrar novas vendas hoje?"
                   )}
                 </p>
                 <Button className="w-full rounded-2xl font-bold bg-white text-primary hover:bg-white/90 shadow-lg h-12">Analisar Tendências</Button>
@@ -301,14 +345,14 @@ function TransactionList({ transactions }: { transactions: any[] }) {
     return (
       <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
         <DollarSign className="h-12 w-12 text-muted-foreground/20 mb-2" />
-        <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Nenhuma transação registrada</p>
+        <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Nenhuma transação neste período</p>
       </div>
     )
   }
 
   return (
     <div className="divide-y divide-primary/5">
-      {transactions.slice(0, 10).map((item, i) => (
+      {transactions.map((item, i) => (
         <div key={item.id} className="flex items-center justify-between p-6 hover:bg-secondary/10 transition-colors group cursor-pointer">
           <div className="flex items-center gap-4 min-w-0">
             <div className={`p-3 rounded-2xl shrink-0 ${
