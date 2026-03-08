@@ -342,9 +342,8 @@ export default function ClientsPage() {
                           <DropdownMenuContent align="end" className="rounded-xl">
                             <DropdownMenuItem 
                               className="font-bold gap-2" 
-                              onSelect={() => {
-                                // Pequeno delay para garantir que o menu feche antes de abrir o diálogo
-                                // Isso evita o congelamento da tela em alguns navegadores/ambientes
+                              onSelect={(e) => {
+                                e.preventDefault();
                                 setTimeout(() => handleOpenEdit(client), 100);
                               }}
                             >
@@ -352,7 +351,8 @@ export default function ClientsPage() {
                             </DropdownMenuItem>
                             <DropdownMenuItem 
                               className="font-bold gap-2 text-rose-600" 
-                              onSelect={() => {
+                              onSelect={(e) => {
+                                e.preventDefault();
                                 setTimeout(() => setClientToDelete(client), 100);
                               }}
                             >
@@ -473,7 +473,8 @@ export default function ClientsPage() {
                               <DropdownMenuContent align="end" className="rounded-xl">
                                 <DropdownMenuItem 
                                   className="font-bold gap-2" 
-                                  onSelect={() => {
+                                  onSelect={(e) => {
+                                    e.preventDefault();
                                     setTimeout(() => handleOpenEdit(client), 100);
                                   }}
                                 >
@@ -481,7 +482,8 @@ export default function ClientsPage() {
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
                                   className="font-bold gap-2 text-rose-600" 
-                                  onSelect={() => {
+                                  onSelect={(e) => {
+                                    e.preventDefault();
                                     setTimeout(() => setClientToDelete(client), 100);
                                   }}
                                 >

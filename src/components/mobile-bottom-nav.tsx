@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -25,7 +26,7 @@ import {
 import { Button } from "@/components/ui/button"
 
 const mainItems = [
-  { title: "Dashboard", href: "/", icon: LayoutDashboard },
+  { title: "Início", href: "/", icon: LayoutDashboard },
   { title: "Nova Venda", href: "/nova-venda", icon: PlusCircle },
   { title: "Clientes", href: "/clientes", icon: Users },
 ]

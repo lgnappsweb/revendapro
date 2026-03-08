@@ -463,7 +463,8 @@ export default function ProductsPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="rounded-xl p-2 w-40">
                           <DropdownMenuItem 
-                            onSelect={() => {
+                            onSelect={(e) => {
+                              e.preventDefault();
                               setTimeout(() => handleEditProduct(product), 100);
                             }} 
                             className="rounded-lg font-bold gap-2 cursor-pointer"
@@ -471,7 +472,8 @@ export default function ProductsPage() {
                             <Pencil className="h-4 w-4 text-blue-500" /> Editar
                           </DropdownMenuItem>
                           <DropdownMenuItem 
-                            onSelect={() => {
+                            onSelect={(e) => {
+                              e.preventDefault();
                               setTimeout(() => setProductToDelete(product), 100);
                             }} 
                             className="rounded-lg font-bold gap-2 text-rose-600 cursor-pointer"

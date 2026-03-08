@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -33,7 +34,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 const mainNav = [
-  { title: "Dashboard", href: "/", icon: LayoutDashboard },
+  { title: "Início", href: "/", icon: LayoutDashboard },
   { title: "Clientes", href: "/clientes", icon: Users },
   { title: "Produtos", href: "/produtos", icon: Package },
   { title: "Pedidos", href: "/pedidos", icon: ShoppingCart },
