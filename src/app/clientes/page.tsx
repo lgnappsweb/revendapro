@@ -18,9 +18,7 @@ import {
   MoreVertical, 
   Phone, 
   MessageSquare, 
-  Calendar,
   MapPin,
-  Sparkles,
   Loader2,
   UserPlus,
   Trash2,
@@ -38,7 +36,6 @@ import {
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { generateWhatsappMarketingMessage } from "@/ai/flows/generate-whatsapp-marketing-message"
 import { useToast } from "@/hooks/use-toast"
 import { Card, CardContent } from "@/components/ui/card"
 import { 
@@ -52,7 +49,6 @@ import { collection, addDoc, serverTimestamp, deleteDoc, doc } from "firebase/fi
 
 export default function ClientsPage() {
   const [searchTerm, setSearchTerm] = useState("")
-  const [isGeneratingMessage, setIsGeneratingMessage] = useState<string | null>(null)
   const [isAddingClient, setIsAddingClient] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const { toast } = useToast()
@@ -131,33 +127,6 @@ export default function ClientsPage() {
       toast({ title: "Cliente removido" })
     } catch (error) {
       toast({ title: "Erro ao remover", variant: "destructive" })
-    }
-  }
-
-  const handleGenerateMessage = async (client: any) => {
-    setIsGeneratingMessage(client.id)
-    try {
-      const result = await generateWhatsappMarketingMessage({
-        clientName: client.name,
-        lastPurchasedProducts: [], 
-        preferredCategories: ["beleza"]
-      })
-      
-      const encodedMsg = encodeURIComponent(result.messageDraft)
-      window.open(`https://wa.me/${client.phone.replace(/\D/g, '')}?text=${encodedMsg}`, '_blank')
-      
-      toast({
-        title: "Mensagem Gerada!",
-        description: "Draft personalizado criado com IA.",
-      })
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Não foi possível gerar a mensagem agora.",
-        variant: "destructive"
-      })
-    } finally {
-      setIsGeneratingMessage(null)
     }
   }
 
@@ -308,6 +277,9 @@ export default function ClientsPage() {
                             <DropdownMenuItem className="font-bold gap-2" onClick={() => window.open(`tel:${client.phone.replace(/\D/g, '')}`)}>
                               <Phone className="h-4 w-4" /> Ligar
                             </DropdownMenuItem>
+                            <DropdownMenuItem className="font-bold gap-2" onClick={() => window.open(`https://wa.me/${client.phone.replace(/\D/g, '')}`, '_blank')}>
+                              <MessageSquare className="h-4 w-4 text-emerald-600" /> WhatsApp
+                            </DropdownMenuItem>
                             <DropdownMenuItem className="font-bold gap-2 text-rose-600" onClick={() => handleDeleteClient(client.id)}>
                               <Trash2 className="h-4 w-4" /> Excluir
                             </DropdownMenuItem>
@@ -330,16 +302,8 @@ export default function ClientsPage() {
 
                       <div className="mt-4 flex items-center justify-between gap-3">
                         <Badge variant="secondary" className="rounded-lg font-black bg-pink-100 text-primary border-none px-3 py-1 uppercase text-[10px]">
-                          CLIENTE PRO
+                          CLIENTE ATIVO
                         </Badge>
-                        <Button 
-                          onClick={() => handleGenerateMessage(client)}
-                          disabled={isGeneratingMessage === client.id}
-                          className="rounded-xl primary-gradient font-bold h-10 gap-2 flex-1 shadow-md"
-                        >
-                          {isGeneratingMessage === client.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                          Marketing IA
-                        </Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -392,16 +356,6 @@ export default function ClientsPage() {
                         </TableCell>
                         <TableCell className="px-6 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <Button 
-                              size="sm" 
-                              variant="ghost" 
-                              disabled={isGeneratingMessage === client.id}
-                              className="rounded-xl hover:bg-primary/10 text-primary font-bold gap-2 px-4 h-10 border border-primary/20"
-                              onClick={() => handleGenerateMessage(client)}
-                            >
-                              {isGeneratingMessage === client.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                              Marketing IA
-                            </Button>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button size="icon" variant="ghost" className="rounded-full h-10 w-10">
@@ -409,6 +363,9 @@ export default function ClientsPage() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="rounded-xl">
+                                <DropdownMenuItem className="font-bold gap-2" onClick={() => window.open(`tel:${client.phone.replace(/\D/g, '')}`)}>
+                                  <Phone className="h-4 w-4 text-primary" /> Ligar
+                                </DropdownMenuItem>
                                 <DropdownMenuItem className="font-bold gap-2" onClick={() => window.open(`https://wa.me/${client.phone.replace(/\D/g, '')}`, '_blank')}>
                                   <MessageSquare className="h-4 w-4 text-emerald-600" /> WhatsApp
                                 </DropdownMenuItem>
