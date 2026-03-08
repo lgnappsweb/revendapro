@@ -62,26 +62,43 @@ export default function ProductsPage() {
     description: ""
   })
 
+  // Helper to format currency string (e.g., 1234 -> 12,34)
+  const formatCurrencyInput = (value: string) => {
+    const digits = value.replace(/\D/g, "");
+    if (!digits) return "";
+    const amount = parseInt(digits, 10) / 100;
+    return amount.toLocaleString("pt-BR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  }
+
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'price' | 'cost') => {
+    const formatted = formatCurrencyInput(e.target.value);
+    setFormData({ ...formData, [field]: formatted });
+  }
+
   const handleSaveProduct = () => {
     if (!formData.name || !formData.price) {
       toast({
         title: "Campos obrigatórios",
-        description: "Por favor, preencha o nome e o preço do produto.",
+        description: "Por favor, preencha o nome e o preço da revista.",
         variant: "destructive"
       })
       return
     }
 
-    // Helper to parse currency string to number handling commas
-    const parseCurrency = (val: string) => {
+    // Helper to parse currency string back to number for Firestore
+    const parseCurrencyToNumber = (val: string) => {
       if (!val) return 0;
-      return parseFloat(val.replace(',', '.'));
+      // Remove dots and replace comma with dot
+      return parseFloat(val.replace(/\./g, '').replace(',', '.'));
     }
 
     const newProduct = {
       ...formData,
-      price: parseCurrency(formData.price),
-      cost: formData.cost ? parseCurrency(formData.cost) : 0,
+      price: parseCurrencyToNumber(formData.price),
+      cost: formData.cost ? parseCurrencyToNumber(formData.cost) : 0,
       image: PlaceHolderImages[Math.floor(Math.random() * (PlaceHolderImages?.length || 1))]?.imageUrl || "",
       createdAt: serverTimestamp()
     }
@@ -170,21 +187,21 @@ export default function ProductsPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="price" className="font-bold">Preço de Venda (R$)</Label>
+                    <Label htmlFor="price" className="font-bold">Preço da revista(R$)</Label>
                     <Input 
                       id="price" 
                       value={formData.price}
-                      onChange={(e) => setFormData({...formData, price: e.target.value})}
+                      onChange={(e) => handlePriceChange(e, 'price')}
                       placeholder="0,00" 
                       className="rounded-xl border-primary/30" 
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="cost" className="font-bold">Custo (R$)</Label>
+                    <Label htmlFor="cost" className="font-bold">Preço da revendedora(R$)</Label>
                     <Input 
                       id="cost" 
                       value={formData.cost}
-                      onChange={(e) => setFormData({...formData, cost: e.target.value})}
+                      onChange={(e) => handlePriceChange(e, 'cost')}
                       placeholder="0,00" 
                       className="rounded-xl border-primary/30" 
                     />
