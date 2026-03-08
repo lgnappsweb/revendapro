@@ -38,8 +38,10 @@ import {
   SelectValue 
 } from "@/components/ui/select"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { useFirestore, useCollection, useMemoFirebase, addDocumentNonBlocking } from "@/firebase"
-import { collection, serverTimestamp } from "firebase/firestore"
+import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
+import { collection, serverTimestamp, addDoc } from "firebase/firestore"
+import { errorEmitter } from "@/firebase/error-emitter"
+import { FirestorePermissionError } from "@/firebase/errors"
 import { useToast } from "@/hooks/use-toast"
 
 const PRODUCT_CATEGORIES = [
@@ -109,7 +111,6 @@ export default function ProductsPage() {
     // Helper to parse currency string back to number for Firestore
     const parseCurrencyToNumber = (val: string) => {
       if (!val) return 0;
-      // Remove dots and replace comma with dot
       return parseFloat(val.replace(/\./g, '').replace(',', '.'));
     }
 
@@ -121,7 +122,15 @@ export default function ProductsPage() {
       createdAt: serverTimestamp()
     }
 
-    addDocumentNonBlocking(productsRef, newProduct)
+    addDoc(productsRef, newProduct)
+      .catch(async (error) => {
+        const permissionError = new FirestorePermissionError({
+          path: productsRef.path,
+          operation: 'create',
+          requestResourceData: newProduct,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      });
     
     toast({
       title: "Produto Salvo!",
@@ -141,9 +150,12 @@ export default function ProductsPage() {
   }
 
   const filteredProducts = products?.filter(p => {
-    const matchesSearch = (p.name || "").toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         (p.code || "").toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesTab = activeTab === "todos" || (p.brand || "").toLowerCase() === activeTab
+    const nameStr = p.name || "";
+    const codeStr = p.code || "";
+    const brandStr = p.brand || "";
+    const matchesSearch = nameStr.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         codeStr.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesTab = activeTab === "todos" || brandStr.toLowerCase() === activeTab
     return matchesSearch && matchesTab
   }) || []
 
@@ -151,8 +163,10 @@ export default function ProductsPage() {
     <LayoutWrapper>
       <div className="flex flex-col gap-10">
         <div className="flex flex-col items-center text-center gap-6 py-4">
-          <div className="space-y-2">
-            <h1 className="text-6xl font-black tracking-tighter text-primary">Produtos</h1>
+          <div className="space-y-2 w-full">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter text-primary whitespace-nowrap overflow-hidden text-ellipsis">
+              Catálogo de Produtos
+            </h1>
             <p className="text-muted-foreground font-medium text-lg">Controle seu estoque e preços de venda.</p>
           </div>
           
