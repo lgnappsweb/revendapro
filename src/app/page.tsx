@@ -123,7 +123,7 @@ export default function Dashboard() {
             <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
             <Input 
               placeholder="Pesquisar pedidos, clientes ou metas..." 
-              className="h-14 pl-12 rounded-2xl border-none shadow-sm bg-white text-base"
+              className="h-14 pl-12 rounded-2xl border border-primary/30 shadow-sm bg-white text-base focus-visible:ring-primary/20"
             />
           </div>
         </div>

@@ -89,7 +89,7 @@ export default function ClientsPage() {
       <div className="flex flex-col gap-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-3xl font-bold tracking-tight">Meus Clientes</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-primary">Meus Clientes</h1>
             <p className="text-muted-foreground font-medium">Gerencie sua rede de contatos e histórico de vendas.</p>
           </div>
           <Dialog>
@@ -106,23 +106,23 @@ export default function ClientsPage() {
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="name" className="text-right font-bold">Nome</Label>
-                  <Input id="name" placeholder="Ex: Maria Santos" className="col-span-3 rounded-xl" />
+                  <Input id="name" placeholder="Ex: Maria Santos" className="col-span-3 rounded-xl border border-primary/30" />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="phone" className="text-right font-bold">WhatsApp</Label>
-                  <Input id="phone" placeholder="11 99999-9999" className="col-span-3 rounded-xl" />
+                  <Input id="phone" placeholder="11 99999-9999" className="col-span-3 rounded-xl border border-primary/30" />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="city" className="text-right font-bold">Cidade</Label>
-                  <Input id="city" className="col-span-3 rounded-xl" />
+                  <Input id="city" className="col-span-3 rounded-xl border border-primary/30" />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="neighborhood" className="text-right font-bold">Bairro</Label>
-                  <Input id="neighborhood" className="col-span-3 rounded-xl" />
+                  <Input id="neighborhood" className="col-span-3 rounded-xl border border-primary/30" />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="notes" className="text-right font-bold">Notas</Label>
-                  <Textarea id="notes" className="col-span-3 rounded-xl" placeholder="Observações importantes..." />
+                  <Textarea id="notes" className="col-span-3 rounded-xl border border-primary/30" placeholder="Observações importantes..." />
                 </div>
               </div>
               <DialogFooter>
@@ -136,13 +136,13 @@ export default function ClientsPage() {
           <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <Input 
             placeholder="Pesquisar por nome ou telefone..." 
-            className="h-12 pl-10 rounded-2xl border-none shadow-sm bg-white"
+            className="h-12 pl-10 rounded-2xl border border-primary/30 shadow-sm bg-white"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
-        <div className="rounded-2xl border bg-white shadow-sm overflow-hidden">
+        <div className="rounded-2xl border border-primary/30 bg-white shadow-sm overflow-hidden">
           <Table>
             <TableHeader className="bg-muted/30">
               <TableRow className="hover:bg-transparent border-none">
@@ -155,7 +155,7 @@ export default function ClientsPage() {
             </TableHeader>
             <TableBody>
               {filteredClients.map((client) => (
-                <TableRow key={client.id} className="cursor-pointer group hover:bg-secondary/10 transition-colors border-b last:border-0">
+                <TableRow key={client.id} className="cursor-pointer group hover:bg-secondary/10 transition-colors border-b last:border-0 border-primary/10">
                   <TableCell className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10 border-2 border-primary/10">

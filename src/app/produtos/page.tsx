@@ -44,7 +44,7 @@ export default function ProductsPage() {
       <div className="flex flex-col gap-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-3xl font-bold tracking-tight">Catálogo de Produtos</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-primary">Catálogo de Produtos</h1>
             <p className="text-muted-foreground font-medium">Controle seu estoque e preços de venda.</p>
           </div>
           <Button className="rounded-xl font-bold bg-primary hover:bg-primary/90 shadow-md h-11 px-6">
@@ -57,13 +57,13 @@ export default function ProductsPage() {
             <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
             <Input 
               placeholder="Buscar por nome, marca ou código..." 
-              className="h-12 pl-10 rounded-2xl border-none shadow-sm bg-white"
+              className="h-12 pl-10 rounded-2xl border border-primary/30 shadow-sm bg-white"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <Tabs defaultValue="todos" className="w-full md:w-auto" onValueChange={setActiveTab}>
-            <TabsList className="h-12 p-1.5 bg-white shadow-sm border rounded-2xl w-full">
+            <TabsList className="h-12 p-1.5 bg-white shadow-sm border border-primary/30 rounded-2xl w-full">
               <TabsTrigger value="todos" className="rounded-xl font-bold data-[state=active]:bg-primary data-[state=active]:text-white transition-all">Todos</TabsTrigger>
               <TabsTrigger value="natura" className="rounded-xl font-bold data-[state=active]:bg-[#FF6A13] data-[state=active]:text-white transition-all">Natura</TabsTrigger>
               <TabsTrigger value="avon" className="rounded-xl font-bold data-[state=active]:bg-[#622D91] data-[state=active]:text-white transition-all">Avon</TabsTrigger>
