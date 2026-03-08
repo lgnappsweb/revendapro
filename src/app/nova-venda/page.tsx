@@ -105,8 +105,8 @@ export default function NewSalePage() {
 
   const total = Math.max(0, subtotal - discount)
   
-  // Lucro baseado no que a consultora paga (resellerPrice)
-  const totalConsultantCost = items.reduce((acc, item) => acc + (item.resellerPrice * item.qty), 0)
+  // Lucro baseado no que a consultora paga (cost) em relação ao que ela cobra (resellerPrice)
+  const totalConsultantCost = items.reduce((acc, item) => acc + (item.costPrice * item.qty), 0)
   const profit = Math.max(0, total - totalConsultantCost)
 
   const handleAddProductToCart = (product: any) => {
@@ -117,9 +117,10 @@ export default function NewSalePage() {
       setItems([...items, { 
         id: product.id, 
         name: product.name, 
-        magazinePrice: Number(product.price || 0), 
+        // Usa o preço de revendedora definido como valor padrão de venda
+        magazinePrice: Number(product.resellerPrice || product.price || 0), 
         costPrice: Number(product.cost || 0),
-        resellerPrice: Number(product.resellerPrice || product.cost || 0),
+        resellerPrice: Number(product.resellerPrice || 0),
         useCost: false,
         qty: 1 
       }])
@@ -262,7 +263,7 @@ export default function NewSalePage() {
                                  onClick={() => toggleItemPriceMode(item.id)}
                                  className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md transition-colors ${item.useCost ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}
                                >
-                                 {item.useCost ? 'PREÇO CUSTO' : 'PREÇO REVISTA'}
+                                 {item.useCost ? 'PREÇO CUSTO' : 'PREÇO VENDA'}
                                </button>
                             </div>
                           </div>
@@ -351,7 +352,7 @@ export default function NewSalePage() {
                   </div>
                   <div className="flex flex-col min-w-0">
                     <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Produtos</span>
-                    <span className={cn("text-base font-bold truncate", items.length > 0 ? "text-foreground" : "text-muted-foreground italic")}>
+                    <span className={cn("text-base font-bold truncate", items.length > 0 ? `${totalItemsCount} ${totalItemsCount === 1 ? 'item' : 'itens'} no carrinho` : "Aguardando produtos...")}>
                       {items.length > 0 ? `${totalItemsCount} ${totalItemsCount === 1 ? 'item' : 'itens'} no carrinho` : "Aguardando produtos..."}
                     </span>
                   </div>
@@ -482,10 +483,10 @@ export default function NewSalePage() {
                        >
                           <div className="flex flex-col min-w-0 pr-4">
                             <span className="font-bold text-base group-hover:text-primary truncate">{p.name}</span>
-                            <span className="text-[10px] text-muted-foreground font-black uppercase tracking-wider">{p.brand} | {p.category}</span>
+                            <span className="text-[10px] text-muted-foreground font-black uppercase tracking-wider">{p.brand === 'CasaEstilo' ? 'Casa/Estilo' : p.brand} | {p.category}</span>
                           </div>
                           <div className="text-right shrink-0">
-                            <span className="text-lg font-black text-primary block">R$ {Number(p.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                            <span className="text-lg font-black text-primary block">R$ {Number(p.resellerPrice || p.price || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                             <span className="text-[9px] text-muted-foreground font-bold">Custo: R$ {Number(p.cost).toLocaleString('pt-BR')}</span>
                           </div>
                        </button>

@@ -70,9 +70,29 @@ export default function ProductsPage() {
     return amount.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
+  const calculateCost = (priceStr: string, brand: string) => {
+    const priceNum = parseFloat(priceStr.replace(/\./g, '').replace(',', '.'));
+    if (isNaN(priceNum)) return "";
+    
+    let discount = 0;
+    if (brand === "Natura") discount = 0.30;
+    else if (brand === "Avon") discount = 0.35;
+    else if (brand === "CasaEstilo") discount = 0.15;
+    
+    const costValue = priceNum * (1 - discount);
+    return costValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'price' | 'cost' | 'resellerPrice') => {
     const formatted = formatCurrencyInput(e.target.value);
-    setFormData({ ...formData, [field]: formatted });
+    let newFormData = { ...formData, [field]: formatted };
+    
+    // Se o preço de revista mudar, recalcula o custo automaticamente
+    if (field === 'price') {
+      newFormData.cost = calculateCost(formatted, formData.brand);
+    }
+    
+    setFormData(newFormData);
   }
 
   const handleOpenNewProduct = () => {
@@ -175,7 +195,7 @@ export default function ProductsPage() {
                 <Card key={product.id} className="group overflow-hidden rounded-[2.5rem] border-primary/20 shadow-sm hover:border-primary transition-all">
                   <CardHeader className="bg-primary/5 border-b p-4">
                      <div className="flex justify-between items-center gap-2">
-                        <Badge className={`rounded-lg font-bold py-1 border-none ${product.brand === 'Natura' ? 'bg-[#FF6A13]' : product.brand === 'Avon' ? 'bg-[#622D91]' : 'bg-emerald-600'}`}>{product.brand}</Badge>
+                        <Badge className={`rounded-lg font-bold py-1 border-none ${product.brand === 'Natura' ? 'bg-[#FF6A13]' : product.brand === 'Avon' ? 'bg-[#622D91]' : 'bg-emerald-600'}`}>{product.brand === 'CasaEstilo' ? 'Casa/Estilo' : product.brand}</Badge>
                         <Badge variant="secondary" className="bg-pink-50 text-primary border-none text-[10px] truncate">{product.category || "Geral"}</Badge>
                      </div>
                   </CardHeader>
@@ -186,8 +206,8 @@ export default function ProductsPage() {
                     </div>
                     <div className="flex items-center justify-between border-t pt-3 border-primary/10">
                       <div className="flex flex-col">
-                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Venda</span>
-                        <span className="text-lg font-black text-foreground">R$ {Number(product.price || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Venda Sugerida</span>
+                        <span className="text-lg font-black text-foreground">R$ {Number(product.resellerPrice || product.price || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                       </div>
                       <Button 
                         variant="ghost" 
@@ -231,7 +251,7 @@ export default function ProductsPage() {
                     <div className="p-2 bg-primary/5 rounded-lg text-primary"><Tag className="h-4 w-4" /></div>
                     <div className="flex flex-col">
                       <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Marca</span>
-                      <span className="text-sm font-bold">{selectedProduct.brand}</span>
+                      <span className="text-sm font-bold">{selectedProduct.brand === 'CasaEstilo' ? 'Casa / Estilo' : selectedProduct.brand}</span>
                     </div>
                   </div>
                   <div className="bg-card p-4 rounded-2xl border border-primary/10 shadow-sm flex items-center gap-3">
@@ -259,10 +279,10 @@ export default function ProductsPage() {
                   <div className="bg-card p-4 rounded-2xl border border-primary/10 shadow-sm flex flex-col bg-primary/5">
                     <div className="flex items-center gap-1 mb-1">
                       <TrendingUp className="h-3 w-3 text-primary" />
-                      <span className="text-[10px] font-black text-primary uppercase tracking-wider">Lucro Estimado</span>
+                      <span className="text-[10px] font-black text-primary uppercase tracking-wider">Lucro Real</span>
                     </div>
                     <span className="text-lg font-black text-primary">
-                      R$ {(Number(selectedProduct.price || 0) - Number(selectedProduct.resellerPrice || selectedProduct.cost || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      R$ {(Number(selectedProduct.resellerPrice || selectedProduct.price || 0) - Number(selectedProduct.cost || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </span>
                   </div>
                 </div>
@@ -311,7 +331,10 @@ export default function ProductsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label className="font-bold text-muted-foreground">Marca</Label>
-                  <Select value={formData.brand} onValueChange={v => setFormData({...formData, brand: v})}>
+                  <Select value={formData.brand} onValueChange={v => {
+                    const calculatedCost = calculateCost(formData.price, v);
+                    setFormData({...formData, brand: v, cost: calculatedCost});
+                  }}>
                     <SelectTrigger className="rounded-xl border-primary/30 h-11 bg-card"><SelectValue /></SelectTrigger>
                     <SelectContent className="rounded-xl">
                       <SelectItem value="Natura">Natura</SelectItem>
@@ -333,15 +356,15 @@ export default function ProductsPage() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="grid gap-2">
                   <Label className="font-bold text-muted-foreground">Preço Revista</Label>
-                  <Input value={formData.price} onChange={e => handlePriceChange(e, 'price')} className="rounded-xl border-primary/30 h-11 bg-card" />
+                  <Input value={formData.price} onChange={e => handlePriceChange(e, 'price')} className="rounded-xl border-primary/30 h-11 bg-card" placeholder="0,00" />
                 </div>
                 <div className="grid gap-2">
-                  <Label className="font-bold text-muted-foreground">Preço Custo</Label>
-                  <Input value={formData.cost} onChange={e => handlePriceChange(e, 'cost')} className="rounded-xl border-primary/30 h-11 bg-card" />
+                  <Label className="font-bold text-muted-foreground">Preço Custo (Automático)</Label>
+                  <Input value={formData.cost} onChange={e => handlePriceChange(e, 'cost')} className="rounded-xl border-primary/30 h-11 bg-card bg-muted/20" placeholder="Calculado..." />
                 </div>
                 <div className="grid gap-2">
-                  <Label className="font-bold text-muted-foreground">Preço Revendedora</Label>
-                  <Input value={formData.resellerPrice} onChange={e => handlePriceChange(e, 'resellerPrice')} className="rounded-xl border-primary/30 h-11 bg-card" />
+                  <Label className="font-bold text-muted-foreground">Preço Revendedora (Final)</Label>
+                  <Input value={formData.resellerPrice} onChange={e => handlePriceChange(e, 'resellerPrice')} className="rounded-xl border-primary/30 h-11 bg-card border-emerald-500/30" placeholder="Seu valor..." />
                 </div>
               </div>
               <div className="grid gap-2">
