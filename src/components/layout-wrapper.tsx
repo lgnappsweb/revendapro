@@ -124,7 +124,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     return (
       <div className="flex h-svh w-screen flex-col items-center justify-center bg-background gap-4">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
-        <p className="font-black text-muted-foreground animate-pulse uppercase tracking-widest text-xs">RevendaPro</p>
+        <p className="font-black text-muted-foreground animate-pulse uppercase tracking-widest text-xs">RevendaPRO</p>
       </div>
     )
   }

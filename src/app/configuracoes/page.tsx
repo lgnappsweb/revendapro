@@ -53,7 +53,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (settings) {
-      setAppName(settings.appName || "RevendaPro")
+      setAppName(settings.appName || "RevendaPRO")
       setThemeId(settings.themeId || "default")
       setDarkMode(settings.darkMode || false)
       if (settings.customColor) setCustomColor(settings.customColor)

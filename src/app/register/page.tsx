@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -51,7 +52,7 @@ export default function RegisterPage() {
 
       toast({
         title: "Conta criada!",
-        description: "Bem-vinda ao RevendaPro.",
+        description: "Bem-vinda ao RevendaPRO.",
       })
       router.push("/")
     } catch (error: any) {
@@ -73,7 +74,7 @@ export default function RegisterPage() {
           <div className="inline-flex h-20 w-20 items-center justify-center rounded-3xl primary-gradient text-white shadow-xl mb-4">
             <Sparkles className="h-12 w-12" />
           </div>
-          <h1 className="text-5xl font-black tracking-tighter text-primary">RevendaPro</h1>
+          <h1 className="text-5xl font-black tracking-tighter text-primary">RevendaPRO</h1>
           <p className="text-muted-foreground font-medium">Sua jornada de sucesso começa aqui.</p>
         </div>
 

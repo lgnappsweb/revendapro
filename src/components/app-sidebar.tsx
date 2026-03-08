@@ -72,7 +72,7 @@ export function AppSidebar() {
     }
   }
 
-  const appName = settings?.appName || "RevendaPro"
+  const appName = settings?.appName || "RevendaPRO"
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
