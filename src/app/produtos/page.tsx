@@ -87,7 +87,7 @@ export default function ProductsPage() {
     const formatted = formatCurrencyInput(e.target.value);
     let newFormData = { ...formData, [field]: formatted };
     
-    // Se o preço de revista mudar, recalcula o custo automaticamente
+    // Se o preço de revista mudar, recalcula o custo automaticamente com base na marca
     if (field === 'price') {
       newFormData.cost = calculateCost(formatted, formData.brand);
     }

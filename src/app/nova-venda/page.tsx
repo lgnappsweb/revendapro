@@ -85,7 +85,6 @@ export default function NewSalePage() {
   const [isProductPickerOpen, setIsProductPickerOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [itemToRemove, setItemToRemove] = useState<CartItem | null>(null)
-  const [discount, setDiscount] = useState(0)
   const [showProfit, setShowProfit] = useState(true)
   
   const { toast } = useToast()
@@ -98,16 +97,18 @@ export default function NewSalePage() {
   const { data: dbProducts, isLoading: loadingProducts } = useCollection(productsRef)
   const { data: dbClients, isLoading: loadingClients } = useCollection(clientsRef)
 
+  // Subtotal é o que a revendedora cobra do cliente (Preço Revendedora)
   const subtotal = items.reduce((acc, item) => {
-    const price = item.useCost ? item.costPrice : item.magazinePrice
-    return acc + (price * item.qty)
+    return acc + (item.resellerPrice * item.qty)
   }, 0)
 
-  const total = Math.max(0, subtotal - discount)
-  
-  // Lucro baseado no que a consultora paga (cost) em relação ao que ela cobra (resellerPrice)
-  const totalConsultantCost = items.reduce((acc, item) => acc + (item.costPrice * item.qty), 0)
-  const profit = Math.max(0, total - totalConsultantCost)
+  // Custo é o que a consultora paga à marca
+  const totalCost = items.reduce((acc, item) => {
+    return acc + (item.costPrice * item.qty)
+  }, 0)
+
+  // Desconto (Sua Margem) é a diferença entre o que você cobra e o que você paga
+  const totalMargin = Math.max(0, subtotal - totalCost)
 
   const handleAddProductToCart = (product: any) => {
     const existingItem = items.find(i => i.id === product.id)
@@ -117,20 +118,15 @@ export default function NewSalePage() {
       setItems([...items, { 
         id: product.id, 
         name: product.name, 
-        // Usa o preço de revendedora definido como valor padrão de venda
-        magazinePrice: Number(product.resellerPrice || product.price || 0), 
+        magazinePrice: Number(product.price || 0), 
         costPrice: Number(product.cost || 0),
-        resellerPrice: Number(product.resellerPrice || 0),
+        resellerPrice: Number(product.resellerPrice || product.price || 0),
         useCost: false,
         qty: 1 
       }])
     }
     setIsProductPickerOpen(false)
     toast({ title: "Produto adicionado", description: product.name })
-  }
-
-  const toggleItemPriceMode = (id: string) => {
-    setItems(items.map(item => item.id === id ? { ...item, useCost: !item.useCost } : item))
   }
 
   const updateQty = (id: string, delta: number) => {
@@ -174,12 +170,13 @@ export default function NewSalePage() {
           productId: item.id,
           productName: item.name,
           quantity: item.qty,
-          unitPrice: item.useCost ? item.costPrice : item.magazinePrice,
-          subtotal: (item.useCost ? item.costPrice : item.magazinePrice) * item.qty,
+          unitPrice: item.resellerPrice,
+          costPrice: item.costPrice,
+          subtotal: item.resellerPrice * item.qty,
         })),
         total: subtotal,
-        discount,
-        finalTotal: total,
+        costTotal: totalCost,
+        profit: totalMargin,
         paymentMethod,
         paymentStatus: paymentMethod === 'fiado' ? 'Pendente' : 'Pago',
         createdAt: serverTimestamp()
@@ -259,12 +256,7 @@ export default function NewSalePage() {
                           <div className="flex flex-col min-w-0 flex-1">
                             <span className="font-bold text-lg truncate leading-tight">{item.name}</span>
                             <div className="flex items-center gap-2 mt-1">
-                               <button 
-                                 onClick={() => toggleItemPriceMode(item.id)}
-                                 className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md transition-colors ${item.useCost ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}
-                               >
-                                 {item.useCost ? 'PREÇO CUSTO' : 'PREÇO VENDA'}
-                               </button>
+                               <Badge variant="secondary" className="text-[9px] font-black tracking-widest bg-blue-50 text-blue-700 border-none uppercase">Preço Revendedora</Badge>
                             </div>
                           </div>
                           <Button 
@@ -284,7 +276,7 @@ export default function NewSalePage() {
                             <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => updateQty(item.id, 1)}><Plus className="h-4 w-4" /></Button>
                           </div>
                           <span className="font-black text-xl text-primary">
-                            R$ {((item.useCost ? item.costPrice : item.magazinePrice) * item.qty).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                            R$ {(item.resellerPrice * item.qty).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                           </span>
                         </div>
                       </div>
@@ -379,28 +371,23 @@ export default function NewSalePage() {
           <div className="lg:col-span-2 space-y-6">
             <Card className="shadow-lg rounded-[2.5rem] overflow-hidden primary-gradient text-white border-none sticky top-24">
               <CardHeader className="p-8 pb-4">
-                <CardTitle className="text-xl font-black uppercase tracking-tight">Resumo do Pedido</CardTitle>
+                <CardTitle className="text-xl font-black uppercase tracking-tight">Resumo Financeiro</CardTitle>
               </CardHeader>
               <CardContent className="p-8 pt-0 space-y-6">
                 <div className="space-y-4">
                   <div className="flex justify-between items-center opacity-80 font-bold">
-                    <span className="text-sm">Subtotal</span>
+                    <span className="text-sm">Subtotal (Venda)</span>
                     <span>R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                   </div>
                   
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex flex-col">
-                      <span className="opacity-80 font-bold text-sm">Desconto</span>
+                      <span className="opacity-80 font-bold text-sm">Desconto (Sua Margem)</span>
+                      <span className="text-[10px] font-black text-pink-200 uppercase tracking-widest">Diferença entre custo e venda</span>
                     </div>
-                    <div className="relative w-32">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 font-black text-sm text-primary">R$</span>
-                      <Input 
-                        type="number" 
-                        value={discount}
-                        onChange={(e) => setDiscount(Number(e.target.value))}
-                        className="h-10 pl-10 rounded-xl bg-white/20 border-none text-white font-black placeholder:text-white/50 text-right focus-visible:ring-white/30" 
-                      />
-                    </div>
+                    <span className="font-black text-lg">
+                      R$ {totalMargin.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </span>
                   </div>
 
                   <Separator className="bg-white/20" />
@@ -424,15 +411,15 @@ export default function NewSalePage() {
                          <span className="text-[10px] font-black uppercase tracking-widest text-emerald-100">Ganhos Reais</span>
                       </div>
                       <span className="font-black text-emerald-300 text-lg">
-                        + R$ {profit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        + R$ {totalMargin.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </span>
                     </div>
                   )}
                 </div>
 
                 <div className="space-y-1 mt-6">
-                  <span className="text-[10px] font-black uppercase tracking-widest opacity-80">Total Final (Cliente)</span>
-                  <div className="text-5xl font-black tracking-tighter">R$ {total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                  <span className="text-[10px] font-black uppercase tracking-widest opacity-80">Total a Pagar (Marca)</span>
+                  <div className="text-5xl font-black tracking-tighter">R$ {totalCost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
                 </div>
 
                 <Button 

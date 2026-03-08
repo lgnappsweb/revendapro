@@ -262,6 +262,12 @@ export default function CategoriesPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
+            <Accordion type="single" collapsible className="w-full sm:hidden mb-4">
+              <AccordionItem value="item-1" className="border-none">
+                <AccordionTrigger className="text-xs font-bold text-muted-foreground hover:no-underline">Ver detalhes da categoria</AccordionTrigger>
+                <AccordionContent className="text-xs text-muted-foreground">A exclusão removerá apenas a categoria, os produtos vinculados precisarão ser re-categorizados.</AccordionContent>
+              </AccordionItem>
+            </Accordion>
             <AlertDialogCancel className="rounded-xl font-bold">Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteConfirm} className="rounded-xl font-bold bg-rose-600">
               Confirmar
