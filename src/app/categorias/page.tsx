@@ -282,6 +282,7 @@ export default function CategoriesPage() {
                       {SUGGESTED_CATEGORIES.map(cat => (
                         <Button 
                           key={cat}
+                          type="button"
                           variant="outline"
                           size="sm"
                           className="rounded-xl border-primary/20 hover:border-primary hover:bg-primary/5 text-xs font-bold h-10 px-2 justify-start"
