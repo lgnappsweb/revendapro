@@ -151,30 +151,32 @@ export default function FinancePage() {
             <p className="text-muted-foreground font-medium text-lg text-center">Controle total de entradas, pendentes e lucros.</p>
           </div>
           
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-2xl px-4">
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <CalendarDays className="h-5 w-5 text-primary" />
+          <div className="flex flex-col items-center justify-center gap-6 w-full max-w-2xl px-4">
+            {/* Seletor de Período em cima */}
+            <div className="flex items-center gap-2 w-full max-w-sm">
+              <CalendarDays className="h-5 w-5 text-primary shrink-0" />
               <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-                <SelectTrigger className="w-full sm:w-[200px] rounded-xl font-bold border-primary/20 bg-white">
+                <SelectTrigger className="w-full rounded-xl font-bold border-primary/20 bg-white h-12">
                   <SelectValue placeholder="Período" />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl font-bold">
-                  <SelectItem value="hoje">Hoje ({format(new Date(), 'dd/MM')})</SelectItem>
-                  <SelectItem value="mes">Este Mês</SelectItem>
+                  <SelectItem value="hoje">Hoje ({format(new Date(), 'dd/MM/yyyy')})</SelectItem>
+                  <SelectItem value="mes">Este Mês ({format(new Date(), 'MMMM', { locale: ptBR })})</SelectItem>
                   <SelectItem value="todos">Todo o Período</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="flex items-center gap-4 w-full sm:w-auto justify-center">
-              <Button onClick={exportData} variant="outline" className="rounded-xl font-bold h-12 border-primary text-primary hover:bg-primary/5 transition-all px-6">
-                <Download className="mr-2 h-5 w-5" /> Exportar
+            {/* Botões lado a lado em baixo */}
+            <div className="flex items-center gap-3 w-full max-w-sm">
+              <Button onClick={exportData} variant="outline" className="flex-1 rounded-xl font-bold h-12 border-primary text-primary hover:bg-primary/5 transition-all px-2 text-xs sm:text-sm">
+                <Download className="mr-1 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Exportar
               </Button>
               
               <Dialog open={isRegisterOpen} onOpenChange={setIsRegisterOpen}>
                 <DialogTrigger asChild>
-                  <Button className="rounded-xl font-bold primary-gradient hover:opacity-90 h-12 px-8 shadow-lg transition-all active:scale-95">
-                    <Plus className="mr-2 h-5 w-5" /> Registrar Entrada
+                  <Button className="flex-1 rounded-xl font-bold primary-gradient hover:opacity-90 h-12 px-2 shadow-lg transition-all active:scale-95 text-xs sm:text-sm">
+                    <Plus className="mr-1 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Registrar Entrada
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[500px] w-[95vw] rounded-3xl border-primary overflow-hidden p-0 flex flex-col max-h-[85vh]">
