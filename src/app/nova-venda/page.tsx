@@ -75,7 +75,7 @@ export default function NewSalePage() {
     <LayoutWrapper>
       <div className="flex flex-col gap-6">
         <div className="space-y-1 text-center py-4">
-          <h1 className="text-4xl font-black tracking-tight text-primary">Nova Venda</h1>
+          <h1 className="text-5xl font-black tracking-tight text-primary">Nova Venda</h1>
           <p className="text-muted-foreground font-medium">Registre uma nova venda de forma rápida e organizada.</p>
         </div>
 
