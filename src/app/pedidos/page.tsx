@@ -31,7 +31,8 @@ import {
   Package,
   Calendar,
   Clock,
-  User
+  User,
+  Info
 } from "lucide-react"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
 import { collection, query, orderBy } from "firebase/firestore"
@@ -59,6 +60,15 @@ export default function OrdersPage() {
     order.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     order.id.toLowerCase().includes(searchTerm.toLowerCase())
   ) || []
+
+  const getMethodIcon = (method: string) => {
+    switch (method?.toLowerCase()) {
+      case 'pix': return <Smartphone className="h-4 w-4" />
+      case 'cartao': return <CreditCard className="h-4 w-4" />
+      case 'dinheiro': return <Banknote className="h-4 w-4" />
+      default: return <AlertTriangle className="h-4 w-4" />
+    }
+  }
 
   return (
     <LayoutWrapper>
@@ -232,17 +242,20 @@ export default function OrdersPage() {
 
                 <div className="bg-card p-5 rounded-2xl border border-primary/10 shadow-sm space-y-4">
                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <CreditCard className="h-4 w-4" />
+                      <Info className="h-4 w-4" />
                       <span className="text-[10px] font-black uppercase tracking-widest">Informações de Pagamento</span>
                    </div>
                    <div className="grid grid-cols-2 gap-4">
-                      <div className="flex flex-col">
+                      <div className="flex flex-col gap-1">
                          <span className="text-[9px] font-bold text-muted-foreground uppercase">Método</span>
-                         <span className="font-black uppercase text-xs">{selectedOrder.paymentMethod || 'N/A'}</span>
+                         <div className="flex items-center gap-2">
+                           <div className="p-1.5 bg-primary/5 rounded-lg text-primary">{getMethodIcon(selectedOrder.paymentMethod)}</div>
+                           <span className="font-black uppercase text-xs">{selectedOrder.paymentMethod || 'N/A'}</span>
+                         </div>
                       </div>
-                      <div className="flex flex-col text-right">
+                      <div className="flex flex-col text-right gap-1">
                          <span className="text-[9px] font-bold text-muted-foreground uppercase">Status</span>
-                         <span className={`font-black uppercase text-xs ${selectedOrder.paymentStatus === 'Pago' ? 'text-emerald-500' : 'text-amber-500'}`}>
+                         <span className={`font-black uppercase text-xs px-2 py-1 rounded-lg w-fit ml-auto ${selectedOrder.paymentStatus === 'Pago' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
                            {selectedOrder.paymentStatus}
                          </span>
                       </div>

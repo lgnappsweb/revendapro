@@ -12,7 +12,9 @@ import {
   Loader2,
   PackageSearch,
   ShoppingBag,
-  Pencil
+  Pencil,
+  Tag,
+  Hash
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -35,6 +37,7 @@ import {
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
 import { collection, serverTimestamp, addDoc, doc, updateDoc, query, orderBy } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
+import { Separator } from "@/components/ui/separator"
 
 export default function ProductsPage() {
   const [activeTab, setActiveTab] = useState("todos")
@@ -208,6 +211,23 @@ export default function ProductsPage() {
               </div>
 
               <div className="flex-1 overflow-y-auto bg-background p-6 space-y-6">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-card p-4 rounded-2xl border border-primary/10 shadow-sm flex items-center gap-3">
+                    <div className="p-2 bg-primary/5 rounded-lg text-primary"><Tag className="h-4 w-4" /></div>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Marca</span>
+                      <span className="text-sm font-bold">{selectedProduct.brand}</span>
+                    </div>
+                  </div>
+                  <div className="bg-card p-4 rounded-2xl border border-primary/10 shadow-sm flex items-center gap-3">
+                    <div className="p-2 bg-primary/5 rounded-lg text-primary"><Hash className="h-4 w-4" /></div>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Código</span>
+                      <span className="text-sm font-bold">{selectedProduct.code || "S/ REF"}</span>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-card p-4 rounded-2xl border border-primary/10 shadow-sm flex flex-col">
                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider mb-1">Preço Revista</span>
@@ -218,10 +238,14 @@ export default function ProductsPage() {
                     <span className="text-xl font-black text-emerald-600">R$ {Number(selectedProduct.cost || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                   </div>
                 </div>
-                <div className="bg-card p-4 rounded-xl border border-primary/5 min-h-[80px]">
-                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap font-medium">
-                    {selectedProduct.description || "Sem descrição."}
-                  </p>
+
+                <div className="space-y-2">
+                  <Label className="font-bold text-muted-foreground ml-1">Descrição</Label>
+                  <div className="bg-card p-4 rounded-xl border border-primary/5 min-h-[100px]">
+                    <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap font-medium">
+                      {selectedProduct.description || "Sem descrição cadastrada."}
+                    </p>
+                  </div>
                 </div>
               </div>
 
