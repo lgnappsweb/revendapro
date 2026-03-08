@@ -11,14 +11,14 @@ import {
   AlertCircle,
   Download,
   ArrowUpRight,
-  ArrowDownRight,
   Plus,
   Loader2,
   CheckCircle2,
   Search,
-  ChevronRight,
   Sparkles,
-  CalendarDays
+  CalendarDays,
+  MessageSquare,
+  FileText
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -45,6 +45,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export default function FinancePage() {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false)
@@ -55,7 +61,6 @@ export default function FinancePage() {
   const { toast } = useToast()
   const db = useFirestore()
 
-  // Evita erros de hidratação garantindo que a data só seja definida no cliente
   useEffect(() => {
     setCurrentDate(new Date())
   }, [])
@@ -66,7 +71,6 @@ export default function FinancePage() {
   )
   const { data: orders, isLoading } = useCollection(ordersRef)
 
-  // Labels formatadas para o seletor
   const todayLabel = useMemo(() => {
     if (!currentDate) return "Carregando..."
     const day = format(currentDate, 'dd')
@@ -84,7 +88,6 @@ export default function FinancePage() {
     return `${capitalizedMonth}/ ${year}`
   }, [currentDate])
 
-  // Filtro de ordens pelo período selecionado
   const filteredOrdersByPeriod = useMemo(() => {
     if (!orders || !currentDate) return []
     
@@ -99,7 +102,7 @@ export default function FinancePage() {
       if (selectedPeriod === "mes") {
         return isSameMonth(orderDate, currentDate) && isSameYear(orderDate, currentDate)
       }
-      return true // "todos"
+      return true
     })
   }, [orders, selectedPeriod, currentDate])
 
@@ -116,7 +119,6 @@ export default function FinancePage() {
     return dDate < currentDate
   }).reduce((acc, o) => acc + (o.finalTotal || 0), 0) || 0
 
-  // Filtro para o diálogo de registrar entrada
   const ordersToReceive = orders?.filter(o => o.paymentStatus === 'Pendente' && (
     o.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     o.id.toLowerCase().includes(searchTerm.toLowerCase())
@@ -146,11 +148,107 @@ export default function FinancePage() {
     }
   }
 
-  const exportData = () => {
-    toast({
-      title: "Exportação iniciada",
-      description: "Seu relatório financeiro está sendo gerado."
+  const exportToWhatsApp = () => {
+    const periodName = selectedPeriod === "hoje" ? todayLabel : selectedPeriod === "mes" ? monthLabel : "Todo o Período"
+    
+    let message = `*Relatório Financeiro - RevendaPro*\n`
+    message += `*Período:* ${periodName}\n\n`
+    message += `💰 *Saldo Recebido:* R$ ${totalReceived.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}\n`
+    message += `⏳ *Contas a Receber:* R$ ${totalPending.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}\n`
+    message += `⚠️ *Total Vencido:* R$ ${totalOverdue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}\n`
+    message += `📈 *Faturamento:* R$ ${(totalReceived + totalPending).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}\n\n`
+    
+    message += `*Fluxo de Caixa (Últimos registros):*\n`
+    filteredOrdersByPeriod.slice(0, 10).forEach(order => {
+      const status = order.paymentStatus === 'Pago' ? '✅' : '⏳'
+      message += `${status} ${order.clientName}: R$ ${order.finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}\n`
     })
+    
+    if (filteredOrdersByPeriod.length > 10) {
+      message += `... e mais ${filteredOrdersByPeriod.length - 10} registros.`
+    }
+
+    const encodedMessage = encodeURIComponent(message)
+    window.open(`https://wa.me/?text=${encodedMessage}`, '_blank')
+  }
+
+  const exportToPDF = async () => {
+    try {
+      const { default: jsPDF } = await import('jspdf')
+      const { default: autoTable } = await import('jspdf-autotable')
+      
+      const doc = new jsPDF()
+      const periodName = selectedPeriod === "hoje" ? todayLabel : selectedPeriod === "mes" ? monthLabel : "Todo o Período"
+      
+      // Cabeçalho Profissional
+      doc.setFillColor(194, 24, 91) // Cor Primária RGB (C2185B aproximado)
+      doc.rect(0, 0, 210, 45, 'F')
+      doc.setTextColor(255, 255, 255)
+      doc.setFontSize(28)
+      doc.text('REVENDAPRO', 105, 25, { align: 'center' })
+      doc.setFontSize(12)
+      doc.text('Gestão Profissional para Consultoras', 105, 35, { align: 'center' })
+      
+      // Info do Relatório
+      doc.setTextColor(40, 40, 40)
+      doc.setFontSize(14)
+      doc.text('RELATÓRIO FINANCEIRO DETALHADO', 14, 55)
+      doc.setFontSize(10)
+      doc.text(`Período Selecionado: ${periodName}`, 14, 62)
+      doc.text(`Data de Geração: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}`, 14, 67)
+      
+      // Tabela de Resumo
+      autoTable(doc, {
+        startY: 75,
+        head: [['Indicador Financeiro', 'Valor']],
+        body: [
+          ['Saldo Recebido (Pagos)', `R$ ${totalReceived.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`],
+          ['Contas a Receber (Pendentes)', `R$ ${totalPending.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`],
+          ['Total Vencido', `R$ ${totalOverdue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`],
+          ['Faturamento Bruto Total', `R$ ${(totalReceived + totalPending).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`],
+        ],
+        headStyles: { fillColor: [194, 24, 91], textColor: [255, 255, 255], fontStyle: 'bold' },
+        styles: { fontSize: 10, cellPadding: 5 },
+        theme: 'grid'
+      })
+      
+      // Tabela de Transações
+      doc.setFontSize(12)
+      doc.text('DETALHAMENTO DO FLUXO DE CAIXA', 14, (doc as any).lastAutoTable.finalY + 15)
+      
+      autoTable(doc, {
+        startY: (doc as any).lastAutoTable.finalY + 20,
+        head: [['Data', 'Cliente', 'Status', 'Valor']],
+        body: filteredOrdersByPeriod.map(order => [
+          order.createdAt ? format(new Date(order.createdAt.seconds * 1000), "dd/MM/yyyy") : '---',
+          order.clientName,
+          order.paymentStatus === 'Pago' ? 'CONFIRMADO' : 'PENDENTE',
+          `R$ ${order.finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+        ]),
+        headStyles: { fillColor: [194, 24, 91], textColor: [255, 255, 255] },
+        alternateRowStyles: { fillColor: [250, 250, 250] },
+        styles: { fontSize: 9 },
+        columnStyles: {
+          3: { halign: 'right', fontStyle: 'bold' }
+        },
+        theme: 'striped'
+      })
+      
+      const fileName = `relatorio-revendapro-${selectedPeriod}-${format(new Date(), 'ddMMyy')}.pdf`
+      doc.save(fileName)
+      
+      toast({
+        title: "Relatório Gerado",
+        description: "O seu PDF profissional foi baixado com sucesso."
+      })
+    } catch (e) {
+      console.error(e)
+      toast({
+        variant: "destructive",
+        title: "Erro ao exportar",
+        description: "Não foi possível gerar o arquivo PDF."
+      })
+    }
   }
 
   const stats = [
@@ -187,9 +285,21 @@ export default function FinancePage() {
             </div>
 
             <div className="flex items-center gap-3 w-full max-w-sm">
-              <Button onClick={exportData} variant="outline" className="flex-1 rounded-xl font-bold h-12 border-primary text-primary hover:bg-primary/5 transition-all px-2 text-xs sm:text-sm">
-                <Download className="mr-1 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Exportar
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="flex-1 rounded-xl font-bold h-12 border-primary text-primary hover:bg-primary/5 transition-all px-2 text-xs sm:text-sm">
+                    <Download className="mr-1 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Exportar
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="rounded-xl font-bold">
+                  <DropdownMenuItem onClick={exportToWhatsApp} className="gap-2 cursor-pointer">
+                    <MessageSquare className="h-4 w-4 text-emerald-600" /> Exportar WhatsApp (Texto)
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={exportToPDF} className="gap-2 cursor-pointer">
+                    <FileText className="h-4 w-4 text-primary" /> Exportar PDF Profissional
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               
               <Dialog open={isRegisterOpen} onOpenChange={setIsRegisterOpen}>
                 <DialogTrigger asChild>
@@ -372,7 +482,7 @@ function TransactionList({ transactions }: { transactions: any[] }) {
 
   return (
     <div className="divide-y divide-primary/5">
-      {transactions.map((item, i) => (
+      {transactions.map((item) => (
         <div key={item.id} className="flex items-center justify-between p-6 hover:bg-secondary/10 transition-colors group cursor-pointer">
           <div className="flex items-center gap-4 min-w-0">
             <div className={`p-3 rounded-2xl shrink-0 ${
