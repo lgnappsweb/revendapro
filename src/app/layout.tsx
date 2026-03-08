@@ -17,8 +17,8 @@ export const metadata: Metadata = {
   description: 'Aplicativo profissional para revendedoras Avon e Natura.',
   manifest: '/manifest.json',
   icons: {
-    icon: 'https://picsum.photos/seed/revendapro-brand/32/32',
-    apple: 'https://picsum.photos/seed/revendapro-brand/180/180',
+    icon: '/icon-192x192.png',
+    apple: '/icon-192x192.png',
   },
   appleWebApp: {
     capable: true,
