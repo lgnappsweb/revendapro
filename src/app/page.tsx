@@ -1,3 +1,4 @@
+
 "use client"
 
 import { LayoutWrapper } from "@/components/layout-wrapper"
@@ -5,12 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { 
   TrendingUp, 
   Users, 
-  Package, 
   Clock, 
   ArrowUpRight, 
   MoreHorizontal,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Search
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -22,6 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { Input } from "@/components/ui/input"
 
 const stats = [
   {
@@ -101,9 +103,19 @@ export default function Dashboard() {
   return (
     <LayoutWrapper>
       <div className="flex flex-col gap-6">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Olá, Bem-vinda! 👋</h1>
-          <p className="text-muted-foreground font-medium">Aqui está o resumo da sua revenda hoje.</p>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Olá, Bem-vinda! 👋</h1>
+            <p className="text-muted-foreground font-medium">Aqui está o resumo da sua revenda hoje.</p>
+          </div>
+          
+          <div className="relative w-full max-w-2xl">
+            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+            <Input 
+              placeholder="Pesquisar pedidos, clientes ou metas..." 
+              className="h-12 pl-10 rounded-2xl border-none shadow-sm bg-white"
+            />
+          </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

@@ -5,7 +5,8 @@ import * as React from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { signOut } from "firebase/auth"
-import { useAuth } from "@/firebase"
+import { useAuth, useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase"
+import { doc } from "firebase/firestore"
 import {
   LayoutDashboard,
   Users,
@@ -28,6 +29,7 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from "@/components/ui/sidebar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 const mainNav = [
   { title: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -41,7 +43,16 @@ const mainNav = [
 export function AppSidebar() {
   const pathname = usePathname()
   const auth = useAuth()
+  const { user } = useUser()
+  const db = useFirestore()
   const router = useRouter()
+
+  const userDocRef = useMemoFirebase(() => {
+    if (!user) return null
+    return doc(db, "users", user.uid)
+  }, [user, db])
+
+  const { data: userProfile } = useDoc(userDocRef)
 
   const handleLogout = async () => {
     try {
@@ -104,7 +115,23 @@ export function AppSidebar() {
           ))}
         </SidebarMenu>
       </SidebarContent>
-      <SidebarFooter className="p-4">
+      <SidebarFooter className="p-4 space-y-4">
+        <div className="flex items-center gap-3 px-2 py-2 group-data-[collapsible=icon]:justify-center">
+          <Avatar className="h-9 w-9 border-2 border-primary/10 shrink-0">
+            <AvatarImage src={user?.photoURL || "https://picsum.photos/seed/user/100/100"} />
+            <AvatarFallback className="bg-primary text-white">
+              {(userProfile?.name || user?.displayName || "AD").substring(0, 2).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col min-w-0 group-data-[collapsible=icon]:hidden">
+            <span className="text-sm font-bold truncate">
+              {userProfile?.name || user?.displayName || "Administradora"}
+            </span>
+            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+              Admin
+            </span>
+          </div>
+        </div>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton 
