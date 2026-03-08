@@ -60,7 +60,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger } from "@/tabs"
 
 interface CartItem {
   id: string
@@ -100,7 +100,6 @@ export default function NewSalePage() {
 
   const total = Math.max(0, subtotal - discount)
   
-  // Cálculo do Custo Total e Lucro (Valor da Revendedora)
   const totalCost = items.reduce((acc, item) => acc + (item.costPrice * item.qty), 0)
   const profit = Math.max(0, total - totalCost)
 
@@ -192,17 +191,18 @@ export default function NewSalePage() {
     return matchesSearch && matchesBrand
   }) || []
 
+  const totalItemsCount = items.reduce((acc, item) => acc + item.qty, 0)
+  const selectedClientName = dbClients?.find(c => c.id === selectedClientId)?.name || "cliente não selecionado"
+
   return (
     <LayoutWrapper>
       <div className="flex flex-col gap-8 w-full max-w-full overflow-x-hidden">
-        <div className="flex flex-col gap-6 items-center text-center">
-          <div className="flex flex-col gap-2">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-primary uppercase text-center">Nova Venda</h1>
-            <p className="text-muted-foreground font-medium text-lg">Registre um novo pedido para seus clientes.</p>
-          </div>
+        <div className="flex flex-col gap-2 items-center text-center">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-primary uppercase">Nova Venda</h1>
+          <p className="text-muted-foreground font-medium text-lg">Registre um novo pedido para seus clientes.</p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-5 px-1">
+        <div className="grid gap-6 lg:grid-cols-5 px-1 pb-20">
           <div className="lg:col-span-3 space-y-6">
             <Card className="shadow-sm rounded-[2.5rem] overflow-hidden border-primary/20">
               <CardHeader className="bg-primary/5 border-b px-8 py-6">
@@ -309,6 +309,23 @@ export default function NewSalePage() {
                         <span className="text-[10px] font-black uppercase tracking-widest">{method.label}</span>
                      </button>
                    ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-sm rounded-[2.5rem] overflow-hidden border-primary/20 bg-primary/5 border-dashed">
+              <CardContent className="p-8 flex items-center gap-6">
+                <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <CheckCircle2 className="h-8 w-8 text-primary" />
+                </div>
+                <div className="flex flex-col">
+                  <h3 className="text-lg font-black text-primary uppercase tracking-tight">Check-in do Pedido</h3>
+                  <p className="text-sm text-muted-foreground font-medium">
+                    {items.length === 0 
+                      ? "Aguardando adição de produtos para confirmar os dados da venda." 
+                      : `Você está registrando um pedido de ${totalItemsCount} ${totalItemsCount === 1 ? 'item' : 'itens'} para ${selectedClientId ? selectedClientName : 'o cliente selecionado'}.`
+                    }
+                  </p>
                 </div>
               </CardContent>
             </Card>
