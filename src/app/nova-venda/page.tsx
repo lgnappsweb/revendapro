@@ -44,6 +44,7 @@ import {
   DialogTrigger 
 } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 interface CartItem {
   id: string
@@ -57,6 +58,7 @@ export default function NewSalePage() {
   const [paymentMethod, setPaymentMethod] = useState<string>("")
   const [selectedClientId, setSelectedClientId] = useState<string>("")
   const [productSearch, setProductSearch] = useState("")
+  const [dialogActiveTab, setDialogActiveTab] = useState("todos")
   const [isProductPickerOpen, setIsProductPickerOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   
@@ -159,10 +161,18 @@ export default function NewSalePage() {
     }
   }
 
-  const filteredProducts = dbProducts?.filter(p => 
-    p.name.toLowerCase().includes(productSearch.toLowerCase()) ||
-    p.code?.toLowerCase().includes(productSearch.toLowerCase())
-  ) || []
+  const filteredProducts = dbProducts?.filter(p => {
+    const name = p.name || ""
+    const code = p.code || ""
+    const brand = p.brand || ""
+    
+    const matchesSearch = name.toLowerCase().includes(productSearch.toLowerCase()) ||
+                         code.toLowerCase().includes(productSearch.toLowerCase())
+    
+    const matchesBrand = dialogActiveTab === "todos" || brand.toLowerCase() === dialogActiveTab.toLowerCase()
+    
+    return matchesSearch && matchesBrand
+  }) || []
 
   return (
     <LayoutWrapper>
@@ -222,7 +232,7 @@ export default function NewSalePage() {
                           <DialogTitle className="text-2xl font-black text-primary uppercase text-center">Selecionar Produto</DialogTitle>
                         </DialogHeader>
                         
-                        <div className="px-6 py-4">
+                        <div className="px-6 py-4 space-y-4">
                           <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input 
@@ -232,6 +242,14 @@ export default function NewSalePage() {
                               onChange={(e) => setProductSearch(e.target.value)}
                             />
                           </div>
+
+                          <Tabs defaultValue="todos" className="w-full" onValueChange={setDialogActiveTab}>
+                            <TabsList className="w-full bg-muted/30 rounded-xl h-10 p-1">
+                              <TabsTrigger value="todos" className="flex-1 rounded-lg font-bold text-xs data-[state=active]:bg-primary data-[state=active]:text-white">Todos</TabsTrigger>
+                              <TabsTrigger value="natura" className="flex-1 rounded-lg font-bold text-xs data-[state=active]:bg-[#FF6A13] data-[state=active]:text-white">Natura</TabsTrigger>
+                              <TabsTrigger value="avon" className="flex-1 rounded-lg font-bold text-xs data-[state=active]:bg-[#622D91] data-[state=active]:text-white">Avon</TabsTrigger>
+                            </TabsList>
+                          </Tabs>
                         </div>
 
                         <ScrollArea className="flex-1 px-6 pb-6">
@@ -243,7 +261,7 @@ export default function NewSalePage() {
                             ) : filteredProducts.length === 0 ? (
                               <div className="text-center py-10">
                                 <Package className="h-10 w-10 text-muted-foreground/30 mx-auto mb-2" />
-                                <p className="text-sm font-medium text-muted-foreground">Nenhum produto cadastrado.</p>
+                                <p className="text-sm font-medium text-muted-foreground">Nenhum produto encontrado.</p>
                               </div>
                             ) : (
                               filteredProducts.map(product => (
