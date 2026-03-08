@@ -108,10 +108,18 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       }
       
       root.style.setProperty('--primary', primaryColorValue);
+
+      // Apply background color if not in dark mode
+      if (settings.customBgColor && !settings.darkMode) {
+        root.style.setProperty('--background', hexToHsl(settings.customBgColor));
+      } else if (!settings.darkMode) {
+        root.style.setProperty('--background', "340 20% 95%"); // Default HSL background
+      }
       
       // Apply dark mode
       if (settings.darkMode) {
         root.classList.add('dark');
+        root.style.setProperty('--background', "222.2 84% 4.9%"); // Shadcn dark background
       } else {
         root.classList.remove('dark');
       }
@@ -142,7 +150,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#FDFBFB] dark:bg-slate-950 overflow-x-hidden">
+    <div className="flex min-h-screen bg-background transition-colors duration-500 overflow-x-hidden">
       <div className="hidden md:block shrink-0">
         <AppSidebar />
       </div>

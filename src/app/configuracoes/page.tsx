@@ -17,7 +17,9 @@ import {
   Save, 
   Loader2,
   Brush,
-  Type
+  Type,
+  Pipette,
+  Layout
 } from "lucide-react"
 import { useFirestore, useDoc, useMemoFirebase } from "@/firebase"
 import { doc, setDoc, serverTimestamp } from "firebase/firestore"
@@ -41,6 +43,7 @@ export default function SettingsPage() {
   const [appName, setAppName] = useState("")
   const [themeId, setThemeId] = useState("default")
   const [customColor, setCustomColor] = useState("#C2185B")
+  const [customBgColor, setCustomBgColor] = useState("#FDFBFB")
   const [darkMode, setDarkMode] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
@@ -49,9 +52,8 @@ export default function SettingsPage() {
       setAppName(settings.appName || "RevendaPro")
       setThemeId(settings.themeId || "default")
       setDarkMode(settings.darkMode || false)
-      if (settings.customColor) {
-        setCustomColor(settings.customColor)
-      }
+      if (settings.customColor) setCustomColor(settings.customColor)
+      if (settings.customBgColor) setCustomBgColor(settings.customBgColor)
     }
   }, [settings])
 
@@ -62,6 +64,7 @@ export default function SettingsPage() {
         appName,
         themeId,
         customColor,
+        customBgColor,
         darkMode,
         updatedAt: serverTimestamp()
       }, { merge: true })
@@ -105,18 +108,18 @@ export default function SettingsPage() {
             <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-primary uppercase">
               Configurações
             </h1>
-            <p className="text-muted-foreground font-medium text-lg">Personalize a identidade visual e o comportamento do seu app.</p>
+            <p className="text-muted-foreground font-medium text-lg">Personalize cada detalhe da sua ferramenta de trabalho.</p>
           </div>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-2 px-1 pb-20">
           <div className="space-y-8">
+            {/* Seção Geral */}
             <Card className="rounded-[2.5rem] border-primary/20 bg-white shadow-sm overflow-hidden">
               <CardHeader className="bg-primary/5 border-b px-8 py-6">
                 <CardTitle className="text-xl font-black text-primary flex items-center gap-2">
                   <Type className="h-6 w-6" /> Geral
                 </CardTitle>
-                <CardDescription className="font-medium">Identidade básica do seu aplicativo.</CardDescription>
               </CardHeader>
               <CardContent className="p-8 space-y-6">
                 <div className="space-y-2">
@@ -132,79 +135,125 @@ export default function SettingsPage() {
               </CardContent>
             </Card>
 
+            {/* Seção de Cores Principal */}
             <Card className="rounded-[2.5rem] border-primary/20 bg-white shadow-sm overflow-hidden">
               <CardHeader className="bg-primary/5 border-b px-8 py-6">
                 <CardTitle className="text-xl font-black text-primary flex items-center gap-2">
-                  <Palette className="h-6 w-6" /> Aparência
+                  <Palette className="h-6 w-6" /> Cor Principal
                 </CardTitle>
-                <CardDescription className="font-medium">Escolha as cores e o modo de exibição.</CardDescription>
+                <CardDescription className="font-medium">Define a cor dos botões e ícones principais.</CardDescription>
               </CardHeader>
               <CardContent className="p-8 space-y-8">
-                <div className="flex items-center justify-between bg-secondary/20 p-4 rounded-2xl border border-primary/10">
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-2">
-                      {darkMode ? <Moon className="h-5 w-5 text-primary" /> : <Sun className="h-5 w-5 text-amber-500" />}
-                      <span className="font-bold">Modo Escuro</span>
-                    </div>
-                  </div>
-                  <Switch 
-                    checked={darkMode}
-                    onCheckedChange={setDarkMode}
-                  />
-                </div>
-
                 <div className="space-y-4">
                   <Label className="font-bold text-muted-foreground ml-1 flex items-center gap-2">
-                    <Brush className="h-4 w-4" /> Cor Principal do Sistema
+                    Temas Padrão
                   </Label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {COLOR_THEMES.map((theme) => (
                       <button
                         key={theme.id}
                         onClick={() => setThemeId(theme.id)}
-                        className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all text-left ${
+                        className={`flex flex-col items-center gap-2 p-3 rounded-2xl border-2 transition-all ${
                           themeId === theme.id 
                           ? "border-primary bg-primary/5 shadow-md" 
-                          : "border-transparent bg-white hover:border-primary/30"
+                          : "border-transparent bg-muted/20 hover:border-primary/30"
                         }`}
                       >
                         <div className={`h-8 w-8 rounded-full shadow-inner ${theme.preview}`} />
-                        <span className={`font-bold text-sm ${themeId === theme.id ? "text-primary" : "text-foreground"}`}>
+                        <span className={`font-bold text-[10px] uppercase tracking-wider ${themeId === theme.id ? "text-primary" : "text-muted-foreground"}`}>
                           {theme.name}
                         </span>
-                        {themeId === theme.id && <Check className="ml-auto h-5 w-5 text-primary" />}
                       </button>
                     ))}
+                  </div>
+                </div>
 
-                    <div
-                      onClick={() => setThemeId("custom")}
-                      className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all text-left cursor-pointer ${
-                        themeId === "custom" 
-                        ? "border-primary bg-primary/5 shadow-md" 
-                        : "border-transparent bg-white hover:border-primary/30"
-                      }`}
+                <div className="space-y-4 pt-4 border-t">
+                  <Label className="font-bold text-muted-foreground ml-1 flex items-center gap-2">
+                    <Pipette className="h-4 w-4" /> Customizar Cor Principal
+                  </Label>
+                  <div className="flex items-center gap-4 p-4 rounded-2xl bg-secondary/20 border border-primary/10">
+                    <div 
+                      className="h-12 w-12 rounded-xl shadow-inner border border-black/10 flex items-center justify-center overflow-hidden shrink-0" 
+                      style={{ backgroundColor: customColor }}
                     >
-                      <div 
-                        className="h-8 w-8 rounded-full shadow-inner border border-black/10 flex items-center justify-center overflow-hidden" 
-                        style={{ backgroundColor: customColor }}
-                      >
-                         <input 
-                           type="color" 
-                           value={customColor}
-                           onChange={(e) => {
-                             setCustomColor(e.target.value)
-                             setThemeId("custom")
-                           }}
-                           className="w-16 h-16 shrink-0 cursor-pointer border-none p-0 bg-transparent"
-                         />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className={`font-bold text-sm ${themeId === "custom" ? "text-primary" : "text-foreground"}`}>
-                          Cor Personalizada
-                        </span>
-                        <span className="text-[10px] text-muted-foreground font-medium">Clique no círculo para escolher</span>
-                      </div>
-                      {themeId === "custom" && <Check className="ml-auto h-5 w-5 text-primary" />}
+                       <input 
+                         type="color" 
+                         value={customColor}
+                         onChange={(e) => {
+                           setCustomColor(e.target.value)
+                           setThemeId("custom")
+                         }}
+                         className="w-20 h-20 shrink-0 cursor-pointer border-none p-0 bg-transparent"
+                       />
+                    </div>
+                    <div className="flex-1 space-y-1">
+                      <Input 
+                        value={customColor}
+                        onChange={(e) => {
+                          setCustomColor(e.target.value)
+                          setThemeId("custom")
+                        }}
+                        className="h-10 rounded-lg border-primary/20 font-mono text-center"
+                        placeholder="#HEXCODE"
+                      />
+                      <p className="text-[10px] text-muted-foreground font-bold uppercase text-center">Código Hexadecimal</p>
+                    </div>
+                    <Button 
+                      variant={themeId === 'custom' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setThemeId("custom")}
+                      className="rounded-lg font-bold"
+                    >
+                      {themeId === 'custom' ? <Check className="h-4 w-4" /> : "Usar"}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Seção de Cor de Fundo */}
+            <Card className="rounded-[2.5rem] border-primary/20 bg-white shadow-sm overflow-hidden">
+              <CardHeader className="bg-primary/5 border-b px-8 py-6">
+                <CardTitle className="text-xl font-black text-primary flex items-center gap-2">
+                  <Layout className="h-6 w-6" /> Ambiente
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-8 space-y-8">
+                <div className="flex items-center justify-between bg-secondary/20 p-4 rounded-2xl border border-primary/10">
+                  <div className="flex items-center gap-3">
+                    {darkMode ? <Moon className="h-6 w-6 text-primary" /> : <Sun className="h-6 w-6 text-amber-500" />}
+                    <div className="flex flex-col">
+                      <span className="font-bold text-sm">Modo Noturno</span>
+                      <span className="text-xs text-muted-foreground font-medium">Ideal para uso à noite</span>
+                    </div>
+                  </div>
+                  <Switch checked={darkMode} onCheckedChange={setDarkMode} />
+                </div>
+
+                <div className="space-y-4">
+                  <Label className="font-bold text-muted-foreground ml-1 flex items-center gap-2">
+                    <Brush className="h-4 w-4" /> Cor de Fundo do Aplicativo
+                  </Label>
+                  <div className="flex items-center gap-4 p-4 rounded-2xl bg-secondary/20 border border-primary/10">
+                    <div 
+                      className="h-12 w-12 rounded-xl shadow-inner border border-black/10 flex items-center justify-center overflow-hidden shrink-0" 
+                      style={{ backgroundColor: customBgColor }}
+                    >
+                       <input 
+                         type="color" 
+                         value={customBgColor}
+                         onChange={(e) => setCustomBgColor(e.target.value)}
+                         className="w-20 h-20 shrink-0 cursor-pointer border-none p-0 bg-transparent"
+                       />
+                    </div>
+                    <div className="flex-1 space-y-1">
+                      <Input 
+                        value={customBgColor}
+                        onChange={(e) => setCustomBgColor(e.target.value)}
+                        className="h-10 rounded-lg border-primary/20 font-mono text-center"
+                      />
+                      <p className="text-[10px] text-muted-foreground font-bold uppercase text-center">Fundo das Páginas</p>
                     </div>
                   </div>
                 </div>
@@ -216,31 +265,36 @@ export default function SettingsPage() {
             <Card className="rounded-[2.5rem] border-primary/20 bg-white shadow-sm overflow-hidden sticky top-8">
               <CardHeader className="bg-primary/5 border-b px-8 py-6">
                 <CardTitle className="text-xl font-black text-primary flex items-center gap-2">
-                  <Smartphone className="h-6 w-6" /> Visualização em Tempo Real
+                  <Smartphone className="h-6 w-6" /> Pré-visualização
                 </CardTitle>
-                <CardDescription className="font-medium">Veja como suas alterações estão ficando.</CardDescription>
               </CardHeader>
               <CardContent className="p-8 flex flex-col items-center">
-                <div className={`w-full max-w-sm rounded-[3rem] border-8 border-slate-800 shadow-2xl p-4 overflow-hidden aspect-[9/16] relative ${darkMode ? 'bg-slate-900' : 'bg-slate-50'}`}>
-                  {/* Mock Content */}
-                  <div className="mt-8 space-y-6">
+                <div 
+                  className={`w-full max-w-[280px] rounded-[3rem] border-8 border-slate-800 shadow-2xl p-4 overflow-hidden aspect-[9/16] relative transition-colors duration-500`}
+                  style={{ backgroundColor: darkMode ? '#0f172a' : customBgColor }}
+                >
+                  <div className="mt-6 space-y-6">
                     <div className="text-center space-y-2">
-                      <h4 className="text-2xl font-black tracking-tighter" style={{ color: getPreviewColor() }}>
+                      <h4 className="text-xl font-black tracking-tighter" style={{ color: getPreviewColor() }}>
                         {appName || "RevendaPro"}
                       </h4>
-                      <div className="h-1 w-12 mx-auto rounded-full" style={{ backgroundColor: getPreviewColor() }} />
+                      <div className="h-1 w-10 mx-auto rounded-full" style={{ backgroundColor: getPreviewColor() }} />
                     </div>
 
-                    <div className={`p-4 rounded-2xl shadow-sm border ${darkMode ? 'bg-slate-800 border-white/10' : 'bg-white border-slate-200'}`}>
+                    <div className={`p-4 rounded-2xl shadow-sm border ${darkMode ? 'bg-slate-800 border-white/10' : 'bg-white border-black/5'}`}>
                       <div className={`h-3 w-2/3 rounded-full mb-3 ${darkMode ? 'bg-white/20' : 'bg-slate-100'}`} />
-                      <div className={`h-2 w-full rounded-full mb-2 ${darkMode ? 'bg-white/10' : 'bg-slate-50'}`} />
+                      <div className={`h-2 w-full rounded-full mb-1 ${darkMode ? 'bg-white/10' : 'bg-slate-50'}`} />
+                      <div className={`h-2 w-4/5 rounded-full ${darkMode ? 'bg-white/10' : 'bg-slate-50'}`} />
                     </div>
 
-                    <div 
-                      className="p-5 rounded-2xl text-center font-bold text-white shadow-lg" 
-                      style={{ backgroundColor: getPreviewColor() }}
-                    >
-                      Botão de Exemplo
+                    <div className="flex gap-2">
+                      <div className="flex-1 h-10 rounded-xl bg-muted/20" />
+                      <div className="flex-1 h-10 rounded-xl" style={{ backgroundColor: getPreviewColor() }} />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 pt-4">
+                       <div className="aspect-square rounded-2xl bg-muted/10 border border-black/5" />
+                       <div className="aspect-square rounded-2xl bg-muted/10 border border-black/5" />
                     </div>
                   </div>
                 </div>
@@ -251,7 +305,7 @@ export default function SettingsPage() {
                     disabled={isSaving}
                     className="w-full h-16 rounded-2xl font-black text-xl primary-gradient shadow-xl"
                   >
-                    {isSaving ? <Loader2 className="h-6 w-6 animate-spin" /> : <><Save className="mr-2 h-6 w-6" /> Aplicar Configurações</>}
+                    {isSaving ? <Loader2 className="h-6 w-6 animate-spin" /> : <><Save className="mr-2 h-6 w-6" /> Salvar Configurações</>}
                   </Button>
                 </div>
               </CardContent>
