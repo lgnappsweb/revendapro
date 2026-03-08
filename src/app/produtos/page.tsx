@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -73,11 +72,17 @@ export default function ProductsPage() {
       return
     }
 
+    // Helper to parse currency string to number handling commas
+    const parseCurrency = (val: string) => {
+      if (!val) return 0;
+      return parseFloat(val.replace(',', '.'));
+    }
+
     const newProduct = {
       ...formData,
-      price: parseFloat(formData.price),
-      cost: formData.cost ? parseFloat(formData.cost) : 0,
-      image: PlaceHolderImages[Math.floor(Math.random() * PlaceHolderImages.length)].imageUrl,
+      price: parseCurrency(formData.price),
+      cost: formData.cost ? parseCurrency(formData.cost) : 0,
+      image: PlaceHolderImages[Math.floor(Math.random() * (PlaceHolderImages?.length || 1))]?.imageUrl || "",
       createdAt: serverTimestamp()
     }
 
@@ -101,9 +106,9 @@ export default function ProductsPage() {
   }
 
   const filteredProducts = products?.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         p.code?.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesTab = activeTab === "todos" || p.brand.toLowerCase() === activeTab
+    const matchesSearch = (p.name || "").toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         (p.code || "").toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesTab = activeTab === "todos" || (p.brand || "").toLowerCase() === activeTab
     return matchesSearch && matchesTab
   }) || []
 
@@ -168,7 +173,6 @@ export default function ProductsPage() {
                     <Label htmlFor="price" className="font-bold">Preço de Venda (R$)</Label>
                     <Input 
                       id="price" 
-                      type="number"
                       value={formData.price}
                       onChange={(e) => setFormData({...formData, price: e.target.value})}
                       placeholder="0,00" 
@@ -179,7 +183,6 @@ export default function ProductsPage() {
                     <Label htmlFor="cost" className="font-bold">Custo (R$)</Label>
                     <Input 
                       id="cost" 
-                      type="number"
                       value={formData.cost}
                       onChange={(e) => setFormData({...formData, cost: e.target.value})}
                       placeholder="0,00" 
@@ -262,8 +265,8 @@ export default function ProductsPage() {
               <Card key={product.id} className="group overflow-hidden rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border-primary">
                 <div className="relative aspect-square overflow-hidden bg-muted">
                   <Image 
-                    src={product.image || PlaceHolderImages[0].imageUrl} 
-                    alt={product.name}
+                    src={product.image || PlaceHolderImages[0]?.imageUrl || ""} 
+                    alt={product.name || "Produto"}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
                   />
@@ -297,14 +300,14 @@ export default function ProductsPage() {
                     <div className="flex items-center justify-between">
                       <div className="flex flex-col">
                         <span className="text-2xl font-black text-foreground">
-                          R$ {Number(product.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          R$ {Number(product.price || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                         </span>
                         <span className="text-[10px] text-muted-foreground font-bold uppercase">Preço Venda</span>
                       </div>
                       <div className="text-right">
                          <span className="text-xs font-bold text-muted-foreground block mb-0.5">Rentabilidade</span>
                          <Badge variant="outline" className="rounded-lg font-bold border-emerald-200 bg-emerald-50 text-emerald-700">
-                           {product.cost ? Math.round(((product.price - product.cost) / product.price) * 100) : 100}%
+                           {product.cost ? Math.round(((Number(product.price) - Number(product.cost)) / Number(product.price)) * 100) : 100}%
                          </Badge>
                       </div>
                     </div>

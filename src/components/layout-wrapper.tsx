@@ -1,10 +1,9 @@
-
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase"
-import { doc, getDoc, setDoc } from "firebase/firestore"
+import { doc, setDoc } from "firebase/firestore"
 import { AppSidebar } from "./app-sidebar"
 import { MobileBottomNav } from "./mobile-bottom-nav"
 import { SidebarInset } from "@/components/ui/sidebar"
@@ -16,16 +15,23 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const db = useFirestore()
   const router = useRouter()
   const pathname = usePathname()
+  const [isRepairing, setIsRepairing] = useState(false)
 
   const isPublicPage = pathname === "/login" || pathname === "/register"
 
-  // Real-time listener for user profile
+  // Real-time listener for user profile and admin status
   const userDocRef = useMemoFirebase(() => {
     if (!user) return null
     return doc(db, "users", user.uid)
   }, [user, db])
 
+  const adminDocRef = useMemoFirebase(() => {
+    if (!user) return null
+    return doc(db, "admins", user.uid)
+  }, [user, db])
+
   const { data: userProfile } = useDoc(userDocRef)
+  const { data: adminRecord, isLoading: isAdminLoading } = useDoc(adminDocRef)
 
   // Auth redirection and Admin Auto-Repair logic
   useEffect(() => {
@@ -36,23 +42,26 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
 
     // Auto-repair: If user is authenticated but lacks admin record, create it.
     // This fixes "Missing or insufficient permissions" for existing users.
-    if (user && !isUserLoading && !isPublicPage) {
+    if (user && !isUserLoading && !isAdminLoading && !adminRecord && !isPublicPage && !isRepairing) {
+      setIsRepairing(true)
       const adminRef = doc(db, "admins", user.uid)
-      getDoc(adminRef).then((snap) => {
-        if (!snap.exists()) {
-          setDoc(adminRef, {
-            id: user.uid,
-            createdAt: new Date().toISOString()
-          })
-        }
-      }).catch(err => console.warn("Admin check skipped:", err))
+      setDoc(adminRef, {
+        id: user.uid,
+        createdAt: new Date().toISOString()
+      }).then(() => {
+        setIsRepairing(false)
+      }).catch(err => {
+        console.error("Admin repair failed:", err)
+        setIsRepairing(false)
+      })
     }
-  }, [user, isUserLoading, isPublicPage, router, db])
+  }, [user, isUserLoading, isAdminLoading, adminRecord, isPublicPage, router, db, isRepairing])
 
-  if (isUserLoading) {
+  if (isUserLoading || (user && isAdminLoading && !adminRecord && !isPublicPage)) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="flex h-screen w-screen flex-col items-center justify-center bg-background gap-4">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        <p className="font-bold text-muted-foreground animate-pulse">Verificando credenciais...</p>
       </div>
     )
   }
