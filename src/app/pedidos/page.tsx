@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -24,7 +25,8 @@ import {
   CreditCard,
   Banknote,
   Smartphone,
-  AlertTriangle
+  AlertTriangle,
+  Sparkles
 } from "lucide-react"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
 import { collection, query, orderBy } from "firebase/firestore"
@@ -65,19 +67,26 @@ export default function OrdersPage() {
 
   return (
     <LayoutWrapper>
-      <div className="flex flex-col gap-6 w-full max-w-full overflow-x-hidden">
-        <div className="space-y-2 w-full text-center flex flex-col items-center">
-          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-primary text-center break-words w-full px-2">
-            Meus Pedidos
-          </h1>
-          <p className="text-muted-foreground font-medium text-base sm:text-lg text-center">Histórico completo de todas as vendas.</p>
+      <div className="flex flex-col gap-10 pt-12 w-full max-w-full overflow-x-hidden">
+        <div className="flex flex-col gap-8 items-center text-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="inline-flex h-20 w-20 items-center justify-center rounded-3xl primary-gradient text-white shadow-xl">
+              <Sparkles className="h-12 w-12" />
+            </div>
+            <div className="flex flex-col gap-2">
+              <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-primary text-center break-words w-full px-2 uppercase">
+                Meus Pedidos
+              </h1>
+              <p className="text-muted-foreground font-medium text-lg text-center">Histórico completo de todas as vendas realizadas.</p>
+            </div>
+          </div>
         </div>
 
         <div className="relative w-full px-1">
           <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <Input 
             placeholder="Pesquisar por cliente ou ID..." 
-            className="h-14 pl-12 rounded-2xl border-primary/30 shadow-sm bg-white text-base focus-visible:ring-primary/20"
+            className="h-14 pl-12 rounded-2xl border border-primary/30 shadow-sm bg-white text-base focus-visible:ring-primary/20"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -107,7 +116,7 @@ export default function OrdersPage() {
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex flex-col gap-1 min-w-0 flex-1">
                           <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">#{order.id.slice(-6).toUpperCase()}</span>
-                          <span className="font-bold text-lg text-foreground truncate block">{order.clientName}</span>
+                          <span className="font-bold text-lg text-foreground block break-words">{order.clientName}</span>
                           <span className="text-xs text-muted-foreground font-medium">
                             {order.createdAt ? new Date(order.createdAt.seconds * 1000).toLocaleDateString('pt-BR') : 'Recentemente'}
                           </span>
@@ -134,9 +143,9 @@ export default function OrdersPage() {
                           variant="secondary" 
                           size="sm" 
                           onClick={() => setSelectedOrder(order)}
-                          className="rounded-xl font-bold bg-secondary/50 hover:bg-primary hover:text-white transition-all shrink-0"
+                          className="rounded-xl font-bold bg-secondary/50 hover:bg-primary hover:text-white transition-all shrink-0 h-10 px-4"
                         >
-                          Detalhes
+                          Ver Detalhes
                         </Button>
                       </div>
                     </CardContent>

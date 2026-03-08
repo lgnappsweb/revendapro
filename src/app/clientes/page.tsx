@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -25,7 +26,8 @@ import {
   FileText,
   Calendar,
   ChevronRight,
-  Info
+  Info,
+  Sparkles
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -207,16 +209,20 @@ export default function ClientsPage() {
 
   return (
     <LayoutWrapper>
-      <div className="flex flex-col gap-6 w-full max-w-full overflow-x-hidden">
-        <div className="flex flex-col gap-6 py-4">
-          <div className="space-y-2 w-full text-center flex flex-col items-center">
-            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-primary text-center break-words w-full px-2">
-              Meus Clientes
-            </h1>
-            <p className="text-muted-foreground font-medium text-base sm:text-lg text-center">Gerencie sua rede de contatos e vendas.</p>
+      <div className="flex flex-col gap-10 pt-12 w-full max-w-full overflow-x-hidden">
+        <div className="flex flex-col gap-8 items-center text-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="inline-flex h-20 w-20 items-center justify-center rounded-3xl primary-gradient text-white shadow-xl">
+              <Sparkles className="h-12 w-12" />
+            </div>
+            <div className="flex flex-col gap-2">
+              <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-primary text-center break-words w-full px-2 uppercase">
+                Meus Clientes
+              </h1>
+              <p className="text-muted-foreground font-medium text-lg text-center">Gerencie sua rede de contatos e fidelize seus compradores.</p>
+            </div>
           </div>
-          
-          <Button onClick={handleOpenAdd} className="w-full rounded-2xl font-bold bg-primary hover:bg-primary/90 shadow-lg h-14 text-lg">
+          <Button onClick={handleOpenAdd} className="w-full max-w-md rounded-2xl font-bold bg-primary hover:bg-primary/90 shadow-lg h-14 text-lg">
             <UserPlus className="mr-2 h-6 w-6" /> Adicionar Cliente
           </Button>
 
@@ -298,7 +304,7 @@ export default function ClientsPage() {
           <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <Input 
             placeholder="Pesquisar por nome ou telefone..." 
-            className="h-14 pl-12 rounded-2xl border-primary/30 shadow-sm bg-white text-base focus-visible:ring-primary/20"
+            className="h-14 pl-12 rounded-2xl border border-primary/30 shadow-sm bg-white text-base focus-visible:ring-primary/20"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -516,7 +522,7 @@ export default function ClientsPage() {
                       </AvatarFallback>
                     </Avatar>
                   </div>
-                  <DialogTitle className="text-2xl sm:text-3xl font-black text-center text-primary leading-tight">
+                  <DialogTitle className="text-2xl sm:text-3xl font-black text-center text-primary leading-tight break-words">
                     {selectedClientForDetails.name}
                   </DialogTitle>
                   <div className="flex items-center justify-center gap-3">

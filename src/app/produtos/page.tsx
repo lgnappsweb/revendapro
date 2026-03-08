@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -17,7 +18,8 @@ import {
   Layers,
   ShoppingBag,
   Pencil,
-  Trash2
+  Trash2,
+  Sparkles
 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -154,15 +156,20 @@ export default function ProductsPage() {
 
   return (
     <LayoutWrapper>
-      <div className="flex flex-col gap-6 w-full max-w-full overflow-x-hidden">
-        <div className="flex flex-col gap-6 py-4">
-          <div className="space-y-2 w-full text-center flex flex-col items-center">
-            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-primary text-center break-words w-full px-2">
-              Produtos
-            </h1>
-            <p className="text-muted-foreground font-medium text-base sm:text-lg text-center">Gestão de estoque e catálogo.</p>
+      <div className="flex flex-col gap-10 pt-12 w-full max-w-full overflow-x-hidden">
+        <div className="flex flex-col gap-8 items-center text-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="inline-flex h-20 w-20 items-center justify-center rounded-3xl primary-gradient text-white shadow-xl">
+              <Sparkles className="h-12 w-12" />
+            </div>
+            <div className="flex flex-col gap-2">
+              <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-primary text-center break-words w-full px-2 uppercase">
+                Produtos
+              </h1>
+              <p className="text-muted-foreground font-medium text-lg text-center">Gestão de estoque e catálogo de produtos.</p>
+            </div>
           </div>
-          <Button onClick={handleOpenNewProduct} className="w-full rounded-2xl font-bold bg-primary hover:bg-primary/90 shadow-lg h-14 text-lg">
+          <Button onClick={handleOpenNewProduct} className="w-full max-w-md rounded-2xl font-bold bg-primary hover:bg-primary/90 shadow-lg h-14 text-lg">
             <Plus className="mr-2 h-6 w-6" /> Novo Produto
           </Button>
         </div>
@@ -172,7 +179,7 @@ export default function ProductsPage() {
             <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
             <Input 
               placeholder="Buscar por nome ou código..." 
-              className="h-12 pl-10 rounded-2xl border-primary/30 shadow-sm bg-white"
+              className="h-12 pl-10 rounded-2xl border border-primary/30 shadow-sm bg-white"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -208,8 +215,11 @@ export default function ProductsPage() {
                       <div className="text-[10px] text-muted-foreground font-bold uppercase truncate">COD: {product.code || "S/ REF"}</div>
                     </div>
                     <div className="flex items-center justify-between border-t pt-3 border-primary/10">
-                      <span className="text-xl font-black text-foreground">R$ {Number(product.price || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                      <Button variant="ghost" size="icon" onClick={() => setSelectedProduct(product)} className="rounded-full h-8 w-8"><ChevronRight className="h-5 w-5" /></Button>
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Preço Venda</span>
+                        <span className="text-xl font-black text-foreground">R$ {Number(product.price || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                      </div>
+                      <Button variant="ghost" size="icon" onClick={() => setSelectedProduct(product)} className="rounded-full h-10 w-10 hover:bg-primary/10 group-hover:text-primary"><ChevronRight className="h-6 w-6" /></Button>
                     </div>
                   </CardContent>
                 </Card>
