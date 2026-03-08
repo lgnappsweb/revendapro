@@ -164,7 +164,7 @@ export default function ProductsPage() {
       <div className="flex flex-col gap-10">
         <div className="flex flex-col items-center text-center gap-6 py-4">
           <div className="space-y-2 w-full">
-            <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter text-primary">
+            <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter text-primary whitespace-nowrap overflow-hidden text-ellipsis">
               Catálogo de Produtos
             </h1>
             <p className="text-muted-foreground font-medium text-lg">Controle seu estoque e preços de venda.</p>
@@ -185,7 +185,7 @@ export default function ProductsPage() {
               </div>
               
               <ScrollArea className="flex-1 px-6">
-                <div className="grid gap-6 py-4">
+                <div className="grid gap-6 py-4 pb-10">
                   <div className="grid gap-2">
                     <Label htmlFor="name" className="font-bold text-muted-foreground">Nome do Produto</Label>
                     <Input 
@@ -256,7 +256,7 @@ export default function ProductsPage() {
                       className="rounded-xl border-primary/30 h-11" 
                     />
                   </div>
-                  <div className="grid gap-2 mb-4">
+                  <div className="grid gap-2">
                     <Label htmlFor="description" className="font-bold text-muted-foreground">Descrição (Opcional)</Label>
                     <Textarea 
                       id="description" 
