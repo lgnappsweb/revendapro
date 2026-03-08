@@ -98,14 +98,9 @@ export default function Dashboard() {
     <LayoutWrapper>
       <div className="flex flex-col gap-10 pt-12 w-full max-w-full overflow-x-hidden">
         <div className="flex flex-col gap-8 items-center text-center">
-          <div className="flex flex-col items-center gap-4">
-            <div className="inline-flex h-20 w-20 items-center justify-center rounded-3xl primary-gradient text-white shadow-xl">
-              <Sparkles className="h-12 w-12" />
-            </div>
-            <div className="flex flex-col gap-2">
-              <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-primary">RevendaPro</h1>
-              <p className="text-muted-foreground font-medium text-lg">Aqui está o resumo da sua revenda hoje.</p>
-            </div>
+          <div className="flex flex-col gap-2">
+            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-primary">RevendaPro</h1>
+            <p className="text-muted-foreground font-medium text-lg">Aqui está o resumo da sua revenda hoje.</p>
           </div>
           
           <div className="relative w-full max-w-2xl px-1">
