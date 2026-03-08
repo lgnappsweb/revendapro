@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -223,7 +224,7 @@ export default function ClientsPage() {
 
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogContent className="sm:max-w-[500px] w-[95vw] rounded-3xl border-primary max-h-[90vh] flex flex-col p-0 overflow-hidden">
-              <div className="p-8 border-b bg-white">
+              <div className="p-8 border-b bg-card">
                 <DialogHeader>
                   <DialogTitle className="text-2xl font-black text-primary text-center uppercase tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">
                     {editingClient ? "Editar Cliente" : "Novo Cliente"}
@@ -231,7 +232,7 @@ export default function ClientsPage() {
                 </DialogHeader>
               </div>
               
-              <div className="flex-1 overflow-y-auto px-6 py-6 bg-[#FDFBFB]">
+              <div className="flex-1 overflow-y-auto px-6 py-6 bg-background">
                 <form onSubmit={handleSaveClient} className="grid gap-6">
                   <div className="grid gap-2">
                     <Label htmlFor="name" className="font-bold text-muted-foreground text-base">Nome Completo</Label>
@@ -240,7 +241,7 @@ export default function ClientsPage() {
                       value={formData.name}
                       onChange={e => setFormData({...formData, name: e.target.value})}
                       placeholder="Ex: Maria Santos" 
-                      className="rounded-xl border-primary/30 h-11 bg-white" 
+                      className="rounded-xl border-primary/30 h-11 bg-card" 
                     />
                   </div>
                   <div className="grid gap-2">
@@ -250,7 +251,7 @@ export default function ClientsPage() {
                       value={formData.phone}
                       onChange={handlePhoneChange}
                       placeholder="(11) 99999-9999" 
-                      className="rounded-xl border-primary/30 h-11 bg-white" 
+                      className="rounded-xl border-primary/30 h-11 bg-card" 
                     />
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -260,7 +261,7 @@ export default function ClientsPage() {
                         id="city" 
                         value={formData.city}
                         onChange={e => setFormData({...formData, city: e.target.value})}
-                        className="rounded-xl border-primary/30 h-11 bg-white" 
+                        className="rounded-xl border-primary/30 h-11 bg-card" 
                       />
                     </div>
                     <div className="grid gap-2">
@@ -269,7 +270,7 @@ export default function ClientsPage() {
                         id="neighborhood" 
                         value={formData.neighborhood}
                         onChange={e => setFormData({...formData, neighborhood: e.target.value})}
-                        className="rounded-xl border-primary/30 h-11 bg-white" 
+                        className="rounded-xl border-primary/30 h-11 bg-card" 
                       />
                     </div>
                   </div>
@@ -279,7 +280,7 @@ export default function ClientsPage() {
                       id="notes" 
                       value={formData.notes}
                       onChange={e => setFormData({...formData, notes: e.target.value})}
-                      className="rounded-xl border-primary/30 min-h-[100px] bg-white" 
+                      className="rounded-xl border-primary/30 min-h-[100px] bg-card" 
                       placeholder="Observações importantes..." 
                     />
                   </div>
@@ -299,7 +300,7 @@ export default function ClientsPage() {
           <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <Input 
             placeholder="Pesquisar por nome ou telefone..." 
-            className="h-14 pl-12 rounded-2xl border border-primary/30 shadow-sm bg-white text-base focus-visible:ring-primary/20"
+            className="h-14 pl-12 rounded-2xl border border-primary/30 shadow-sm bg-card text-base focus-visible:ring-primary/20"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -315,7 +316,7 @@ export default function ClientsPage() {
               {/* Mobile View: Cards */}
               <div className="grid gap-4 md:hidden w-full">
                 {filteredClients.map((client) => (
-                  <Card key={client.id} className="rounded-3xl border-primary/20 shadow-sm overflow-hidden bg-white w-full">
+                  <Card key={client.id} className="rounded-3xl border-primary/20 shadow-sm overflow-hidden w-full">
                     <CardContent className="p-4 flex flex-col gap-4">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3 min-w-0">
@@ -401,7 +402,7 @@ export default function ClientsPage() {
               </div>
 
               {/* Desktop View: Table */}
-              <div className="hidden md:block rounded-3xl border border-primary/20 bg-white shadow-sm overflow-hidden w-full">
+              <div className="hidden md:block rounded-3xl border border-primary/20 bg-card shadow-sm overflow-hidden w-full">
                 <Table>
                   <TableHeader className="bg-muted/30">
                     <TableRow className="hover:bg-transparent border-none h-14">
@@ -508,7 +509,7 @@ export default function ClientsPage() {
         <DialogContent className="sm:max-w-[600px] w-[95vw] rounded-3xl border-primary overflow-hidden p-0 flex flex-col max-h-[90vh]">
           {selectedClientForDetails && (
             <>
-              <div className="p-8 border-b bg-white">
+              <div className="p-8 border-b bg-card">
                 <DialogHeader className="space-y-4">
                   <div className="flex justify-center">
                     <Avatar className="h-20 w-20 border-4 border-primary/10">
@@ -528,9 +529,9 @@ export default function ClientsPage() {
                 </DialogHeader>
               </div>
 
-              <div className="flex-1 overflow-y-auto bg-[#FDFBFB] p-6 sm:p-8 space-y-8">
+              <div className="flex-1 overflow-y-auto bg-background p-6 sm:p-8 space-y-8">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="bg-white p-5 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-1">
+                  <div className="bg-card p-5 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-1">
                     <div className="flex items-center gap-2 text-primary">
                       <Phone className="h-4 w-4" />
                       <span className="text-[10px] font-black uppercase tracking-wider">WhatsApp</span>
@@ -539,7 +540,7 @@ export default function ClientsPage() {
                       {selectedClientForDetails.phone}
                     </span>
                   </div>
-                  <div className="bg-white p-5 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-1">
+                  <div className="bg-card p-5 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-1">
                     <div className="flex items-center gap-2 text-blue-600">
                       <MapPin className="h-4 w-4" />
                       <span className="text-[10px] font-black uppercase tracking-wider">Localização</span>
@@ -573,7 +574,7 @@ export default function ClientsPage() {
                       <h4 className="font-bold text-lg">Observações e Notas</h4>
                    </div>
                    <Separator className="bg-primary/10" />
-                   <div className="bg-white p-4 rounded-xl border border-primary/5 min-h-[100px]">
+                   <div className="bg-card p-4 rounded-xl border border-primary/5 min-h-[100px]">
                       <p className="text-muted-foreground leading-relaxed text-base font-medium whitespace-pre-wrap">
                         {selectedClientForDetails.notes || "Nenhuma observação cadastrada para este cliente."}
                       </p>
@@ -581,7 +582,7 @@ export default function ClientsPage() {
                 </div>
               </div>
 
-              <div className="p-6 bg-white border-t flex gap-2">
+              <div className="p-6 bg-card border-t flex gap-2">
                  <Button 
                    variant="outline"
                    onClick={() => setSelectedClientForDetails(null)} 

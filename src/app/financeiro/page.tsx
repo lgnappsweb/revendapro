@@ -224,7 +224,7 @@ export default function FinancePage() {
             <div className="flex items-center gap-2 w-full max-w-sm">
               <CalendarDays className="h-5 w-5 text-primary shrink-0" />
               <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-                <SelectTrigger className="w-full rounded-xl font-bold border-primary/20 bg-white h-12 shadow-sm">
+                <SelectTrigger className="w-full rounded-xl font-bold border-primary/20 bg-card h-12 shadow-sm">
                   <SelectValue placeholder="Período" />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl font-bold">
@@ -257,7 +257,7 @@ export default function FinancePage() {
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 px-1">
           {stats.map((stat, i) => (
-            <Card key={i} className="shadow-sm rounded-[2rem] overflow-hidden border-primary/20 bg-white transition-all hover:shadow-md">
+            <Card key={i} className="shadow-sm rounded-[2rem] overflow-hidden border-primary/20 transition-all hover:shadow-md">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className={`p-3 rounded-2xl ${stat.bg}`}>
@@ -275,9 +275,9 @@ export default function FinancePage() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3 px-1">
-          <Card className="lg:col-span-2 shadow-sm rounded-[2.5rem] overflow-hidden border-primary/20 bg-white">
+          <Card className="lg:col-span-2 shadow-sm rounded-[2.5rem] overflow-hidden border-primary/20">
             <Tabs defaultValue="todos" className="w-full">
-              <CardHeader className="flex flex-col sm:flex-row items-center justify-between px-8 py-6 border-b bg-white gap-4">
+              <CardHeader className="flex flex-col sm:flex-row items-center justify-between px-8 py-6 border-b bg-card gap-4">
                 <CardTitle className="text-xl font-black text-primary uppercase tracking-tight">Fluxo de Caixa</CardTitle>
                 <TabsList className="bg-muted/50 rounded-xl p-1 h-10">
                   <TabsTrigger value="todos" className="rounded-lg font-bold text-xs px-4">Todos</TabsTrigger>
@@ -307,7 +307,7 @@ export default function FinancePage() {
           </Card>
 
           <div className="space-y-6">
-            <Card className="shadow-sm rounded-[2.5rem] overflow-hidden border-primary/20 bg-white">
+            <Card className="shadow-sm rounded-[2.5rem] overflow-hidden border-primary/20">
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg font-black text-primary flex items-center gap-2">
                   <TrendingUp className="h-5 w-5" />

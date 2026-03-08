@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -80,7 +81,7 @@ export default function OrdersPage() {
           <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <Input 
             placeholder="Pesquisar por cliente ou ID..." 
-            className="h-14 pl-12 rounded-2xl border border-primary/30 shadow-sm bg-white text-base focus-visible:ring-primary/20"
+            className="h-14 pl-12 rounded-2xl border border-primary/30 shadow-sm bg-card text-base focus-visible:ring-primary/20"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -93,7 +94,7 @@ export default function OrdersPage() {
               <p className="font-bold text-muted-foreground">Carregando histórico...</p>
             </div>
           ) : filteredOrders.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-white rounded-3xl border border-dashed border-primary/30">
+            <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-card rounded-3xl border border-dashed border-primary/30">
               <PackageSearch className="h-16 w-16 text-primary/20 mb-4" />
               <h3 className="text-xl font-bold text-foreground">Nenhum pedido encontrado</h3>
               <p className="text-muted-foreground font-medium max-w-xs mt-2">
@@ -105,7 +106,7 @@ export default function OrdersPage() {
               {/* Mobile View: Cards */}
               <div className="grid gap-4 md:hidden w-full">
                 {filteredOrders.map((order) => (
-                  <Card key={order.id} className="rounded-3xl border-primary/20 shadow-sm overflow-hidden bg-white w-full">
+                  <Card key={order.id} className="rounded-3xl border-primary/20 shadow-sm overflow-hidden w-full">
                     <CardContent className="p-4 flex flex-col gap-4">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex flex-col gap-1 min-w-0 flex-1">
@@ -148,7 +149,7 @@ export default function OrdersPage() {
               </div>
 
               {/* Desktop View: Table */}
-              <div className="hidden md:block rounded-3xl border border-primary/20 bg-white shadow-sm overflow-hidden w-full">
+              <div className="hidden md:block rounded-3xl border border-primary/20 bg-card shadow-sm overflow-hidden w-full">
                 <Table>
                   <TableHeader className="bg-muted/30">
                     <TableRow className="hover:bg-transparent border-none h-14">
@@ -228,7 +229,7 @@ export default function OrdersPage() {
         <DialogContent className="sm:max-w-[600px] w-[95vw] rounded-3xl border-primary overflow-hidden p-0 flex flex-col max-h-[90vh]">
           {selectedOrder && (
             <>
-              <div className="p-8 border-b bg-white">
+              <div className="p-8 border-b bg-card">
                 <DialogHeader className="space-y-4">
                   <div className="flex justify-center">
                     <div className="bg-primary/10 p-4 rounded-3xl">
@@ -246,13 +247,13 @@ export default function OrdersPage() {
                 </DialogHeader>
               </div>
 
-              <div className="flex-1 overflow-y-auto bg-[#FDFBFB] p-6 sm:p-8 space-y-8">
+              <div className="flex-1 overflow-y-auto bg-background p-6 sm:p-8 space-y-8">
                 <div className="flex flex-col gap-4">
-                  <div className="bg-white p-5 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-1">
+                  <div className="bg-card p-5 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-1">
                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Cliente</span>
                     <span className="text-lg font-bold text-foreground break-words">{selectedOrder.clientName}</span>
                   </div>
-                  <div className="bg-white p-5 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-1">
+                  <div className="bg-card p-5 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-1">
                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Pagamento</span>
                     <span className="text-lg font-bold text-foreground capitalize">{selectedOrder.paymentMethod}</span>
                   </div>
@@ -265,7 +266,7 @@ export default function OrdersPage() {
                   <Separator className="bg-primary/10" />
                   <div className="space-y-3">
                     {selectedOrder.items?.map((item: any, idx: number) => (
-                      <div key={idx} className="flex justify-between items-center p-4 bg-white rounded-xl border border-primary/5">
+                      <div key={idx} className="flex justify-between items-center p-4 bg-card rounded-xl border border-primary/5">
                         <div className="flex flex-col">
                           <span className="font-bold text-sm">{item.productName}</span>
                           <span className="text-xs text-muted-foreground">{item.quantity}un x R$ {item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
@@ -293,7 +294,7 @@ export default function OrdersPage() {
                 </div>
               </div>
 
-              <div className="p-6 bg-white border-t">
+              <div className="p-6 bg-card border-t">
                 <Button 
                   onClick={() => setSelectedOrder(null)} 
                   className="w-full h-14 rounded-2xl font-bold text-lg primary-gradient shadow-xl"

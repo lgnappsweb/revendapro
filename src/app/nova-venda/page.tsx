@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -225,7 +226,7 @@ export default function NewSalePage() {
 
         <div className="grid gap-6 lg:grid-cols-5 px-1">
           <div className="lg:col-span-3 space-y-6">
-            <Card className="shadow-sm rounded-3xl border-primary/20 bg-white">
+            <Card className="shadow-sm rounded-3xl border-primary/20">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-primary font-black">
                   <div className="p-2 bg-primary/10 rounded-lg">
@@ -309,7 +310,7 @@ export default function NewSalePage() {
                                 <button
                                   key={product.id}
                                   onClick={() => handleAddProductToCart(product)}
-                                  className="w-full text-left p-4 rounded-2xl bg-white border border-primary/10 hover:border-primary hover:bg-primary/5 transition-all flex justify-between items-center group"
+                                  className="w-full text-left p-4 rounded-2xl bg-card border border-primary/10 hover:border-primary hover:bg-primary/5 transition-all flex justify-between items-center group"
                                 >
                                   <div className="flex flex-col gap-0.5">
                                     <span className="font-bold text-foreground group-hover:text-primary">{product.name}</span>
@@ -333,7 +334,7 @@ export default function NewSalePage() {
                   ) : (
                     <div className="space-y-3">
                       {items.map((item) => (
-                        <div key={item.id} className="flex flex-col p-4 bg-white rounded-xl shadow-sm border border-primary/10 animate-in fade-in slide-in-from-left-4 gap-3">
+                        <div key={item.id} className="flex flex-col p-4 bg-card rounded-xl shadow-sm border border-primary/10 animate-in fade-in slide-in-from-left-4 gap-3">
                           <div className="flex items-center gap-3">
                             <div className="flex-1">
                               <h4 className="font-bold text-sm text-foreground">{item.name}</h4>
@@ -388,7 +389,7 @@ export default function NewSalePage() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-sm rounded-3xl border-primary/20 bg-white">
+            <Card className="shadow-sm rounded-3xl border-primary/20">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-accent font-black">
                   <div className="p-2 bg-accent/10 rounded-lg">
@@ -443,7 +444,7 @@ export default function NewSalePage() {
           </div>
 
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white rounded-3xl p-6 shadow-sm space-y-4 border border-primary/10">
+            <div className="bg-card rounded-3xl p-6 shadow-sm space-y-4 border border-primary/10">
               <h4 className="font-black text-foreground flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5 text-emerald-500" />
                 Checklist da Venda
@@ -476,7 +477,7 @@ export default function NewSalePage() {
 
                 <div className="flex justify-between items-center text-white/80 font-bold py-1">
                   <div className="flex flex-col">
-                    <span className="flex items-center gap-1.5">Preço de Custo <Zap className="h-3 w-3 fill-yellow-400 text-yellow-400" /></span>
+                    <span className="text-xs font-black opacity-80 uppercase tracking-widest flex items-center gap-1.5">Preço de Custo <Zap className="h-3 w-3 fill-yellow-400 text-yellow-400" /></span>
                     <span className="text-[10px] opacity-70 font-black uppercase tracking-widest">Usar valor da revendedora</span>
                   </div>
                   <Switch 
@@ -537,7 +538,7 @@ export default function NewSalePage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="rounded-xl font-bold">Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmRemove} className="rounded-xl font-bold bg-rose-600 font-bold">
+            <AlertDialogAction onClick={handleConfirmRemove} className="rounded-xl font-bold bg-rose-600">
               Confirmar Remoção
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -176,13 +176,13 @@ export default function ProductsPage() {
             <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
             <Input 
               placeholder="Buscar por nome ou código..." 
-              className="h-12 pl-10 rounded-2xl border border-primary/30 shadow-sm bg-white"
+              className="h-12 pl-10 rounded-2xl border border-primary/30 shadow-sm bg-card"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <Tabs defaultValue="todos" className="w-full md:w-auto" onValueChange={setActiveTab}>
-            <TabsList className="h-12 p-1.5 bg-white shadow-sm border border-primary/30 rounded-2xl w-full">
+            <TabsList className="h-12 p-1.5 bg-card shadow-sm border border-primary/30 rounded-2xl w-full">
               <TabsTrigger value="todos" className="flex-1 rounded-xl font-bold transition-all">Todos</TabsTrigger>
               <TabsTrigger value="natura" className="flex-1 rounded-xl font-bold transition-all">Natura</TabsTrigger>
               <TabsTrigger value="avon" className="flex-1 rounded-xl font-bold transition-all">Avon</TabsTrigger>
@@ -194,14 +194,14 @@ export default function ProductsPage() {
           {isLoadingProducts ? (
             <div className="flex flex-col items-center justify-center py-20"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>
           ) : filteredProducts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-white rounded-3xl border border-dashed border-primary/30">
+            <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-card rounded-3xl border border-dashed border-primary/30">
               <PackageSearch className="h-16 w-16 text-primary/20 mb-4" />
               <p className="text-muted-foreground font-medium">Nenhum produto encontrado.</p>
             </div>
           ) : (
             <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pb-10 w-full">
               {filteredProducts.map((product) => (
-                <Card key={product.id} className="group overflow-hidden rounded-3xl border-primary/20 bg-white w-full shadow-sm hover:border-primary transition-all">
+                <Card key={product.id} className="group overflow-hidden rounded-3xl border-primary/20 w-full shadow-sm hover:border-primary transition-all">
                   <CardContent className="p-4 flex flex-col h-full gap-4">
                     <div className="flex justify-between items-start">
                       <Badge className={`rounded-lg font-bold py-1 border-none ${product.brand === 'Natura' ? 'bg-[#FF6A13] text-white' : 'bg-[#622D91] text-white'}`}>{product.brand}</Badge>
@@ -230,7 +230,7 @@ export default function ProductsPage() {
         <DialogContent className="sm:max-w-[500px] w-[95vw] rounded-3xl border-primary overflow-hidden p-0 flex flex-col max-h-[90vh]">
           {selectedProduct && (
             <>
-              <div className="p-8 border-b bg-white">
+              <div className="p-8 border-b bg-card">
                 <DialogHeader className="space-y-4">
                   <div className="flex justify-center">
                     <div className="bg-primary/10 p-4 rounded-3xl">
@@ -251,13 +251,13 @@ export default function ProductsPage() {
                 </DialogHeader>
               </div>
 
-              <div className="flex-1 overflow-y-auto bg-[#FDFBFB] p-6 space-y-6">
+              <div className="flex-1 overflow-y-auto bg-background p-6 space-y-6">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white p-4 rounded-2xl border border-primary/10 shadow-sm flex flex-col">
+                  <div className="bg-card p-4 rounded-2xl border border-primary/10 shadow-sm flex flex-col">
                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider mb-1">Preço Revista</span>
                     <span className="text-xl font-black text-primary">R$ {Number(selectedProduct.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                   </div>
-                  <div className="bg-white p-4 rounded-2xl border border-primary/10 shadow-sm flex flex-col">
+                  <div className="bg-card p-4 rounded-2xl border border-primary/10 shadow-sm flex flex-col">
                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider mb-1">Preço Custo</span>
                     <span className="text-xl font-black text-emerald-600">R$ {Number(selectedProduct.cost || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                   </div>
@@ -275,7 +275,7 @@ export default function ProductsPage() {
                     </div>
                     <div className="flex flex-col gap-2 pt-2">
                       <span className="text-muted-foreground font-medium text-sm">Descrição:</span>
-                      <div className="bg-white p-4 rounded-xl border border-primary/5 min-h-[80px]">
+                      <div className="bg-card p-4 rounded-xl border border-primary/5 min-h-[80px]">
                         <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap font-medium">
                           {selectedProduct.description || "Nenhuma descrição detalhada cadastrada."}
                         </p>
@@ -285,7 +285,7 @@ export default function ProductsPage() {
                 </div>
               </div>
 
-              <div className="p-6 bg-white border-t flex gap-2">
+              <div className="p-6 bg-card border-t flex gap-2">
                  <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" className="flex-1 h-12 rounded-xl font-bold border-primary text-primary">
@@ -315,7 +315,7 @@ export default function ProductsPage() {
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[500px] w-[95vw] rounded-3xl border-primary max-h-[90vh] flex flex-col p-0 overflow-hidden">
-          <div className="p-8 border-b bg-white">
+          <div className="p-8 border-b bg-card">
             <DialogHeader>
               <DialogTitle className="text-2xl font-black text-primary text-center uppercase tracking-tight">
                 {editingProductId ? "Editar Produto" : "Novo Produto"}
@@ -323,7 +323,7 @@ export default function ProductsPage() {
             </DialogHeader>
           </div>
           
-          <div className="flex-1 overflow-y-auto px-6 py-6 bg-[#FDFBFB]">
+          <div className="flex-1 overflow-y-auto px-6 py-6 bg-background">
             <div className="grid gap-6">
               <div className="grid gap-2">
                 <Label className="font-bold text-muted-foreground">Nome do Produto</Label>
@@ -331,14 +331,14 @@ export default function ProductsPage() {
                   value={formData.name}
                   onChange={e => setFormData({...formData, name: e.target.value})}
                   placeholder="Ex: Kaiak Aventura 100ml" 
-                  className="rounded-xl border-primary/30 h-11 bg-white" 
+                  className="rounded-xl border-primary/30 h-11 bg-card" 
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label className="font-bold text-muted-foreground">Marca</Label>
                   <Select value={formData.brand} onValueChange={v => setFormData({...formData, brand: v})}>
-                    <SelectTrigger className="rounded-xl border-primary/30 h-11 bg-white">
+                    <SelectTrigger className="rounded-xl border-primary/30 h-11 bg-card">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl">
@@ -350,7 +350,7 @@ export default function ProductsPage() {
                 <div className="grid gap-2">
                   <Label className="font-bold text-muted-foreground">Categoria</Label>
                   <Select value={formData.category} onValueChange={v => setFormData({...formData, category: v})}>
-                    <SelectTrigger className="rounded-xl border-primary/30 h-11 bg-white">
+                    <SelectTrigger className="rounded-xl border-primary/30 h-11 bg-card">
                       <SelectValue placeholder={isLoadingCategories ? "Carregando..." : "Selecione..."} />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl">
@@ -372,7 +372,7 @@ export default function ProductsPage() {
                     <Input 
                       value={formData.price}
                       onChange={e => handlePriceChange(e, 'price')}
-                      className="rounded-xl border-primary/30 h-11 bg-white pl-10" 
+                      className="rounded-xl border-primary/30 h-11 bg-card pl-10" 
                     />
                   </div>
                 </div>
@@ -383,7 +383,7 @@ export default function ProductsPage() {
                     <Input 
                       value={formData.cost}
                       onChange={e => handlePriceChange(e, 'cost')}
-                      className="rounded-xl border-primary/30 h-11 bg-white pl-10" 
+                      className="rounded-xl border-primary/30 h-11 bg-card pl-10" 
                     />
                   </div>
                 </div>
@@ -394,7 +394,7 @@ export default function ProductsPage() {
                   value={formData.code}
                   onChange={e => setFormData({...formData, code: e.target.value})}
                   placeholder="Ex: 504030" 
-                  className="rounded-xl border-primary/30 h-11 bg-white" 
+                  className="rounded-xl border-primary/30 h-11 bg-card" 
                 />
               </div>
               <div className="grid gap-2">
@@ -402,7 +402,7 @@ export default function ProductsPage() {
                 <Textarea 
                   value={formData.description}
                   onChange={e => setFormData({...formData, description: e.target.value})}
-                  className="rounded-xl border-primary/30 min-h-[80px] bg-white" 
+                  className="rounded-xl border-primary/30 min-h-[80px] bg-card" 
                   placeholder="Detalhes sobre o produto..." 
                 />
               </div>

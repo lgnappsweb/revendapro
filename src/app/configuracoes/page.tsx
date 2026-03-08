@@ -115,7 +115,7 @@ export default function SettingsPage() {
         <div className="grid gap-8 lg:grid-cols-2 px-1 pb-20">
           <div className="space-y-8">
             {/* Seção Geral */}
-            <Card className="rounded-[2.5rem] border-primary/20 bg-white shadow-sm overflow-hidden">
+            <Card className="rounded-[2.5rem] border-primary/20 overflow-hidden">
               <CardHeader className="bg-primary/5 border-b px-8 py-6">
                 <CardTitle className="text-xl font-black text-primary flex items-center gap-2">
                   <Type className="h-6 w-6" /> Geral
@@ -129,14 +129,14 @@ export default function SettingsPage() {
                     value={appName}
                     onChange={(e) => setAppName(e.target.value)}
                     placeholder="Ex: RevendaPro"
-                    className="h-12 rounded-xl border-primary/30 text-lg font-medium"
+                    className="h-12 rounded-xl border-primary/30 text-lg font-medium bg-card"
                   />
                 </div>
               </CardContent>
             </Card>
 
             {/* Seção de Cores Principal */}
-            <Card className="rounded-[2.5rem] border-primary/20 bg-white shadow-sm overflow-hidden">
+            <Card className="rounded-[2.5rem] border-primary/20 overflow-hidden">
               <CardHeader className="bg-primary/5 border-b px-8 py-6">
                 <CardTitle className="text-xl font-black text-primary flex items-center gap-2">
                   <Palette className="h-6 w-6" /> Cor Principal
@@ -194,7 +194,7 @@ export default function SettingsPage() {
                           setCustomColor(e.target.value)
                           setThemeId("custom")
                         }}
-                        className="h-10 rounded-lg border-primary/20 font-mono text-center"
+                        className="h-10 rounded-lg border-primary/20 font-mono text-center bg-card"
                         placeholder="#HEXCODE"
                       />
                       <p className="text-[10px] text-muted-foreground font-bold uppercase text-center">Código Hexadecimal</p>
@@ -213,7 +213,7 @@ export default function SettingsPage() {
             </Card>
 
             {/* Seção de Cor de Fundo */}
-            <Card className="rounded-[2.5rem] border-primary/20 bg-white shadow-sm overflow-hidden">
+            <Card className="rounded-[2.5rem] border-primary/20 overflow-hidden">
               <CardHeader className="bg-primary/5 border-b px-8 py-6">
                 <CardTitle className="text-xl font-black text-primary flex items-center gap-2">
                   <Layout className="h-6 w-6" /> Ambiente
@@ -251,7 +251,7 @@ export default function SettingsPage() {
                       <Input 
                         value={customBgColor}
                         onChange={(e) => setCustomBgColor(e.target.value)}
-                        className="h-10 rounded-lg border-primary/20 font-mono text-center"
+                        className="h-10 rounded-lg border-primary/20 font-mono text-center bg-card"
                       />
                       <p className="text-[10px] text-muted-foreground font-bold uppercase text-center">Fundo das Páginas</p>
                     </div>
@@ -262,7 +262,7 @@ export default function SettingsPage() {
           </div>
 
           <div className="space-y-8">
-            <Card className="rounded-[2.5rem] border-primary/20 bg-white shadow-sm overflow-hidden sticky top-8">
+            <Card className="rounded-[2.5rem] border-primary/20 overflow-hidden sticky top-8">
               <CardHeader className="bg-primary/5 border-b px-8 py-6">
                 <CardTitle className="text-xl font-black text-primary flex items-center gap-2">
                   <Smartphone className="h-6 w-6" /> Pré-visualização

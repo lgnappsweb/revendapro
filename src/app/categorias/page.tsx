@@ -181,7 +181,7 @@ export default function CategoriesPage() {
           <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <Input 
             placeholder="Buscar categoria..." 
-            className="h-14 pl-12 rounded-2xl border border-primary/30 shadow-sm bg-white text-base focus-visible:ring-primary/20"
+            className="h-14 pl-12 rounded-2xl border border-primary/30 shadow-sm bg-card text-base focus-visible:ring-primary/20"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -191,14 +191,14 @@ export default function CategoriesPage() {
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>
           ) : filteredCategories.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-white rounded-3xl border border-dashed border-primary/30">
+            <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-card rounded-3xl border border-dashed border-primary/30">
               <Layers className="h-16 w-16 text-primary/20 mb-4" />
               <p className="text-muted-foreground font-medium">Nenhuma categoria encontrada.</p>
             </div>
           ) : (
             <div className="grid gap-4 grid-cols-1 pb-10 w-full">
               {filteredCategories.map((category) => (
-                <Card key={category.id} className="group overflow-hidden rounded-3xl border-primary/20 bg-white w-full shadow-sm hover:border-primary transition-all">
+                <Card key={category.id} className="group overflow-hidden rounded-3xl border-primary/20 w-full shadow-sm hover:border-primary transition-all">
                   <CardContent className="p-6 flex items-start justify-between gap-4">
                     <div className="flex items-start gap-4 min-w-0 flex-1">
                       <div className="p-3 bg-primary/5 rounded-2xl text-primary shrink-0">
@@ -245,7 +245,7 @@ export default function CategoriesPage() {
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[450px] w-[95vw] rounded-3xl border-primary max-h-[90vh] flex flex-col p-0 overflow-hidden">
-          <div className="p-8 border-b bg-white">
+          <div className="p-8 border-b bg-card">
             <DialogHeader>
               <DialogTitle className="text-2xl font-black text-primary text-center uppercase tracking-tight">
                 {editingCategoryId ? "Editar Categoria" : "Nova Categoria"}
@@ -253,7 +253,7 @@ export default function CategoriesPage() {
             </DialogHeader>
           </div>
           
-          <div className="flex-1 overflow-y-auto px-6 py-8 bg-[#FDFBFB]">
+          <div className="flex-1 overflow-y-auto px-6 py-8 bg-background">
             <div className="grid gap-6">
               <div className="grid gap-2">
                 <Label className="font-bold text-muted-foreground ml-1">Nome da Categoria</Label>
@@ -261,7 +261,7 @@ export default function CategoriesPage() {
                   value={formData.name}
                   onChange={e => setFormData({...formData, name: e.target.value})}
                   placeholder="Ex: Perfumaria, Maquiagem..." 
-                  className="rounded-xl border-primary/30 h-12 bg-white text-lg font-medium" 
+                  className="rounded-xl border-primary/30 h-12 bg-card text-lg font-medium" 
                 />
               </div>
 
