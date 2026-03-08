@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useEffect, useState } from "react"
@@ -141,8 +142,8 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
         <AppSidebar />
       </div>
       <SidebarInset className="bg-transparent flex-1 w-full overflow-x-hidden">
-        <main className="p-2 sm:p-4 md:p-6 lg:p-8 flex justify-center pb-24 md:pb-8 w-full">
-          <div className="w-full max-w-[1600px] relative border-2 border-primary/20 dark:border-primary/40 rounded-[2rem] sm:rounded-[3rem] bg-card dark:bg-card shadow-sm p-3 sm:p-6 md:p-10 min-h-[calc(100vh-4rem)] flex flex-col gap-6 overflow-hidden">
+        <main className="flex flex-col min-h-screen w-full pb-24 md:pb-0">
+          <div className="flex-1 w-full relative border-l-2 border-primary/20 dark:border-primary/40 bg-card dark:bg-card p-4 sm:p-8 md:p-12 flex flex-col gap-6 overflow-hidden">
             {pathname !== "/" && (
               <div className="flex items-start shrink-0">
                 <Button
