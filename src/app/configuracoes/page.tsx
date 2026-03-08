@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { 
-  Settings, 
   Palette, 
   Smartphone, 
   Moon, 
@@ -23,14 +22,13 @@ import {
 import { useFirestore, useDoc, useMemoFirebase } from "@/firebase"
 import { doc, setDoc, serverTimestamp } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
-import { Separator } from "@/components/ui/separator"
 
 const COLOR_THEMES = [
-  { id: "default", name: "Padrão Rosa", primary: "340 78% 43%", preview: "bg-[#C2185B]" },
-  { id: "ocean", name: "Azul Oceano", primary: "221 83% 53%", preview: "bg-[#3B82F6]" },
-  { id: "forest", name: "Verde Floresta", primary: "142 76% 36%", preview: "bg-[#16A34A]" },
-  { id: "luxury", name: "Luxo Dourado", primary: "43 74% 49%", preview: "bg-[#D4A017]" },
-  { id: "sunset", name: "Pôr do Sol", primary: "12 80% 50%", preview: "bg-[#EA580C]" },
+  { id: "default", name: "Padrão Rosa", primary: "340 78% 43%", hex: "#C2185B", preview: "bg-[#C2185B]" },
+  { id: "ocean", name: "Azul Oceano", primary: "221 83% 53%", hex: "#3B82F6", preview: "bg-[#3B82F6]" },
+  { id: "forest", name: "Verde Floresta", primary: "142 76% 36%", hex: "#16A34A", preview: "bg-[#16A34A]" },
+  { id: "luxury", name: "Luxo Dourado", primary: "43 74% 49%", hex: "#D4A017", preview: "bg-[#D4A017]" },
+  { id: "sunset", name: "Pôr do Sol", primary: "12 80% 50%", hex: "#EA580C", preview: "bg-[#EA580C]" },
 ]
 
 export default function SettingsPage() {
@@ -42,6 +40,7 @@ export default function SettingsPage() {
 
   const [appName, setAppName] = useState("")
   const [themeId, setThemeId] = useState("default")
+  const [customColor, setCustomColor] = useState("#C2185B")
   const [darkMode, setDarkMode] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
@@ -50,6 +49,9 @@ export default function SettingsPage() {
       setAppName(settings.appName || "RevendaPro")
       setThemeId(settings.themeId || "default")
       setDarkMode(settings.darkMode || false)
+      if (settings.customColor) {
+        setCustomColor(settings.customColor)
+      }
     }
   }, [settings])
 
@@ -59,6 +61,7 @@ export default function SettingsPage() {
       await setDoc(settingsRef, {
         appName,
         themeId,
+        customColor,
         darkMode,
         updatedAt: serverTimestamp()
       }, { merge: true })
@@ -76,6 +79,12 @@ export default function SettingsPage() {
     } finally {
       setIsSaving(false)
     }
+  }
+
+  const getPreviewColor = () => {
+    if (themeId === "custom") return customColor
+    const theme = COLOR_THEMES.find(t => t.id === themeId)
+    return theme ? theme.hex : COLOR_THEMES[0].hex
   }
 
   if (isLoading) {
@@ -119,7 +128,6 @@ export default function SettingsPage() {
                     placeholder="Ex: RevendaPro"
                     className="h-12 rounded-xl border-primary/30 text-lg font-medium"
                   />
-                  <p className="text-xs text-muted-foreground font-medium ml-1">Este nome será exibido na barra lateral e no título do app.</p>
                 </div>
               </CardContent>
             </Card>
@@ -138,7 +146,6 @@ export default function SettingsPage() {
                       {darkMode ? <Moon className="h-5 w-5 text-primary" /> : <Sun className="h-5 w-5 text-amber-500" />}
                       <span className="font-bold">Modo Escuro</span>
                     </div>
-                    <span className="text-xs text-muted-foreground font-medium">Melhora a leitura em ambientes escuros.</span>
                   </div>
                   <Switch 
                     checked={darkMode}
@@ -168,6 +175,37 @@ export default function SettingsPage() {
                         {themeId === theme.id && <Check className="ml-auto h-5 w-5 text-primary" />}
                       </button>
                     ))}
+
+                    <div
+                      onClick={() => setThemeId("custom")}
+                      className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all text-left cursor-pointer ${
+                        themeId === "custom" 
+                        ? "border-primary bg-primary/5 shadow-md" 
+                        : "border-transparent bg-white hover:border-primary/30"
+                      }`}
+                    >
+                      <div 
+                        className="h-8 w-8 rounded-full shadow-inner border border-black/10 flex items-center justify-center overflow-hidden" 
+                        style={{ backgroundColor: customColor }}
+                      >
+                         <input 
+                           type="color" 
+                           value={customColor}
+                           onChange={(e) => {
+                             setCustomColor(e.target.value)
+                             setThemeId("custom")
+                           }}
+                           className="w-16 h-16 shrink-0 cursor-pointer border-none p-0 bg-transparent"
+                         />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className={`font-bold text-sm ${themeId === "custom" ? "text-primary" : "text-foreground"}`}>
+                          Cor Personalizada
+                        </span>
+                        <span className="text-[10px] text-muted-foreground font-medium">Clique no círculo para escolher</span>
+                      </div>
+                      {themeId === "custom" && <Check className="ml-auto h-5 w-5 text-primary" />}
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -184,31 +222,24 @@ export default function SettingsPage() {
               </CardHeader>
               <CardContent className="p-8 flex flex-col items-center">
                 <div className={`w-full max-w-sm rounded-[3rem] border-8 border-slate-800 shadow-2xl p-4 overflow-hidden aspect-[9/16] relative ${darkMode ? 'bg-slate-900' : 'bg-slate-50'}`}>
-                  {/* Status Bar */}
-                  <div className="flex justify-between px-6 py-2">
-                    <span className={`text-[10px] font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>9:41</span>
-                    <div className="flex gap-1 items-center">
-                      <div className={`h-2 w-2 rounded-full ${darkMode ? 'bg-white' : 'bg-slate-900'}`} />
-                      <div className={`h-2 w-2 rounded-full ${darkMode ? 'bg-white/50' : 'bg-slate-400'}`} />
-                    </div>
-                  </div>
-
                   {/* Mock Content */}
                   <div className="mt-8 space-y-6">
                     <div className="text-center space-y-2">
-                      <h4 className={`text-2xl font-black tracking-tighter ${themeId === 'ocean' ? 'text-[#3B82F6]' : themeId === 'forest' ? 'text-[#16A34A]' : themeId === 'luxury' ? 'text-[#D4A017]' : themeId === 'sunset' ? 'text-[#EA580C]' : 'text-primary'}`}>
+                      <h4 className="text-2xl font-black tracking-tighter" style={{ color: getPreviewColor() }}>
                         {appName || "RevendaPro"}
                       </h4>
-                      <div className={`h-1 w-12 mx-auto rounded-full ${themeId === 'ocean' ? 'bg-[#3B82F6]' : themeId === 'forest' ? 'bg-[#16A34A]' : themeId === 'luxury' ? 'bg-[#D4A017]' : themeId === 'sunset' ? 'bg-[#EA580C]' : 'bg-primary'}`} />
+                      <div className="h-1 w-12 mx-auto rounded-full" style={{ backgroundColor: getPreviewColor() }} />
                     </div>
 
                     <div className={`p-4 rounded-2xl shadow-sm border ${darkMode ? 'bg-slate-800 border-white/10' : 'bg-white border-slate-200'}`}>
                       <div className={`h-3 w-2/3 rounded-full mb-3 ${darkMode ? 'bg-white/20' : 'bg-slate-100'}`} />
                       <div className={`h-2 w-full rounded-full mb-2 ${darkMode ? 'bg-white/10' : 'bg-slate-50'}`} />
-                      <div className={`h-2 w-1/2 rounded-full ${darkMode ? 'bg-white/10' : 'bg-slate-50'}`} />
                     </div>
 
-                    <div className={`p-5 rounded-2xl text-center font-bold text-white shadow-lg ${themeId === 'ocean' ? 'bg-[#3B82F6]' : themeId === 'forest' ? 'bg-[#16A34A]' : themeId === 'luxury' ? 'bg-[#D4A017]' : themeId === 'sunset' ? 'bg-[#EA580C]' : 'bg-primary'}`}>
+                    <div 
+                      className="p-5 rounded-2xl text-center font-bold text-white shadow-lg" 
+                      style={{ backgroundColor: getPreviewColor() }}
+                    >
                       Botão de Exemplo
                     </div>
                   </div>
@@ -218,13 +249,10 @@ export default function SettingsPage() {
                   <Button 
                     onClick={handleSave} 
                     disabled={isSaving}
-                    className="w-full h-16 rounded-2xl font-black text-xl primary-gradient shadow-xl active:scale-95 transition-all"
+                    className="w-full h-16 rounded-2xl font-black text-xl primary-gradient shadow-xl"
                   >
                     {isSaving ? <Loader2 className="h-6 w-6 animate-spin" /> : <><Save className="mr-2 h-6 w-6" /> Aplicar Configurações</>}
                   </Button>
-                  <p className="text-center text-xs text-muted-foreground font-medium mt-4">
-                    Ao clicar em aplicar, as mudanças serão salvas para todos os seus dispositivos.
-                  </p>
                 </div>
               </CardContent>
             </Card>

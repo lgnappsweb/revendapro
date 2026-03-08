@@ -100,6 +100,7 @@
       "properties": {
         "appName": { "type": "string" },
         "themeId": { "type": "string" },
+        "customColor": { "type": "string" },
         "darkMode": { "type": "boolean" },
         "updatedAt": { "type": "string", "format": "date-time" }
       }
