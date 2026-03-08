@@ -251,7 +251,7 @@ export default function ProductsPage() {
       <div className="flex flex-col gap-10">
         <div className="flex flex-col gap-6 py-4">
           <div className="space-y-2 w-full text-center flex flex-col items-center">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-primary text-center lg:whitespace-nowrap">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter text-primary text-center whitespace-nowrap overflow-hidden text-ellipsis w-full px-2">
               Catálogo de Produtos
             </h1>
             <p className="text-muted-foreground font-medium text-lg">Controle seu estoque e preços de venda.</p>

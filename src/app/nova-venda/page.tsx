@@ -178,7 +178,7 @@ export default function NewSalePage() {
     <LayoutWrapper>
       <div className="flex flex-col gap-6">
         <div className="space-y-1 text-center py-4">
-          <h1 className="text-4xl md:text-6xl font-black tracking-tight text-primary">Nova Venda</h1>
+          <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter text-primary text-center whitespace-nowrap overflow-hidden text-ellipsis w-full px-2">Nova Venda</h1>
           <p className="text-muted-foreground font-medium text-lg">Registre uma nova venda de forma rápida e organizada.</p>
         </div>
 
@@ -229,7 +229,7 @@ export default function NewSalePage() {
                       </DialogTrigger>
                       <DialogContent className="sm:max-w-[500px] w-[95vw] rounded-3xl border-primary max-h-[85vh] flex flex-col p-0 overflow-hidden">
                         <DialogHeader className="p-6 pb-0">
-                          <DialogTitle className="text-2xl font-black text-primary uppercase text-center">Selecionar Produto</DialogTitle>
+                          <DialogTitle className="text-2xl font-black text-primary uppercase text-center whitespace-nowrap overflow-hidden text-ellipsis">Selecionar Produto</DialogTitle>
                         </DialogHeader>
                         
                         <div className="px-6 py-4 space-y-4">

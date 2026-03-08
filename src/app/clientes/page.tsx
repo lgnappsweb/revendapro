@@ -211,7 +211,7 @@ export default function ClientsPage() {
       <div className="flex flex-col gap-8">
         <div className="flex flex-col gap-6 py-4">
           <div className="space-y-2 w-full text-center flex flex-col items-center">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-primary">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter text-primary text-center whitespace-nowrap overflow-hidden text-ellipsis w-full px-2">
               Meus Clientes
             </h1>
             <p className="text-muted-foreground font-medium text-lg text-center">Gerencie sua rede de contatos e vendas.</p>
@@ -225,7 +225,7 @@ export default function ClientsPage() {
             <DialogContent className="sm:max-w-[500px] w-[95vw] rounded-3xl border-primary max-h-[90vh] flex flex-col p-0 overflow-hidden">
               <div className="p-8 border-b bg-white">
                 <DialogHeader>
-                  <DialogTitle className="text-3xl font-black text-primary text-center uppercase tracking-tight">
+                  <DialogTitle className="text-3xl font-black text-primary text-center uppercase tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">
                     {editingClient ? "Editar Cliente" : "Novo Cliente"}
                   </DialogTitle>
                 </DialogHeader>
@@ -517,7 +517,7 @@ export default function ClientsPage() {
                       </AvatarFallback>
                     </Avatar>
                   </div>
-                  <DialogTitle className="text-3xl md:text-4xl font-black text-center text-primary leading-tight">
+                  <DialogTitle className="text-3xl md:text-4xl font-black text-center text-primary leading-tight whitespace-nowrap overflow-hidden text-ellipsis">
                     {selectedClientForDetails.name}
                   </DialogTitle>
                   <div className="flex items-center justify-center gap-3">
