@@ -62,6 +62,7 @@ export default function FinancePage() {
   const db = useFirestore()
 
   useEffect(() => {
+    // Evita erros de hidratação garantindo que a data seja definida apenas no cliente
     setCurrentDate(new Date())
   }, [])
 
@@ -180,8 +181,7 @@ export default function FinancePage() {
       const doc = new jsPDF()
       const periodName = selectedPeriod === "hoje" ? todayLabel : selectedPeriod === "mes" ? monthLabel : "Todo o Período"
       
-      // Cabeçalho Profissional
-      doc.setFillColor(194, 24, 91) // Cor Primária RGB (C2185B aproximado)
+      doc.setFillColor(194, 24, 91)
       doc.rect(0, 0, 210, 45, 'F')
       doc.setTextColor(255, 255, 255)
       doc.setFontSize(28)
@@ -189,7 +189,6 @@ export default function FinancePage() {
       doc.setFontSize(12)
       doc.text('Gestão Profissional para Consultoras', 105, 35, { align: 'center' })
       
-      // Info do Relatório
       doc.setTextColor(40, 40, 40)
       doc.setFontSize(14)
       doc.text('RELATÓRIO FINANCEIRO DETALHADO', 14, 55)
@@ -197,7 +196,6 @@ export default function FinancePage() {
       doc.text(`Período Selecionado: ${periodName}`, 14, 62)
       doc.text(`Data de Geração: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}`, 14, 67)
       
-      // Tabela de Resumo
       autoTable(doc, {
         startY: 75,
         head: [['Indicador Financeiro', 'Valor']],
@@ -212,7 +210,6 @@ export default function FinancePage() {
         theme: 'grid'
       })
       
-      // Tabela de Transações
       doc.setFontSize(12)
       doc.text('DETALHAMENTO DO FLUXO DE CAIXA', 14, (doc as any).lastAutoTable.finalY + 15)
       
