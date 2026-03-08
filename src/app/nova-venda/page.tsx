@@ -339,7 +339,7 @@ export default function NewSalePage() {
                             <div className="flex-1">
                               <h4 className="font-bold text-sm text-foreground">{item.name}</h4>
                               <div className="flex items-center gap-2 mt-1">
-                                <Badge variant="outline" className={`rounded-md text-[9px] font-black uppercase px-1.5 py-0.5 ${item.useCost ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-primary/5 text-primary border-primary/10'}`}>
+                                <Badge variant="outline" className={`rounded-md text-[9px] font-black uppercase px-1.5 py-0.5 ${item.useCost ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-primary/10 text-primary border-primary/20'}`}>
                                   {item.useCost ? 'Preço Custo' : 'Preço Revista'}
                                 </Badge>
                                 <span className="text-xs text-muted-foreground font-medium">R$ {(item.useCost ? item.costPrice : item.magazinePrice).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} / un</span>
@@ -361,7 +361,7 @@ export default function NewSalePage() {
                                  variant="outline" 
                                  size="sm" 
                                  onClick={() => toggleItemPriceMode(item.id)}
-                                 className={`h-8 rounded-lg font-bold text-[10px] px-2 uppercase ${item.useCost ? 'border-emerald-200 text-emerald-600 bg-emerald-50' : 'border-primary/20 text-primary'}`}
+                                 className={`h-8 rounded-lg font-bold text-[10px] px-2 uppercase ${item.useCost ? 'border-emerald-500/20 text-emerald-500 bg-emerald-500/10' : 'border-primary/20 text-primary'}`}
                                >
                                  <Tag className="mr-1 h-3 w-3" /> {item.useCost ? 'Usar Revista' : 'Usar Custo'}
                                </Button>
@@ -391,8 +391,8 @@ export default function NewSalePage() {
 
             <Card className="shadow-sm rounded-3xl border-primary/20">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-accent font-black">
-                  <div className="p-2 bg-accent/10 rounded-lg">
+                <CardTitle className="flex items-center gap-2 text-primary font-black">
+                  <div className="p-2 bg-primary/10 rounded-lg">
                     <CreditCard className="h-5 w-5" />
                   </div>
                   Pagamento e Entrega
@@ -429,7 +429,7 @@ export default function NewSalePage() {
                       <Label className="font-bold text-rose-600">Data de Vencimento</Label>
                       <div className="relative">
                         <CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input type="date" className="h-11 pl-10 rounded-xl bg-rose-50 border-rose-100 shadow-none focus:ring-rose-200 font-bold" />
+                        <Input type="date" className="h-11 pl-10 rounded-xl bg-rose-500/10 border-rose-500/20 shadow-none focus:ring-rose-500/20 font-bold" />
                       </div>
                     </div>
                   )}

@@ -203,10 +203,10 @@ export default function FinancePage() {
   }
 
   const stats = [
-    { title: "Saldo Recebido", value: totalReceived, color: "text-emerald-600", bg: "bg-emerald-50", icon: DollarSign, sub: "Recebimentos confirmados" },
-    { title: "Contas a Receber", value: totalPending, color: "text-amber-600", bg: "bg-amber-50", icon: Clock, sub: "Aguardando pagamento" },
-    { title: "Total Vencido", value: totalOverdue, color: "text-rose-600", bg: "bg-rose-50", icon: AlertCircle, sub: "Pagamentos em atraso" },
-    { title: "Faturamento Total", value: totalReceived + totalPending, color: "text-primary", bg: "bg-primary/5", icon: TrendingUp, sub: "Vendas brutas" },
+    { title: "Saldo Recebido", value: totalReceived, color: "text-emerald-500", bg: "bg-emerald-500/10", icon: DollarSign, sub: "Recebimentos confirmados" },
+    { title: "Contas a Receber", value: totalPending, color: "text-amber-500", bg: "bg-amber-500/10", icon: Clock, sub: "Aguardando pagamento" },
+    { title: "Total Vencido", value: totalOverdue, color: "text-rose-500", bg: "bg-rose-500/10", icon: AlertCircle, sub: "Pagamentos em atraso" },
+    { title: "Faturamento Total", value: totalReceived + totalPending, color: "text-primary", bg: "bg-primary/10", icon: TrendingUp, sub: "Vendas brutas" },
   ]
 
   return (
@@ -321,7 +321,7 @@ export default function FinancePage() {
                     <span>Meta de Vendas</span>
                     <span className="text-primary">R$ {totalReceived.toLocaleString('pt-BR')} / R$ 5.000</span>
                   </div>
-                  <Progress value={(totalReceived / 5000) * 100} className="h-3 bg-pink-50" />
+                  <Progress value={(totalReceived / 5000) * 100} className="h-3 bg-pink-500/10" />
                   <p className="text-[10px] text-muted-foreground font-bold text-right italic">
                     {totalReceived >= 5000 ? "Meta batida! Parabéns! 🎉" : `Faltam R$ ${(Math.max(0, 5000 - totalReceived)).toLocaleString('pt-BR')} para o seu objetivo.`}
                   </p>
@@ -330,13 +330,13 @@ export default function FinancePage() {
                 <div className="space-y-3">
                   <div className="flex justify-between text-xs font-black uppercase tracking-wider">
                     <span>Eficiência de Cobrança</span>
-                    <span className="text-emerald-600">
+                    <span className="text-emerald-500">
                       {(totalReceived + totalPending) > 0 ? Math.round((totalReceived / (totalReceived + totalPending)) * 100) : 0}% Recebido
                     </span>
                   </div>
                   <Progress 
                     value={(totalReceived + totalPending) > 0 ? (totalReceived / (totalReceived + totalPending)) * 100 : 0} 
-                    className="h-3 bg-emerald-50 [&>div]:bg-emerald-500" 
+                    className="h-3 bg-emerald-500/10 [&>div]:bg-emerald-500" 
                   />
                   <p className="text-[10px] text-muted-foreground font-bold text-right italic">
                     R$ {totalReceived.toLocaleString('pt-BR')} recebidos de R$ {(totalReceived + totalPending).toLocaleString('pt-BR')}
@@ -367,7 +367,7 @@ function TransactionList({ transactions }: { transactions: any[] }) {
         <div key={item.id} className="flex items-center justify-between p-6 hover:bg-secondary/10 transition-colors group cursor-pointer">
           <div className="flex items-center gap-4 min-w-0">
             <div className={`p-3 rounded-2xl shrink-0 ${
-              item.paymentStatus === 'Pago' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'
+              item.paymentStatus === 'Pago' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'
             }`}>
               {item.paymentStatus === 'Pago' ? <ArrowUpRight className="h-6 w-6" /> : <Clock className="h-6 w-6" />}
             </div>
@@ -379,13 +379,13 @@ function TransactionList({ transactions }: { transactions: any[] }) {
             </div>
           </div>
           <div className="text-right shrink-0">
-            <p className={`font-black text-lg ${item.paymentStatus === 'Pago' ? 'text-emerald-600' : 'text-foreground'}`}>
+            <p className={`font-black text-lg ${item.paymentStatus === 'Pago' ? 'text-emerald-500' : 'text-foreground'}`}>
               R$ {item.finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </p>
             <Badge 
               variant="outline" 
               className={`text-[9px] font-black uppercase tracking-tighter px-1.5 py-0 border-none ${
-                item.paymentStatus === 'Pago' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
+                item.paymentStatus === 'Pago' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'
               }`}
             >
               {item.paymentStatus}
