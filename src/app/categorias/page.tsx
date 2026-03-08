@@ -14,8 +14,7 @@ import {
   Trash2,
   Pencil,
   Tag,
-  Sparkles,
-  ChevronDown
+  Sparkles
 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { 
@@ -120,8 +119,8 @@ export default function CategoriesPage() {
     setEditingCategoryId(category.id)
     setFormData({ name: category.name || "" })
     setAccordionValue(undefined)
-    // Pequeno atraso para evitar conflito de foco com o DropdownMenu
-    setTimeout(() => setIsDialogOpen(true), 100)
+    // Pequeno atraso para garantir que o menu feche antes de abrir o diálogo
+    setTimeout(() => setIsDialogOpen(true), 150)
   }
 
   const handleDeleteConfirm = () => {
@@ -215,7 +214,7 @@ export default function CategoriesPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="rounded-xl w-48">
                         <DropdownMenuItem 
-                          className="font-bold gap-2" 
+                          className="font-bold gap-2 cursor-pointer" 
                           onSelect={(e) => {
                             e.preventDefault();
                             handleEditCategory(category);
@@ -224,10 +223,11 @@ export default function CategoriesPage() {
                           <Pencil className="h-4 w-4 text-blue-500" /> Editar
                         </DropdownMenuItem>
                         <DropdownMenuItem 
-                          className="font-bold gap-2 text-rose-600" 
+                          className="font-bold gap-2 text-rose-600 cursor-pointer" 
                           onSelect={(e) => {
                             e.preventDefault();
-                            setCategoryToDelete(category);
+                            // Atraso para evitar conflito de foco no fechamento do menu
+                            setTimeout(() => setCategoryToDelete(category), 150);
                           }}
                         >
                           <Trash2 className="h-4 w-4" /> Excluir
@@ -288,7 +288,7 @@ export default function CategoriesPage() {
                           className="rounded-xl border-primary/20 hover:border-primary hover:bg-primary/5 text-xs font-bold h-10 px-2 justify-start overflow-hidden text-ellipsis whitespace-nowrap"
                           onClick={() => {
                             setFormData({ ...formData, name: cat });
-                            setAccordionValue(""); // Fecha o menu ao clicar
+                            setAccordionValue(undefined); // Fecha o menu ao clicar
                           }}
                         >
                           <Plus className="h-3 w-3 mr-1 shrink-0" />
