@@ -1,9 +1,10 @@
+
 "use client"
 
 import { useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase"
-import { doc } from "firebase/firestore"
+import { doc, getDoc, setDoc } from "firebase/firestore"
 import { AppSidebar } from "./app-sidebar"
 import { MobileBottomNav } from "./mobile-bottom-nav"
 import { SidebarInset } from "@/components/ui/sidebar"
@@ -18,7 +19,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
 
   const isPublicPage = pathname === "/login" || pathname === "/register"
 
-  // Real-time listener for user profile to support multi-device synchronization
+  // Real-time listener for user profile
   const userDocRef = useMemoFirebase(() => {
     if (!user) return null
     return doc(db, "users", user.uid)
@@ -26,11 +27,27 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
 
   const { data: userProfile } = useDoc(userDocRef)
 
+  // Auth redirection and Admin Auto-Repair logic
   useEffect(() => {
     if (!isUserLoading && !user && !isPublicPage) {
       router.push("/login")
+      return
     }
-  }, [user, isUserLoading, isPublicPage, router])
+
+    // Auto-repair: If user is authenticated but lacks admin record, create it.
+    // This fixes "Missing or insufficient permissions" for existing users.
+    if (user && !isUserLoading && !isPublicPage) {
+      const adminRef = doc(db, "admins", user.uid)
+      getDoc(adminRef).then((snap) => {
+        if (!snap.exists()) {
+          setDoc(adminRef, {
+            id: user.uid,
+            createdAt: new Date().toISOString()
+          })
+        }
+      }).catch(err => console.warn("Admin check skipped:", err))
+    }
+  }, [user, isUserLoading, isPublicPage, router, db])
 
   if (isUserLoading) {
     return (
@@ -63,7 +80,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
         <main className="p-4 md:p-6 lg:p-8 flex justify-center pb-24 md:pb-8">
           <div className="w-full max-w-7xl relative">
             {pathname !== "/" && (
-              <div className="h-16 md:h-12 mb-4">
+              <div className="h-20 mb-4">
                 <Button
                   variant="outline"
                   size="sm"

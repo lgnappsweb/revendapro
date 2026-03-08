@@ -18,7 +18,7 @@ service cloud.firestore {
     
     match /admins/{adminId} {
       // Permite que o próprio usuário leia e crie seu registro de admin
-      // Isso é necessário para o fluxo de registro inicial
+      // Isso é fundamental para o primeiro acesso e auto-correção
       allow read, write: if isAuthenticated() && request.auth.uid == adminId;
     }
 
