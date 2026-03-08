@@ -84,7 +84,7 @@ export default function NewSalePage() {
   const [productSearch, setProductSearch] = useState("")
   const [dialogActiveTab, setDialogActiveTab] = useState("todos")
   const [isProductPickerOpen, setIsProductPickerOpen] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isProcessing, setIsProcessing] = useState(false)
   const [itemToRemove, setItemToRemove] = useState<CartItem | null>(null)
   const [showProfit, setShowProfit] = useState(true)
   
@@ -105,17 +105,8 @@ export default function NewSalePage() {
   const { data: dbProducts, isLoading: loadingProducts } = useCollection(productsRef)
   const { data: dbClients, isLoading: loadingClients } = useCollection(clientsRef)
 
-  // Subtotal é o que a revendedora cobra do cliente (Preço Revendedora)
-  const subtotal = items.reduce((acc, item) => {
-    return acc + (item.resellerPrice * item.qty)
-  }, 0)
-
-  // Custo é o que a consultora paga à marca
-  const totalCost = items.reduce((acc, item) => {
-    return acc + (item.costPrice * item.qty)
-  }, 0)
-
-  // Desconto (Sua Margem) é a diferença entre o que você cobra e o que você paga
+  const subtotal = items.reduce((acc, item) => acc + (item.resellerPrice * item.qty), 0)
+  const totalCost = items.reduce((acc, item) => acc + (item.costPrice * item.qty), 0)
   const totalMargin = Math.max(0, subtotal - totalCost)
 
   const handleAddProductToCart = (product: any) => {
@@ -155,20 +146,12 @@ export default function NewSalePage() {
   }
 
   const handleFinalize = async () => {
-    if (!selectedClientId) {
-      toast({ title: "Selecione um cliente", variant: "destructive" })
-      return
-    }
-    if (items.length === 0) {
-      toast({ title: "Adicione produtos ao pedido", variant: "destructive" })
-      return
-    }
-    if (!paymentMethod) {
-      toast({ title: "Selecione o método de pagamento", variant: "destructive" })
+    if (!selectedClientId || items.length === 0 || !paymentMethod || isProcessing) {
+      toast({ title: "Verifique os dados da venda", variant: "destructive" })
       return
     }
 
-    setIsSubmitting(true)
+    setIsProcessing(true)
     try {
       const selectedClient = dbClients?.find(c => c.id === selectedClientId)
       const saleData = {
@@ -192,10 +175,12 @@ export default function NewSalePage() {
       await addDoc(collection(db, "orders"), saleData)
       toast({ title: "Venda Registrada!" })
       router.push('/pedidos')
-    } catch (error) { 
+    } catch (error: any) { 
+      console.error("Erro ao finalizar venda:", error)
       toast({ title: "Erro ao salvar", variant: "destructive" }) 
+    } finally { 
+      setIsProcessing(false) 
     }
-    finally { setIsSubmitting(false) }
   }
 
   const filteredProducts = dbProducts?.filter(p => {
@@ -209,6 +194,15 @@ export default function NewSalePage() {
 
   return (
     <LayoutWrapper>
+      {isProcessing && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-card p-8 rounded-[2.5rem] shadow-2xl flex flex-col items-center gap-4 border-2 border-primary">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <p className="font-black text-primary uppercase tracking-widest text-sm animate-pulse">Finalizando Venda...</p>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col gap-8 w-full max-w-full overflow-x-hidden">
         <div className="flex flex-col gap-2 items-center text-center">
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-primary uppercase">Nova Venda</h1>
@@ -226,7 +220,7 @@ export default function NewSalePage() {
               <CardContent className="space-y-6 p-8">
                 <div className="space-y-2">
                   <Label className="font-bold text-muted-foreground text-base">Selecione o Cliente</Label>
-                  <Select value={selectedClientId} onValueChange={setSelectedClientId}>
+                  <Select value={selectedClientId} onValueChange={setSelectedClientId} disabled={isProcessing}>
                     <SelectTrigger className="rounded-xl h-12 bg-muted/30 border-none text-base font-medium">
                       <SelectValue placeholder="Escolha um cliente..." />
                     </SelectTrigger>
@@ -244,6 +238,7 @@ export default function NewSalePage() {
                     onClick={() => setIsProductPickerOpen(true)} 
                     className="w-full sm:w-auto rounded-xl font-bold border-primary text-primary h-12 px-6"
                     variant="outline"
+                    disabled={isProcessing}
                   >
                     <Plus className="h-5 w-5 mr-2" /> Buscar Produtos
                   </Button>
@@ -272,6 +267,7 @@ export default function NewSalePage() {
                             size="icon" 
                             className="text-rose-500 hover:bg-rose-50"
                             onClick={() => setItemToRemove(item)}
+                            disabled={isProcessing}
                           >
                             <Trash2 className="h-5 w-5" />
                           </Button>
@@ -279,9 +275,9 @@ export default function NewSalePage() {
                         
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-1 bg-secondary/50 rounded-xl p-1">
-                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => updateQty(item.id, -1)}><Minus className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => updateQty(item.id, -1)} disabled={isProcessing}><Minus className="h-4 w-4" /></Button>
                             <span className="w-10 text-center font-black text-sm">{item.qty}</span>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => updateQty(item.id, 1)}><Plus className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => updateQty(item.id, 1)} disabled={isProcessing}><Plus className="h-4 w-4" /></Button>
                           </div>
                           <span className="font-black text-xl text-primary">
                             R$ {(item.resellerPrice * item.qty).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
@@ -310,7 +306,8 @@ export default function NewSalePage() {
                    ].map(method => (
                      <button
                        key={method.id}
-                       onClick={() => setPaymentMethod(method.id)}
+                       onClick={() => !isProcessing && setPaymentMethod(method.id)}
+                       disabled={isProcessing}
                        className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all gap-2 ${paymentMethod === method.id ? 'border-primary bg-primary/5' : 'border-transparent bg-muted/20 hover:bg-muted/30'}`}
                      >
                         <method.icon className={`h-6 w-6 ${method.color}`} />
@@ -409,6 +406,7 @@ export default function NewSalePage() {
                       checked={showProfit} 
                       onCheckedChange={setShowProfit}
                       className="data-[state=checked]:bg-emerald-500"
+                      disabled={isProcessing}
                     />
                   </div>
 
@@ -432,10 +430,10 @@ export default function NewSalePage() {
 
                 <Button 
                   onClick={handleFinalize} 
-                  disabled={isSubmitting || items.length === 0} 
+                  disabled={isProcessing || items.length === 0} 
                   className="w-full h-16 rounded-2xl bg-white text-primary hover:bg-white/90 mt-4 text-xl font-black uppercase tracking-tight shadow-xl active:scale-95 transition-all"
                 >
-                  {isSubmitting ? <Loader2 className="h-6 w-6 animate-spin" /> : "Finalizar Venda"}
+                  {isProcessing ? <Loader2 className="h-6 w-6 animate-spin" /> : "Finalizar Venda"}
                 </Button>
               </CardContent>
             </Card>
@@ -443,7 +441,7 @@ export default function NewSalePage() {
         </div>
       </div>
       
-      <Dialog open={isProductPickerOpen} onOpenChange={setIsProductPickerOpen}>
+      <Dialog open={isProductPickerOpen} onOpenChange={(o) => !isProcessing && setIsProductPickerOpen(o)}>
          <DialogContent className="sm:max-w-[550px] w-[95vw] rounded-[2rem] p-0 overflow-hidden border-primary">
             <div className="p-6 bg-card border-b flex flex-col gap-4">
                 <DialogTitle className="text-xl font-black text-primary uppercase text-center tracking-tight">Selecionar Produtos</DialogTitle>
@@ -454,6 +452,7 @@ export default function NewSalePage() {
                     className="h-12 pl-10 rounded-xl bg-muted/30 border-none font-medium"
                     value={productSearch}
                     onChange={(e) => setProductSearch(e.target.value)}
+                    disabled={isProcessing}
                   />
                 </div>
                 <Tabs value={dialogActiveTab} onValueChange={setDialogActiveTab} className="w-full">
@@ -475,6 +474,7 @@ export default function NewSalePage() {
                          key={p.id} 
                          onClick={() => handleAddProductToCart(p)} 
                          className="p-4 rounded-2xl border border-primary/10 text-left hover:bg-primary/5 transition-all flex justify-between items-center group"
+                         disabled={isProcessing}
                        >
                           <div className="flex flex-col min-w-0 pr-4">
                             <span className="font-bold text-base group-hover:text-primary truncate">{p.name}</span>
@@ -501,8 +501,8 @@ export default function NewSalePage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-xl font-bold">Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmRemove} className="rounded-xl font-bold bg-rose-600 hover:bg-rose-700">Remover</AlertDialogAction>
+            <AlertDialogCancel className="rounded-xl font-bold" disabled={isProcessing}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmRemove} className="rounded-xl font-bold bg-rose-600 hover:bg-rose-700" disabled={isProcessing}>Remover</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

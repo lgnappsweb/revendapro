@@ -72,7 +72,7 @@ export default function ProductsPage() {
   const [activeTab, setActiveTab] = useState("todos")
   const [searchTerm, setSearchTerm] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
+  const [isProcessing, setIsProcessing] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<any>(null)
   const [productToDelete, setProductToDelete] = useState<any>(null)
   const [editingProductId, setEditingProductId] = useState<string | null>(null)
@@ -130,12 +130,14 @@ export default function ProductsPage() {
   }
 
   const handleOpenNewProduct = () => {
+    if (isProcessing) return
     setEditingProductId(null)
     setFormData({ name: "", brand: "Natura", category: "", price: "", cost: "", resellerPrice: "", code: "", description: "" })
     setIsDialogOpen(true)
   }
 
   const handleEditProduct = (product: any) => {
+    if (isProcessing) return
     setEditingProductId(product.id)
     setFormData({
       name: product.name || "",
@@ -151,30 +153,35 @@ export default function ProductsPage() {
     setIsDialogOpen(true)
   }
 
-  const handleDeleteConfirm = () => {
-    if (!productToDelete) return
+  const handleDeleteConfirm = async () => {
+    if (!productToDelete || isProcessing) return
     const productId = productToDelete.id
+    setIsProcessing(true)
     setProductToDelete(null)
 
-    const docRef = doc(db, "products", productId)
-    deleteDoc(docRef)
-      .then(() => {
-        toast({ title: "Produto removido!" })
-      })
-      .catch(async () => {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({
-          path: docRef.path,
-          operation: 'delete'
-        }))
-      })
+    try {
+      const docRef = doc(db, "products", productId)
+      await deleteDoc(docRef)
+      toast({ title: "Produto removido!" })
+    } catch (error: any) {
+      console.error("Erro ao excluir produto:", error)
+      errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: `products/${productId}`,
+        operation: 'delete'
+      }))
+      toast({ title: "Erro ao excluir", variant: "destructive" })
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
-  const handleSaveProduct = () => {
-    if (!formData.name || !formData.price || !formData.category) {
+  const handleSaveProduct = async () => {
+    if (!formData.name || !formData.price || !formData.category || isProcessing) {
       toast({ title: "Preencha os campos obrigatórios", variant: "destructive" })
       return
     }
-    setIsSaving(true)
+
+    setIsProcessing(true)
     const parseCurrencyToNumber = (val: string) => val ? parseFloat(val.replace(/\./g, '').replace(',', '.')) : 0;
     const productData = { 
       ...formData, 
@@ -184,27 +191,26 @@ export default function ProductsPage() {
       updatedAt: serverTimestamp() 
     }
 
-    const currentEditingId = editingProductId
-
-    if (currentEditingId) {
-      const docRef = doc(db, "products", currentEditingId)
-      updateDoc(docRef, productData)
-        .then(() => { toast({ title: "Atualizado!" }); })
-        .catch(async () => errorEmitter.emit('permission-error', new FirestorePermissionError({ path: docRef.path, operation: 'update', requestResourceData: productData })))
-        .finally(() => {
-          setIsSaving(false)
-          setIsDialogOpen(false)
-        })
-    } else {
-      if (productsRef) {
-        addDoc(productsRef, { ...productData, createdAt: serverTimestamp() })
-          .then(() => { toast({ title: "Salvo!" }); })
-          .catch(async () => errorEmitter.emit('permission-error', new FirestorePermissionError({ path: 'products', operation: 'create', requestResourceData: productData })))
-          .finally(() => {
-            setIsSaving(false)
-            setIsDialogOpen(false)
-          })
+    try {
+      if (editingProductId) {
+        const docRef = doc(db, "products", editingProductId)
+        await updateDoc(docRef, productData)
+        toast({ title: "Atualizado!" })
+      } else {
+        await addDoc(collection(db, "products"), { ...productData, createdAt: serverTimestamp() })
+        toast({ title: "Salvo!" })
       }
+      setIsDialogOpen(false)
+    } catch (error: any) {
+      console.error("Erro ao salvar produto:", error)
+      errorEmitter.emit('permission-error', new FirestorePermissionError({ 
+        path: editingProductId ? `products/${editingProductId}` : 'products', 
+        operation: editingProductId ? 'update' : 'create', 
+        requestResourceData: productData 
+      }))
+      toast({ title: "Erro ao salvar", variant: "destructive" })
+    } finally {
+      setIsProcessing(false)
     }
   }
 
@@ -216,6 +222,15 @@ export default function ProductsPage() {
 
   return (
     <LayoutWrapper>
+      {isProcessing && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-card p-8 rounded-[2.5rem] shadow-2xl flex flex-col items-center gap-4 border-2 border-primary">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <p className="font-black text-primary uppercase tracking-widest text-sm animate-pulse">Processando...</p>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col gap-8 w-full max-w-full overflow-x-hidden">
         <div className="flex flex-col gap-6 items-center text-center">
           <div className="flex flex-col gap-2">
@@ -224,7 +239,7 @@ export default function ProductsPage() {
             </h1>
             <p className="text-muted-foreground font-medium text-lg">Catálogo e gestão de estoque.</p>
           </div>
-          <Button onClick={handleOpenNewProduct} className="w-full max-w-md rounded-2xl font-bold bg-primary hover:bg-primary/90 shadow-lg h-14 text-lg">
+          <Button onClick={handleOpenNewProduct} disabled={isProcessing} className="w-full max-w-md rounded-2xl font-bold bg-primary hover:bg-primary/90 shadow-lg h-14 text-lg">
             <Plus className="mr-2 h-6 w-6" /> Novo Produto
           </Button>
         </div>
@@ -269,7 +284,7 @@ export default function ProductsPage() {
                         </div>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 hover:bg-primary/10">
+                            <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 hover:bg-primary/10" disabled={isProcessing}>
                               <MoreVertical className="h-4 w-4 text-primary" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -311,6 +326,7 @@ export default function ProductsPage() {
                         size="sm" 
                         onClick={() => setSelectedProduct(product)} 
                         className="rounded-xl font-bold bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all"
+                        disabled={isProcessing}
                       >
                         Ver Detalhes
                       </Button>
@@ -397,6 +413,7 @@ export default function ProductsPage() {
                    variant="outline" 
                    className="flex-1 h-14 rounded-2xl font-bold border-primary text-primary" 
                    onClick={() => handleEditProduct(selectedProduct)}
+                   disabled={isProcessing}
                  >
                     <Pencil className="h-4 w-4 mr-2" /> Editar
                  </Button>
@@ -407,7 +424,7 @@ export default function ProductsPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isDialogOpen} onOpenChange={(o) => !isProcessing && setIsDialogOpen(o)}>
         <DialogContent className="sm:max-w-[550px] w-[95vw] rounded-3xl border-primary max-h-[90vh] flex flex-col p-0 overflow-hidden">
           <div className="p-8 border-b bg-card">
             <DialogHeader>
@@ -421,7 +438,7 @@ export default function ProductsPage() {
             <div className="grid gap-6">
               <div className="grid gap-2">
                 <Label className="font-bold text-muted-foreground">Nome do Produto</Label>
-                <Input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="Ex: Kaiak Aventura 100ml" className="rounded-xl border-primary/30 h-11 bg-card" />
+                <Input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="Ex: Kaiak Aventura 100ml" className="rounded-xl border-primary/30 h-11 bg-card" disabled={isProcessing} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
@@ -429,7 +446,7 @@ export default function ProductsPage() {
                   <Select value={formData.brand} onValueChange={v => {
                     const calculatedCost = calculateCost(formData.price, v);
                     setFormData({...formData, brand: v, cost: calculatedCost});
-                  }}>
+                  }} disabled={isProcessing}>
                     <SelectTrigger className="rounded-xl border-primary/30 h-11 bg-card"><SelectValue /></SelectTrigger>
                     <SelectContent className="rounded-xl">
                       <SelectItem value="Natura">Natura</SelectItem>
@@ -440,7 +457,7 @@ export default function ProductsPage() {
                 </div>
                 <div className="grid gap-2">
                   <Label className="font-bold text-muted-foreground">Categoria</Label>
-                  <Select value={formData.category} onValueChange={v => setFormData({...formData, category: v})}>
+                  <Select value={formData.category} onValueChange={v => setFormData({...formData, category: v})} disabled={isProcessing}>
                     <SelectTrigger className="rounded-xl border-primary/30 h-11 bg-card"><SelectValue placeholder="Selecione..." /></SelectTrigger>
                     <SelectContent className="rounded-xl">
                       {categories?.map(cat => <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>)}
@@ -451,20 +468,20 @@ export default function ProductsPage() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="grid gap-2">
                   <Label className="font-bold text-muted-foreground">Preço Revista</Label>
-                  <Input value={formData.price} onChange={e => handlePriceChange(e, 'price')} className="rounded-xl border-primary/30 h-11 bg-card" placeholder="0,00" />
+                  <Input value={formData.price} onChange={e => handlePriceChange(e, 'price')} className="rounded-xl border-primary/30 h-11 bg-card" placeholder="0,00" disabled={isProcessing} />
                 </div>
                 <div className="grid gap-2">
                   <Label className="font-bold text-muted-foreground">Preço Custo (Automático)</Label>
-                  <Input value={formData.cost} onChange={e => handlePriceChange(e, 'cost')} className="rounded-xl border-primary/30 h-11 bg-card bg-muted/20" placeholder="Calculado..." />
+                  <Input value={formData.cost} onChange={e => handlePriceChange(e, 'cost')} className="rounded-xl border-primary/30 h-11 bg-card bg-muted/20" placeholder="Calculado..." disabled={true} />
                 </div>
                 <div className="grid gap-2">
                   <Label className="font-bold text-muted-foreground">Preço Revendedora (Final)</Label>
-                  <Input value={formData.resellerPrice} onChange={e => handlePriceChange(e, 'resellerPrice')} className="rounded-xl border-primary/30 h-11 bg-card border-emerald-500/30" placeholder="Seu valor..." />
+                  <Input value={formData.resellerPrice} onChange={e => handlePriceChange(e, 'resellerPrice')} className="rounded-xl border-primary/30 h-11 bg-card border-emerald-500/30" placeholder="Seu valor..." disabled={isProcessing} />
                 </div>
               </div>
               <div className="grid gap-2">
                 <Label className="font-bold text-muted-foreground">Código de Referência</Label>
-                <Input value={formData.code} onChange={e => setFormData({...formData, code: e.target.value})} placeholder="Ex: 50123" className="rounded-xl border-primary/30 h-11 bg-card" />
+                <Input value={formData.code} onChange={e => setFormData({...formData, code: e.target.value})} placeholder="Ex: 50123" className="rounded-xl border-primary/30 h-11 bg-card" disabled={isProcessing} />
               </div>
               <div className="grid gap-2">
                 <Label className="font-bold text-muted-foreground ml-1">Descrição / Notas</Label>
@@ -473,17 +490,18 @@ export default function ProductsPage() {
                    onChange={e => setFormData({...formData, description: e.target.value})} 
                    placeholder="Detalhes do produto..."
                    className="rounded-xl border-primary/30 min-h-[100px] bg-card"
+                   disabled={isProcessing}
                 />
               </div>
-              <Button onClick={handleSaveProduct} disabled={isSaving} className="w-full rounded-xl font-bold h-14 text-lg primary-gradient shadow-lg">
-                {isSaving ? <Loader2 className="h-6 w-6 animate-spin" /> : "Salvar Produto"}
+              <Button onClick={handleSaveProduct} disabled={isProcessing} className="w-full rounded-xl font-bold h-14 text-lg primary-gradient shadow-lg">
+                {isProcessing ? <Loader2 className="h-6 w-6 animate-spin" /> : "Salvar Produto"}
               </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={!!productToDelete} onOpenChange={(o) => !o && setProductToDelete(null)}>
+      <AlertDialog open={!!productToDelete} onOpenChange={(o) => !isProcessing && setProductToDelete(null)}>
         <AlertDialogContent className="rounded-3xl border-primary">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-2xl font-black text-primary uppercase">Excluir Produto?</AlertDialogTitle>
@@ -498,8 +516,10 @@ export default function ProductsPage() {
                 <AccordionContent className="text-xs text-muted-foreground">A exclusão remove o item apenas do catálogo. Vendas passadas que contém este produto não serão afetadas.</AccordionContent>
               </AccordionItem>
             </Accordion>
-            <AlertDialogCancel className="rounded-xl font-bold">Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm} className="rounded-xl font-bold bg-rose-600 hover:bg-rose-700">Confirmar Exclusão</AlertDialogAction>
+            <AlertDialogCancel className="rounded-xl font-bold" disabled={isProcessing}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} disabled={isProcessing} className="rounded-xl font-bold bg-rose-600 hover:bg-rose-700">
+              {isProcessing ? "Excluindo..." : "Confirmar Exclusão"}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

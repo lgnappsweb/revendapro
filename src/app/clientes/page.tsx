@@ -68,7 +68,7 @@ import { Separator } from "@/components/ui/separator"
 export default function ClientsPage() {
   const { user } = useUser()
   const [searchTerm, setSearchTerm] = useState("")
-  const [isSaving, setIsSaving] = useState(false)
+  const [isProcessing, setIsProcessing] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingClient, setEditingClient] = useState<any>(null)
   const [clientToDelete, setClientToDelete] = useState<any>(null)
@@ -112,12 +112,14 @@ export default function ClientsPage() {
   };
 
   const handleOpenAdd = () => {
+    if (isProcessing) return
     setEditingClient(null)
     setFormData({ name: "", phone: "", city: "", neighborhood: "", notes: "" })
     setIsDialogOpen(true)
   }
 
   const handleOpenEdit = (client: any) => {
+    if (isProcessing) return
     setEditingClient(client)
     setFormData({
       name: client.name || "",
@@ -129,8 +131,10 @@ export default function ClientsPage() {
     setIsDialogOpen(true)
   }
 
-  const handleSaveClient = (e: React.FormEvent) => {
+  const handleSaveClient = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (isProcessing) return
+    
     if (!formData.name || !formData.phone) {
       toast({
         title: "Campos obrigatórios",
@@ -140,72 +144,59 @@ export default function ClientsPage() {
       return
     }
 
-    setIsSaving(true)
+    setIsProcessing(true)
     const clientData = {
       ...formData,
       updatedAt: serverTimestamp()
     }
 
-    const currentEditingClient = editingClient
-
-    if (currentEditingClient) {
-      const clientDocRef = doc(db, "clients", currentEditingClient.id)
-      updateDoc(clientDocRef, clientData)
-        .then(() => {
-          toast({ title: "Cliente Atualizado" })
+    try {
+      if (editingClient) {
+        const clientDocRef = doc(db, "clients", editingClient.id)
+        await updateDoc(clientDocRef, clientData)
+        toast({ title: "Cliente Atualizado" })
+      } else {
+        await addDoc(collection(db, "clients"), {
+          ...clientData,
+          createdAt: serverTimestamp()
         })
-        .catch(async (error) => {
-          errorEmitter.emit('permission-error', new FirestorePermissionError({
-            path: clientDocRef.path,
-            operation: 'update',
-            requestResourceData: clientData,
-          }))
-        })
-        .finally(() => {
-          setIsSaving(false)
-          setIsDialogOpen(false)
-        })
-    } else {
-      const newClient = {
-        ...clientData,
-        createdAt: serverTimestamp()
+        toast({ title: "Cliente Cadastrado" })
       }
-      if (clientsRef) {
-        addDoc(clientsRef, newClient)
-          .then(() => {
-            toast({ title: "Cliente Cadastrado" })
-          })
-          .catch(async (error) => {
-            errorEmitter.emit('permission-error', new FirestorePermissionError({
-              path: 'clients',
-              operation: 'create',
-              requestResourceData: newClient,
-            }))
-          })
-          .finally(() => {
-            setIsSaving(false)
-            setIsDialogOpen(false)
-          })
-      }
+      setIsDialogOpen(false)
+    } catch (error: any) {
+      console.error("Erro ao salvar cliente:", error)
+      errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: editingClient ? `clients/${editingClient.id}` : 'clients',
+        operation: editingClient ? 'update' : 'create',
+        requestResourceData: clientData,
+      }))
+      toast({ title: "Erro ao salvar", variant: "destructive" })
+    } finally {
+      setIsProcessing(false)
     }
   }
 
-  const handleDeleteClient = () => {
-    if (!clientToDelete) return
+  const handleDeleteClient = async () => {
+    if (!clientToDelete || isProcessing) return
+    
     const clientId = clientToDelete.id
+    setIsProcessing(true)
     setClientToDelete(null)
 
-    const clientDocRef = doc(db, "clients", clientId)
-    deleteDoc(clientDocRef)
-      .then(() => {
-        toast({ title: "Cliente removido" })
-      })
-      .catch(async (error) => {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({
-          path: clientDocRef.path,
-          operation: 'delete',
-        }))
-      })
+    try {
+      const clientDocRef = doc(db, "clients", clientId)
+      await deleteDoc(clientDocRef)
+      toast({ title: "Cliente removido" })
+    } catch (error: any) {
+      console.error("Erro ao excluir cliente:", error)
+      errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: `clients/${clientId}`,
+        operation: 'delete',
+      }))
+      toast({ title: "Erro ao excluir", variant: "destructive" })
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
   const filteredClients = clients?.filter(c => 
@@ -220,6 +211,15 @@ export default function ClientsPage() {
 
   return (
     <LayoutWrapper>
+      {isProcessing && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-card p-8 rounded-[2.5rem] shadow-2xl flex flex-col items-center gap-4 border-2 border-primary">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <p className="font-black text-primary uppercase tracking-widest text-sm animate-pulse">Processando...</p>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col gap-8 w-full max-w-full overflow-x-hidden">
         <div className="flex flex-col gap-6 items-center text-center">
           <div className="flex flex-col gap-2">
@@ -229,11 +229,11 @@ export default function ClientsPage() {
             <p className="text-muted-foreground font-medium text-lg">Gerencie sua rede de contatos e fidelize seus compradores.</p>
           </div>
           
-          <Button onClick={handleOpenAdd} className="w-full max-w-md rounded-2xl font-bold bg-primary hover:bg-primary/90 shadow-lg h-14 text-lg">
+          <Button onClick={handleOpenAdd} disabled={isProcessing} className="w-full max-w-md rounded-2xl font-bold bg-primary hover:bg-primary/90 shadow-lg h-14 text-lg">
             <UserPlus className="mr-2 h-6 w-6" /> Adicionar Cliente
           </Button>
 
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <Dialog open={isDialogOpen} onOpenChange={(o) => !isProcessing && setIsDialogOpen(o)}>
             <DialogContent className="sm:max-w-[500px] w-[95vw] rounded-3xl border-primary max-h-[90vh] flex flex-col p-0 overflow-hidden">
               <div className="p-8 border-b bg-card">
                 <DialogHeader>
@@ -253,6 +253,7 @@ export default function ClientsPage() {
                       onChange={e => setFormData({...formData, name: e.target.value})}
                       placeholder="Ex: Maria Santos" 
                       className="rounded-xl border-primary/30 h-11 bg-card" 
+                      disabled={isProcessing}
                     />
                   </div>
                   <div className="grid gap-2">
@@ -263,6 +264,7 @@ export default function ClientsPage() {
                       onChange={handlePhoneChange}
                       placeholder="(11) 99999-9999" 
                       className="rounded-xl border-primary/30 h-11 bg-card" 
+                      disabled={isProcessing}
                     />
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -273,6 +275,7 @@ export default function ClientsPage() {
                         value={formData.city}
                         onChange={e => setFormData({...formData, city: e.target.value})}
                         className="rounded-xl border-primary/30 h-11 bg-card" 
+                        disabled={isProcessing}
                       />
                     </div>
                     <div className="grid gap-2">
@@ -282,6 +285,7 @@ export default function ClientsPage() {
                         value={formData.neighborhood}
                         onChange={e => setFormData({...formData, neighborhood: e.target.value})}
                         className="rounded-xl border-primary/30 h-11 bg-card" 
+                        disabled={isProcessing}
                       />
                     </div>
                   </div>
@@ -293,12 +297,13 @@ export default function ClientsPage() {
                       onChange={e => setFormData({...formData, notes: e.target.value})}
                       className="rounded-xl border-primary/30 min-h-[100px] bg-card" 
                       placeholder="Observações importantes..." 
+                      disabled={isProcessing}
                     />
                   </div>
                   
                   <div className="pt-2 pb-6">
-                    <Button type="submit" disabled={isSaving} className="w-full rounded-xl font-bold h-14 text-lg primary-gradient shadow-lg">
-                      {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : "Salvar Cliente"}
+                    <Button type="submit" disabled={isProcessing} className="w-full rounded-xl font-bold h-14 text-lg primary-gradient shadow-lg">
+                      {isProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : "Salvar Cliente"}
                     </Button>
                   </div>
                 </form>
@@ -353,7 +358,7 @@ export default function ClientsPage() {
                           </div>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="rounded-full h-10 w-10">
+                              <Button variant="ghost" size="icon" className="rounded-full h-10 w-10" disabled={isProcessing}>
                                 <MoreVertical className="h-5 w-5" />
                               </Button>
                             </DropdownMenuTrigger>
@@ -467,7 +472,7 @@ export default function ClientsPage() {
                               </Button>
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button size="icon" variant="ghost" className="rounded-full h-9 w-9">
+                                  <Button size="icon" variant="ghost" className="rounded-full h-9 w-9" disabled={isProcessing}>
                                     <MoreVertical className="h-5 w-5" />
                                   </Button>
                                 </DropdownMenuTrigger>
@@ -583,7 +588,7 @@ export default function ClientsPage() {
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={!!clientToDelete} onOpenChange={(o) => !o && setClientToDelete(null)}>
+      <AlertDialog open={!!clientToDelete} onOpenChange={(o) => !isProcessing && setClientToDelete(null)}>
         <AlertDialogContent className="rounded-3xl border-primary">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-2xl font-black text-primary">Excluir Cliente?</AlertDialogTitle>
@@ -592,9 +597,9 @@ export default function ClientsPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-xl font-bold">Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteClient} className="rounded-xl font-bold bg-rose-600 hover:bg-rose-700">
-              Confirmar
+            <AlertDialogCancel className="rounded-xl font-bold" disabled={isProcessing}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteClient} disabled={isProcessing} className="rounded-xl font-bold bg-rose-600 hover:bg-rose-700">
+              {isProcessing ? "Excluindo..." : "Confirmar"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

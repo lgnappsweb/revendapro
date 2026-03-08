@@ -81,8 +81,7 @@ export default function OrdersPage() {
   const [selectedOrder, setSelectedOrder] = useState<any>(null)
   const [orderToDelete, setOrderToDelete] = useState<any>(null)
   const [editingOrder, setEditingOrder] = useState<any>(null)
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
+  const [isProcessing, setIsProcessing] = useState(false)
   
   const db = useFirestore()
   const { toast } = useToast()
@@ -107,6 +106,7 @@ export default function OrdersPage() {
   ) || []
 
   const handleOpenEdit = (order: any) => {
+    if (isProcessing) return
     setEditingOrder(order)
     setEditFormData({
       paymentStatus: order.paymentStatus || "Pendente",
@@ -119,9 +119,9 @@ export default function OrdersPage() {
     })
   }
 
-  const handleSaveEdit = () => {
-    if (!editingOrder) return
-    setIsSaving(true)
+  const handleSaveEdit = async () => {
+    if (!editingOrder || isProcessing) return
+    setIsProcessing(true)
     
     const currentOrder = editingOrder
     const docRef = doc(db, "orders", currentOrder.id)
@@ -141,44 +141,43 @@ export default function OrdersPage() {
       updateData.createdAt = new Date(editFormData.date)
     }
 
-    updateDoc(docRef, updateData)
-      .then(() => {
-        toast({ title: "Pedido atualizado!" })
-      })
-      .catch(async (error: any) => {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({
-          path: docRef.path,
-          operation: 'update',
-          requestResourceData: updateData
-        }))
-      })
-      .finally(() => {
-        setIsSaving(false)
-        setEditingOrder(null)
-      })
+    try {
+      await updateDoc(docRef, updateData)
+      toast({ title: "Pedido atualizado!" })
+      setEditingOrder(null)
+    } catch (error: any) {
+      console.error("Erro ao salvar pedido:", error)
+      errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: docRef.path,
+        operation: 'update',
+        requestResourceData: updateData
+      }))
+      toast({ title: "Erro ao salvar", variant: "destructive" })
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
-  const handleDeleteOrder = () => {
-    if (!orderToDelete) return
-    setIsDeleting(true)
-    
+  const handleDeleteOrder = async () => {
+    if (!orderToDelete || isProcessing) return
+    setIsProcessing(true)
     const orderId = orderToDelete.id
     setOrderToDelete(null)
 
-    const docRef = doc(db, "orders", orderId)
-    deleteDoc(docRef)
-      .then(() => {
-        toast({ title: "Pedido removido com sucesso" })
-      })
-      .catch(async (error: any) => {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({
-          path: docRef.path,
-          operation: 'delete'
-        }))
-      })
-      .finally(() => {
-        setIsDeleting(false)
-      })
+    try {
+      const docRef = doc(db, "orders", orderId)
+      await deleteDoc(docRef)
+      toast({ title: "Pedido removido!" })
+    } catch (error: any) {
+      console.error("Erro ao excluir pedido:", error)
+      errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: `orders/${orderId}`,
+        operation: 'delete'
+      }))
+      toast({ title: "Erro ao excluir", variant: "destructive" })
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
   const getMethodIcon = (method: string) => {
@@ -192,6 +191,15 @@ export default function OrdersPage() {
 
   return (
     <LayoutWrapper>
+      {isProcessing && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-card p-8 rounded-[2.5rem] shadow-2xl flex flex-col items-center gap-4 border-2 border-primary">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <p className="font-black text-primary uppercase tracking-widest text-sm animate-pulse">Processando...</p>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col gap-8 w-full max-w-full overflow-x-hidden">
         <div className="flex flex-col gap-6 items-center text-center">
           <div className="flex flex-col gap-2">
@@ -251,7 +259,7 @@ export default function OrdersPage() {
                             </Badge>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" disabled={isProcessing}>
                                   <MoreVertical className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
@@ -289,7 +297,7 @@ export default function OrdersPage() {
                         </div>
                         <div className="flex items-center justify-between border-t pt-3">
                           <span className="text-lg font-black text-primary">R$ {order.finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                          <Button variant="secondary" size="sm" onClick={() => setSelectedOrder(order)} className="rounded-xl font-bold bg-secondary/50 h-10 px-4">Detalhes</Button>
+                          <Button variant="secondary" size="sm" onClick={() => setSelectedOrder(order)} className="rounded-xl font-bold bg-secondary/50 h-10 px-4" disabled={isProcessing}>Detalhes</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -334,10 +342,10 @@ export default function OrdersPage() {
                           </TableCell>
                           <TableCell className="px-8 text-right">
                             <div className="flex items-center justify-end gap-2">
-                              <Button variant="secondary" size="sm" onClick={() => setSelectedOrder(order)} className="rounded-xl font-bold bg-secondary/50 h-10 px-4">Detalhes <ChevronRight className="ml-1 h-4 w-4" /></Button>
+                              <Button variant="secondary" size="sm" onClick={() => setSelectedOrder(order)} className="rounded-xl font-bold bg-secondary/50 h-10 px-4" disabled={isProcessing}>Detalhes <ChevronRight className="ml-1 h-4 w-4" /></Button>
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full">
+                                  <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full" disabled={isProcessing}>
                                     <MoreVertical className="h-5 w-5" />
                                   </Button>
                                 </DropdownMenuTrigger>
@@ -486,7 +494,7 @@ export default function OrdersPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={!!editingOrder} onOpenChange={(open) => !open && setEditingOrder(null)}>
+      <Dialog open={!!editingOrder} onOpenChange={(open) => !isProcessing && setEditingOrder(null)}>
         <DialogContent className="sm:max-w-[500px] w-[95vw] rounded-3xl border-primary overflow-hidden p-0 flex flex-col max-h-[90vh]">
           {editingOrder && (
             <>
@@ -512,6 +520,7 @@ export default function OrdersPage() {
                       value={editFormData.date}
                       onChange={(e) => setEditFormData({...editFormData, date: e.target.value})}
                       className="rounded-xl h-12 bg-card border-primary/30 font-bold"
+                      disabled={isProcessing}
                     />
                   </div>
                   <div className="grid gap-2">
@@ -523,6 +532,7 @@ export default function OrdersPage() {
                         value={editFormData.discount}
                         onChange={(e) => setEditFormData({...editFormData, discount: Number(e.target.value)})}
                         className="rounded-xl h-12 bg-card border-primary/30 pl-10 font-bold"
+                        disabled={isProcessing}
                       />
                     </div>
                   </div>
@@ -534,6 +544,7 @@ export default function OrdersPage() {
                     <Select 
                       value={editFormData.paymentStatus} 
                       onValueChange={(v) => setEditFormData({...editFormData, paymentStatus: v})}
+                      disabled={isProcessing}
                     >
                       <SelectTrigger className="rounded-xl h-12 bg-card border-primary/30 font-bold">
                         <SelectValue />
@@ -550,6 +561,7 @@ export default function OrdersPage() {
                     <Select 
                       value={editFormData.paymentMethod} 
                       onValueChange={(v) => setEditFormData({...editFormData, paymentMethod: v})}
+                      disabled={isProcessing}
                     >
                       <SelectTrigger className="rounded-xl h-12 bg-card border-primary/30 font-bold uppercase">
                         <SelectValue />
@@ -571,6 +583,7 @@ export default function OrdersPage() {
                     onChange={(e) => setEditFormData({...editFormData, notes: e.target.value})}
                     placeholder="Alguma nota sobre este pedido..."
                     className="rounded-xl border-primary/30 min-h-[100px] bg-card"
+                    disabled={isProcessing}
                   />
                 </div>
 
@@ -587,11 +600,11 @@ export default function OrdersPage() {
               <div className="p-6 bg-card border-t">
                 <Button 
                   onClick={handleSaveEdit} 
-                  disabled={isSaving}
+                  disabled={isProcessing}
                   className="w-full h-16 rounded-2xl font-black text-xl primary-gradient shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3"
                 >
-                  {isSaving ? <Loader2 className="h-6 w-6 animate-spin" /> : <Save className="h-6 w-6" />}
-                  SALVAR ALTERAÇÕES
+                  {isProcessing ? <Loader2 className="h-6 w-6 animate-spin" /> : <Save className="h-6 w-6" />}
+                  {isProcessing ? "SALVANDO..." : "SALVAR ALTERAÇÕES"}
                 </Button>
               </div>
             </>
@@ -599,7 +612,7 @@ export default function OrdersPage() {
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={!!orderToDelete} onOpenChange={(o) => !o && setOrderToDelete(null)}>
+      <AlertDialog open={!!orderToDelete} onOpenChange={(o) => !isProcessing && setOrderToDelete(null)}>
         <AlertDialogContent className="rounded-3xl border-primary">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-2xl font-black text-primary uppercase">Excluir Pedido?</AlertDialogTitle>
@@ -608,13 +621,13 @@ export default function OrdersPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-xl font-bold">Cancelar</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-xl font-bold" disabled={isProcessing}>Cancelar</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDeleteOrder} 
-              disabled={isDeleting}
+              disabled={isProcessing}
               className="rounded-xl font-bold bg-rose-600 hover:bg-rose-700"
             >
-              {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirmar Exclusão"}
+              {isProcessing ? "Excluindo..." : "Confirmar Exclusão"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

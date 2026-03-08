@@ -65,7 +65,7 @@ export default function CategoriesPage() {
   const { user } = useUser()
   const [searchTerm, setSearchTerm] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
+  const [isProcessing, setIsProcessing] = useState(false)
   const [categoryToDelete, setCategoryToDelete] = useState<any>(null)
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)
   const [accordionValue, setAccordionValue] = useState<string>("")
@@ -83,6 +83,7 @@ export default function CategoriesPage() {
   const [formData, setFormData] = useState({ name: "" })
 
   const handleOpenNewCategory = () => {
+    if (isProcessing) return
     setEditingCategoryId(null)
     setFormData({ name: "" })
     setAccordionValue("")
@@ -90,54 +91,62 @@ export default function CategoriesPage() {
   }
 
   const handleEditCategory = (category: any) => {
+    if (isProcessing) return
     setEditingCategoryId(category.id)
     setFormData({ name: category.name || "" })
     setAccordionValue("")
     setIsDialogOpen(true)
   }
 
-  const handleDeleteConfirm = () => {
-    if (!categoryToDelete) return
+  const handleDeleteConfirm = async () => {
+    if (!categoryToDelete || isProcessing) return
     const categoryId = categoryToDelete.id
     const categoryName = categoryToDelete.name
+    setIsProcessing(true)
     setCategoryToDelete(null)
 
-    const docRef = doc(db, "categories", categoryId)
-    deleteDoc(docRef)
-      .then(() => toast({ title: "Categoria removida", description: categoryName }))
-      .catch(async () => errorEmitter.emit('permission-error', new FirestorePermissionError({ path: docRef.path, operation: 'delete' })))
+    try {
+      const docRef = doc(db, "categories", categoryId)
+      await deleteDoc(docRef)
+      toast({ title: "Categoria removida", description: categoryName })
+    } catch (error: any) {
+      console.error("Erro ao excluir categoria:", error)
+      errorEmitter.emit('permission-error', new FirestorePermissionError({ path: `categories/${categoryId}`, operation: 'delete' }))
+      toast({ title: "Erro ao excluir", variant: "destructive" })
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
-  const handleSaveCategory = () => {
-    if (!formData.name) {
+  const handleSaveCategory = async () => {
+    if (!formData.name || isProcessing) {
       toast({ title: "Nome obrigatório", variant: "destructive" })
       return
     }
-    setIsSaving(true)
-    const categoryData = { name: formData.name, updatedAt: serverTimestamp() }
-    const currentEditingId = editingCategoryId
 
-    if (currentEditingId) {
-      const docRef = doc(db, "categories", currentEditingId)
-      updateDoc(docRef, categoryData)
-        .then(() => { 
-          toast({ title: "Atualizada!" }); 
-        })
-        .catch(async () => errorEmitter.emit('permission-error', new FirestorePermissionError({ path: docRef.path, operation: 'update', requestResourceData: categoryData })))
-        .finally(() => {
-          setIsSaving(false)
-          setIsDialogOpen(false)
-        })
-    } else {
-      addDoc(collection(db, "categories"), { ...categoryData, createdAt: serverTimestamp() })
-        .then(() => { 
-          toast({ title: "Salva!" }); 
-        })
-        .catch(async () => errorEmitter.emit('permission-error', new FirestorePermissionError({ path: 'categories', operation: 'create', requestResourceData: categoryData })))
-        .finally(() => {
-          setIsSaving(false)
-          setIsDialogOpen(false)
-        })
+    setIsProcessing(true)
+    const categoryData = { name: formData.name, updatedAt: serverTimestamp() }
+
+    try {
+      if (editingCategoryId) {
+        const docRef = doc(db, "categories", editingCategoryId)
+        await updateDoc(docRef, categoryData)
+        toast({ title: "Atualizada!" })
+      } else {
+        await addDoc(collection(db, "categories"), { ...categoryData, createdAt: serverTimestamp() })
+        toast({ title: "Salva!" })
+      }
+      setIsDialogOpen(false)
+    } catch (error: any) {
+      console.error("Erro ao salvar categoria:", error)
+      errorEmitter.emit('permission-error', new FirestorePermissionError({ 
+        path: editingCategoryId ? `categories/${editingCategoryId}` : 'categories', 
+        operation: editingCategoryId ? 'update' : 'create', 
+        requestResourceData: categoryData 
+      }))
+      toast({ title: "Erro ao salvar", variant: "destructive" })
+    } finally {
+      setIsProcessing(false)
     }
   }
 
@@ -147,6 +156,15 @@ export default function CategoriesPage() {
 
   return (
     <LayoutWrapper>
+      {isProcessing && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-card p-8 rounded-[2.5rem] shadow-2xl flex flex-col items-center gap-4 border-2 border-primary">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <p className="font-black text-primary uppercase tracking-widest text-sm animate-pulse">Processando...</p>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col gap-8 w-full max-w-full overflow-x-hidden">
         <div className="flex flex-col gap-6 items-center text-center">
           <div className="flex flex-col gap-2">
@@ -155,7 +173,7 @@ export default function CategoriesPage() {
             </h1>
             <p className="text-muted-foreground font-medium text-lg">Organize seus produtos por categorias.</p>
           </div>
-          <Button onClick={handleOpenNewCategory} className="w-full max-w-md rounded-2xl font-bold bg-primary hover:bg-primary/90 shadow-lg h-14 text-lg">
+          <Button onClick={handleOpenNewCategory} disabled={isProcessing} className="w-full max-w-md rounded-2xl font-bold bg-primary hover:bg-primary/90 shadow-lg h-14 text-lg">
             <Plus className="mr-2 h-6 w-6" /> Nova Categoria
           </Button>
         </div>
@@ -197,7 +215,7 @@ export default function CategoriesPage() {
                         </div>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
+                            <Button variant="ghost" size="icon" className="rounded-full h-8 w-8" disabled={isProcessing}>
                               <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -232,7 +250,7 @@ export default function CategoriesPage() {
         </div>
       </div>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isDialogOpen} onOpenChange={(o) => !isProcessing && setIsDialogOpen(o)}>
         <DialogContent className="sm:max-w-[450px] w-[95vw] rounded-3xl border-primary max-h-[90vh] flex flex-col p-0 overflow-hidden">
           <div className="p-8 border-b bg-card">
             <DialogHeader>
@@ -251,6 +269,7 @@ export default function CategoriesPage() {
                   onChange={e => setFormData({...formData, name: e.target.value})}
                   placeholder="Ex: Perfumaria, Maquiagem..." 
                   className="rounded-xl border-primary/30 h-12 bg-card" 
+                  disabled={isProcessing}
                 />
               </div>
 
@@ -272,6 +291,7 @@ export default function CategoriesPage() {
                           size="sm"
                           className="rounded-xl border-primary/20 text-xs font-bold h-10 px-2 justify-start"
                           onClick={() => { setFormData({ ...formData, name: cat }); setAccordionValue(""); }}
+                          disabled={isProcessing}
                         >
                           <Plus className="h-3 w-3 mr-1" />
                           <span className="truncate">{cat}</span>
@@ -282,15 +302,15 @@ export default function CategoriesPage() {
                 </AccordionItem>
               </Accordion>
 
-              <Button onClick={handleSaveCategory} disabled={isSaving} className="w-full rounded-xl font-bold h-14 text-lg primary-gradient shadow-lg">
-                {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : "Salvar"}
+              <Button onClick={handleSaveCategory} disabled={isProcessing} className="w-full rounded-xl font-bold h-14 text-lg primary-gradient shadow-lg">
+                {isProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : "Salvar"}
               </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={!!categoryToDelete} onOpenChange={o => !o && setCategoryToDelete(null)}>
+      <AlertDialog open={!!categoryToDelete} onOpenChange={o => !isProcessing && setCategoryToDelete(null)}>
         <AlertDialogContent className="rounded-3xl border-primary">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-2xl font-black text-primary">Excluir?</AlertDialogTitle>
@@ -299,9 +319,9 @@ export default function CategoriesPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-xl font-bold">Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm} className="rounded-xl font-bold bg-rose-600">
-              Confirmar
+            <AlertDialogCancel className="rounded-xl font-bold" disabled={isProcessing}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="rounded-xl font-bold bg-rose-600" disabled={isProcessing}>
+              {isProcessing ? "Removendo..." : "Confirmar"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
