@@ -14,7 +14,8 @@ import {
   Loader2,
   ChevronRight,
   Package,
-  ShoppingBag
+  ShoppingBag,
+  AlertCircle
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -276,7 +277,7 @@ export default function Dashboard() {
                       </div>
                       <div className="flex flex-1 flex-col min-w-0">
                         <span className="text-sm font-black truncate">{item.name}</span>
-                        <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">REAL DATA</span>
+                        <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">DADOS REAIS</span>
                       </div>
                       <div className="text-right shrink-0">
                         <span className="text-sm font-black text-foreground">{item.count} un</span>
@@ -293,25 +294,42 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card className="bg-rose-500/10 rounded-[2.5rem] shadow-sm border-l-4 border-rose-500 overflow-hidden">
-              <CardContent className="p-8 flex items-start gap-4">
-                <div className="p-3 bg-rose-500/20 rounded-xl shrink-0">
-                  <AlertCircle className="h-6 w-6 text-rose-500" />
-                </div>
-                <div className="space-y-1 min-w-0">
-                  <h4 className="font-black text-rose-500 uppercase text-xs tracking-tight">Pagamentos Pendentes</h4>
-                  <p className="text-[10px] text-muted-foreground leading-tight font-bold">Acompanhe as dívidas em aberto no seu financeiro.</p>
-                  <Button variant="link" className="p-0 h-auto text-rose-500 font-black uppercase text-[10px] underline decoration-2" asChild>
-                    <Link href="/financeiro">Ver Financeiro</Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            {totalPending > 0 ? (
+              <Card className="bg-rose-500/10 rounded-[2.5rem] shadow-sm border-l-4 border-rose-500 overflow-hidden">
+                <CardContent className="p-8 flex items-start gap-4">
+                  <div className="p-3 bg-rose-500/20 rounded-xl shrink-0">
+                    <AlertCircle className="h-6 w-6 text-rose-500" />
+                  </div>
+                  <div className="space-y-1 min-w-0">
+                    <h4 className="font-black text-rose-500 uppercase text-xs tracking-tight">Pagamentos Pendentes</h4>
+                    <p className="text-[10px] text-muted-foreground leading-tight font-bold">
+                      Existem R$ {totalPending.toLocaleString('pt-BR')} em aberto.
+                    </p>
+                    <Button variant="link" className="p-0 h-auto text-rose-500 font-black uppercase text-[10px] underline decoration-2" asChild>
+                      <Link href="/financeiro">Ver Detalhes</Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="bg-emerald-500/10 rounded-[2.5rem] shadow-sm border-l-4 border-emerald-500 overflow-hidden">
+                <CardContent className="p-8 flex items-start gap-4">
+                  <div className="p-3 bg-emerald-500/20 rounded-xl shrink-0">
+                    <CheckCircle2 className="h-6 w-6 text-emerald-500" />
+                  </div>
+                  <div className="space-y-1 min-w-0">
+                    <h4 className="font-black text-emerald-500 uppercase text-xs tracking-tight">Tudo em Dia!</h4>
+                    <p className="text-[10px] text-muted-foreground leading-tight font-bold">Excelente! Não há cobranças pendentes no momento.</p>
+                    <Button variant="link" className="p-0 h-auto text-emerald-500 font-black uppercase text-[10px] underline decoration-2" asChild>
+                      <Link href="/financeiro">Relatório Completo</Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </div>
     </LayoutWrapper>
   )
 }
-import { AlertCircle } from "lucide-react"
-
