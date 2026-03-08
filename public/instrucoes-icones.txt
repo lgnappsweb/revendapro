@@ -1,0 +1,5 @@
+Coloque os arquivos de ícone nesta pasta com os nomes:
+- icon-192x192.png
+- icon-512x512.png
+
+Eles serão usados automaticamente como ícones do aplicativo (PWA) quando instalado no celular.
