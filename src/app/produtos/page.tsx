@@ -36,7 +36,6 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
 import { collection, serverTimestamp, addDoc } from "firebase/firestore"
 import { errorEmitter } from "@/firebase/error-emitter"
@@ -66,11 +65,9 @@ export default function ProductsPage() {
   const db = useFirestore()
   const { toast } = useToast()
 
-  // Firestore setup
   const productsRef = useMemoFirebase(() => collection(db, "products"), [db])
   const { data: products, isLoading } = useCollection(productsRef)
 
-  // Form State
   const [formData, setFormData] = useState({
     name: "",
     brand: "Natura",
@@ -81,7 +78,6 @@ export default function ProductsPage() {
     description: ""
   })
 
-  // Helper to format currency string (e.g., 1234 -> 12,34)
   const formatCurrencyInput = (value: string) => {
     const digits = value.replace(/\D/g, "");
     if (!digits) return "";
@@ -107,7 +103,6 @@ export default function ProductsPage() {
       return
     }
 
-    // Helper to parse currency string back to number for Firestore
     const parseCurrencyToNumber = (val: string) => {
       if (!val) return 0;
       return parseFloat(val.replace(/\./g, '').replace(',', '.'));
@@ -176,17 +171,17 @@ export default function ProductsPage() {
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px] w-[95vw] rounded-2xl border-primary max-h-[90vh] flex flex-col p-0 overflow-hidden">
-              <div className="p-6 pb-2">
+              <div className="p-6 pb-2 border-b">
                 <DialogHeader>
-                  <DialogTitle className="text-2xl font-bold text-primary">Cadastrar Produto</DialogTitle>
-                  <DialogDescription className="font-medium text-muted-foreground">Adicione um novo item ao seu catálogo de revenda.</DialogDescription>
+                  <DialogTitle className="text-2xl font-bold text-primary text-center">Cadastrar Produto</DialogTitle>
+                  <DialogDescription className="font-medium text-muted-foreground text-center">Adicione um novo item ao seu catálogo de revenda.</DialogDescription>
                 </DialogHeader>
               </div>
               
-              <ScrollArea className="flex-1 px-6">
-                <div className="grid gap-6 py-4 pb-10">
+              <div className="flex-1 overflow-y-auto px-6 py-4">
+                <div className="grid gap-6">
                   <div className="grid gap-2">
-                    <Label htmlFor="name" className="font-bold text-muted-foreground">Nome do Produto</Label>
+                    <Label htmlFor="name" className="font-bold text-muted-foreground text-base">Nome do Produto</Label>
                     <Input 
                       id="name" 
                       value={formData.name}
@@ -197,7 +192,7 @@ export default function ProductsPage() {
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="brand" className="font-bold text-muted-foreground">Marca</Label>
+                      <Label htmlFor="brand" className="font-bold text-muted-foreground text-base">Marca</Label>
                       <Select value={formData.brand} onValueChange={(v) => setFormData({...formData, brand: v})}>
                         <SelectTrigger className="rounded-xl border-primary/30 h-11">
                           <SelectValue placeholder="Selecione..." />
@@ -210,7 +205,7 @@ export default function ProductsPage() {
                       </Select>
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="category" className="font-bold text-muted-foreground">Categoria</Label>
+                      <Label htmlFor="category" className="font-bold text-muted-foreground text-base">Categoria</Label>
                       <Select value={formData.category} onValueChange={(v) => setFormData({...formData, category: v})}>
                         <SelectTrigger className="rounded-xl border-primary/30 h-11">
                           <SelectValue placeholder="Selecione categoria..." />
@@ -225,7 +220,7 @@ export default function ProductsPage() {
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="price" className="font-bold text-muted-foreground">Preço da revista (R$)</Label>
+                      <Label htmlFor="price" className="font-bold text-muted-foreground text-base">Preço da revista (R$)</Label>
                       <Input 
                         id="price" 
                         value={formData.price}
@@ -235,7 +230,7 @@ export default function ProductsPage() {
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="cost" className="font-bold text-muted-foreground">Preço da revendedora (R$)</Label>
+                      <Label htmlFor="cost" className="font-bold text-muted-foreground text-base">Preço da revendedora (R$)</Label>
                       <Input 
                         id="cost" 
                         value={formData.cost}
@@ -246,7 +241,7 @@ export default function ProductsPage() {
                     </div>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="code" className="font-bold text-muted-foreground">Código / Referência</Label>
+                    <Label htmlFor="code" className="font-bold text-muted-foreground text-base">Código / Referência</Label>
                     <Input 
                       id="code" 
                       value={formData.code}
@@ -256,20 +251,23 @@ export default function ProductsPage() {
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="description" className="font-bold text-muted-foreground">Descrição (Opcional)</Label>
+                    <Label htmlFor="description" className="font-bold text-muted-foreground text-base">Descrição (Opcional)</Label>
                     <Textarea 
                       id="description" 
                       value={formData.description}
                       onChange={(e) => setFormData({...formData, description: e.target.value})}
                       placeholder="Detalhes sobre o produto..." 
-                      className="rounded-xl border-primary/30 min-h-[100px]" 
+                      className="rounded-xl border-primary/30 min-h-[120px]" 
                     />
                   </div>
-                  <Button onClick={handleSaveProduct} className="w-full rounded-xl font-bold h-12 text-lg primary-gradient shadow-lg mt-4">
-                    Salvar Produto
-                  </Button>
+                  
+                  <div className="pt-2 pb-6">
+                    <Button onClick={handleSaveProduct} className="w-full rounded-xl font-bold h-14 text-lg primary-gradient shadow-lg">
+                      Salvar Produto
+                    </Button>
+                  </div>
                 </div>
-              </ScrollArea>
+              </div>
             </DialogContent>
           </Dialog>
         </div>
