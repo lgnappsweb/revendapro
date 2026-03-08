@@ -13,7 +13,8 @@ import {
   AlertCircle,
   Search,
   Sparkles,
-  Loader2
+  Loader2,
+  ChevronRight
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
