@@ -55,7 +55,10 @@ import { useToast } from "@/hooks/use-toast"
 const SUGGESTED_CATEGORIES = [
   "Perfumaria Feminina", "Perfumaria Masculina", "Maquiagem", "Cuidados com o Rosto",
   "Cuidados com o Corpo", "Cabelos", "Desodorantes", "Proteção Solar", "Infantil",
-  "Linha Masculina", "Presentes e Kits", "Acessórios", "Casa e Estilo"
+  "Linha Masculina", "Presentes e Kits", "Acessórios", 
+  "Cozinha e Preparação", "Potes e Armazenagem", "Utensílios de Cozinha",
+  "Cama, Mesa e Banho", "Decoração", "Organização Doméstica",
+  "Moda e Acessórios", "Lingerie e Calçados", "Casa e Estilo Geral"
 ]
 
 export default function CategoriesPage() {
