@@ -118,58 +118,65 @@ export default function OrdersPage() {
     })
   }
 
-  const handleSaveEdit = async () => {
+  const handleSaveEdit = () => {
     if (!editingOrder) return
     setIsSaving(true)
     
     const docRef = doc(db, "orders", editingOrder.id)
-    
-    // Recalcula o total final baseado no novo desconto
     const subtotal = editingOrder.total || 0
     const newFinalTotal = Math.max(0, subtotal - Number(editFormData.discount))
 
-    const updateData = {
+    const updateData: any = {
       paymentStatus: editFormData.paymentStatus,
       paymentMethod: editFormData.paymentMethod,
       notes: editFormData.notes,
       discount: Number(editFormData.discount),
       finalTotal: newFinalTotal,
-      createdAt: new Date(editFormData.date),
       updatedAt: serverTimestamp()
     }
 
-    try {
-      await updateDoc(docRef, updateData)
-      toast({ title: "Pedido atualizado!" })
-      setEditingOrder(null)
-    } catch (error: any) {
-      errorEmitter.emit('permission-error', new FirestorePermissionError({
-        path: docRef.path,
-        operation: 'update',
-        requestResourceData: updateData
-      }))
-    } finally {
-      setIsSaving(false)
+    if (editFormData.date) {
+      updateData.createdAt = new Date(editFormData.date)
     }
+
+    // Mutação não-bloqueante (sem await)
+    updateDoc(docRef, updateData)
+      .then(() => {
+        toast({ title: "Pedido atualizado!" })
+        setEditingOrder(null)
+      })
+      .catch(async (error: any) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: docRef.path,
+          operation: 'update',
+          requestResourceData: updateData
+        }))
+      })
+      .finally(() => {
+        setIsSaving(false)
+      })
   }
 
-  const handleDeleteOrder = async () => {
+  const handleDeleteOrder = () => {
     if (!orderToDelete) return
     setIsDeleting(true)
     
     const docRef = doc(db, "orders", orderToDelete.id)
-    try {
-      await deleteDoc(docRef)
-      toast({ title: "Pedido removido com sucesso" })
-      setOrderToDelete(null)
-    } catch (error: any) {
-      errorEmitter.emit('permission-error', new FirestorePermissionError({
-        path: docRef.path,
-        operation: 'delete'
-      }))
-    } finally {
-      setIsDeleting(false)
-    }
+    // Mutação não-bloqueante (sem await)
+    deleteDoc(docRef)
+      .then(() => {
+        toast({ title: "Pedido removido com sucesso" })
+        setOrderToDelete(null)
+      })
+      .catch(async (error: any) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: docRef.path,
+          operation: 'delete'
+        }))
+      })
+      .finally(() => {
+        setIsDeleting(false)
+      })
   }
 
   const getMethodIcon = (method: string) => {
@@ -247,13 +254,31 @@ export default function OrdersPage() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="rounded-xl">
-                                <DropdownMenuItem className="font-bold gap-2" onSelect={() => setSelectedOrder(order)}>
+                                <DropdownMenuItem 
+                                  className="font-bold gap-2" 
+                                  onSelect={(e) => {
+                                    e.preventDefault();
+                                    setTimeout(() => setSelectedOrder(order), 100);
+                                  }}
+                                >
                                   <Eye className="h-4 w-4 text-blue-500" /> Detalhes
                                 </DropdownMenuItem>
-                                <DropdownMenuItem className="font-bold gap-2" onSelect={() => handleOpenEdit(order)}>
+                                <DropdownMenuItem 
+                                  className="font-bold gap-2" 
+                                  onSelect={(e) => {
+                                    e.preventDefault();
+                                    setTimeout(() => handleOpenEdit(order), 100);
+                                  }}
+                                >
                                   <Pencil className="h-4 w-4 text-amber-500" /> Editar
                                 </DropdownMenuItem>
-                                <DropdownMenuItem className="font-bold gap-2 text-rose-600" onSelect={() => setOrderToDelete(order)}>
+                                <DropdownMenuItem 
+                                  className="font-bold gap-2 text-rose-600" 
+                                  onSelect={(e) => {
+                                    e.preventDefault();
+                                    setTimeout(() => setOrderToDelete(order), 100);
+                                  }}
+                                >
                                   <Trash2 className="h-4 w-4" /> Excluir
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
@@ -315,13 +340,31 @@ export default function OrdersPage() {
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="rounded-xl">
-                                  <DropdownMenuItem className="font-bold gap-2" onSelect={() => setSelectedOrder(order)}>
+                                  <DropdownMenuItem 
+                                    className="font-bold gap-2" 
+                                    onSelect={(e) => {
+                                      e.preventDefault();
+                                      setTimeout(() => setSelectedOrder(order), 100);
+                                    }}
+                                  >
                                     <Eye className="h-4 w-4 text-blue-500" /> Visualizar
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem className="font-bold gap-2" onSelect={() => handleOpenEdit(order)}>
+                                  <DropdownMenuItem 
+                                    className="font-bold gap-2" 
+                                    onSelect={(e) => {
+                                      e.preventDefault();
+                                      setTimeout(() => handleOpenEdit(order), 100);
+                                    }}
+                                  >
                                     <Pencil className="h-4 w-4 text-amber-500" /> Editar
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem className="font-bold gap-2 text-rose-600" onSelect={() => setOrderToDelete(order)}>
+                                  <DropdownMenuItem 
+                                    className="font-bold gap-2 text-rose-600" 
+                                    onSelect={(e) => {
+                                      e.preventDefault();
+                                      setTimeout(() => setOrderToDelete(order), 100);
+                                    }}
+                                  >
                                     <Trash2 className="h-4 w-4" /> Excluir
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>

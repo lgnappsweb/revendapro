@@ -183,7 +183,16 @@ export default function ProductsPage() {
                         <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Venda</span>
                         <span className="text-lg font-black text-foreground">R$ {Number(product.price || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                       </div>
-                      <Button variant="ghost" size="icon" onClick={() => setSelectedProduct(product)} className="rounded-full h-9 w-9 hover:bg-primary/10 group-hover:text-primary"><ChevronRight className="h-5 w-5" /></Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => {
+                          setTimeout(() => setSelectedProduct(product), 100);
+                        }} 
+                        className="rounded-full h-9 w-9 hover:bg-primary/10 group-hover:text-primary"
+                      >
+                        <ChevronRight className="h-5 w-5" />
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -250,7 +259,11 @@ export default function ProductsPage() {
               </div>
 
               <div className="p-6 bg-card border-t flex gap-2">
-                 <Button variant="outline" className="flex-1 h-14 rounded-2xl font-bold border-primary text-primary" onClick={() => handleEditProduct(selectedProduct)}>
+                 <Button 
+                   variant="outline" 
+                   className="flex-1 h-14 rounded-2xl font-bold border-primary text-primary" 
+                   onClick={() => handleEditProduct(selectedProduct)}
+                 >
                     <Pencil className="h-4 w-4 mr-2" /> Editar
                  </Button>
                  <Button onClick={() => setSelectedProduct(null)} className="flex-1 h-14 rounded-2xl font-bold primary-gradient shadow-lg">Fechar</Button>
