@@ -10,6 +10,7 @@ import { MobileBottomNav } from "./mobile-bottom-nav"
 import { SidebarInset } from "@/components/ui/sidebar"
 import { Loader2, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 const COLOR_THEMES = {
   default: "340 78% 43%",
@@ -143,21 +144,21 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       </div>
       <SidebarInset className="bg-transparent flex-1 w-full overflow-x-hidden">
         <main className="flex flex-col min-h-screen w-full pb-24 md:pb-0">
-          <div className="flex-1 w-full relative border-l-2 border-primary/20 dark:border-primary/40 bg-card dark:bg-card p-4 sm:p-8 md:p-12 flex flex-col gap-6 overflow-hidden">
+          <div className="flex-1 w-full relative border-l-2 border-primary/20 dark:border-primary/40 bg-card dark:bg-card flex flex-col min-h-full">
             {pathname !== "/" && (
-              <div className="flex items-start shrink-0">
+              <header className="sticky top-0 z-30 w-full p-4 sm:p-8 md:p-12 py-4 sm:py-6 md:py-8 bg-card/80 backdrop-blur-md border-b border-primary/10 flex items-center">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => router.push("/")}
-                  className="rounded-xl border-primary text-primary bg-card hover:bg-primary/5 font-bold h-10 px-4 shadow-sm transition-all active:scale-95"
+                  className="rounded-xl border-primary text-primary bg-card hover:bg-primary/5 font-bold h-10 px-4 shadow-sm transition-all active:scale-95 shrink-0"
                 >
                   <ArrowLeft className="mr-2 h-4 w-4" />
-                  Voltar
+                  Voltar ao Início
                 </Button>
-              </div>
+              </header>
             )}
-            <div className="flex-1 w-full overflow-x-hidden">
+            <div className={cn("flex-1 w-full p-4 sm:p-8 md:p-12", pathname === "/" ? "" : "pt-6 sm:pt-10 md:pt-12")}>
               {children}
             </div>
           </div>
