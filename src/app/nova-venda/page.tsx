@@ -71,6 +71,7 @@ interface CartItem {
   name: string
   magazinePrice: number
   costPrice: number
+  resellerPrice: number
   useCost: boolean
   qty: number
 }
@@ -104,8 +105,9 @@ export default function NewSalePage() {
 
   const total = Math.max(0, subtotal - discount)
   
-  const totalCost = items.reduce((acc, item) => acc + (item.costPrice * item.qty), 0)
-  const profit = Math.max(0, total - totalCost)
+  // Lucro baseado no que a consultora paga (resellerPrice)
+  const totalConsultantCost = items.reduce((acc, item) => acc + (item.resellerPrice * item.qty), 0)
+  const profit = Math.max(0, total - totalConsultantCost)
 
   const handleAddProductToCart = (product: any) => {
     const existingItem = items.find(i => i.id === product.id)
@@ -117,6 +119,7 @@ export default function NewSalePage() {
         name: product.name, 
         magazinePrice: Number(product.price || 0), 
         costPrice: Number(product.cost || 0),
+        resellerPrice: Number(product.resellerPrice || product.cost || 0),
         useCost: false,
         qty: 1 
       }])
@@ -458,10 +461,11 @@ export default function NewSalePage() {
                   />
                 </div>
                 <Tabs value={dialogActiveTab} onValueChange={setDialogActiveTab} className="w-full">
-                  <TabsList className="grid grid-cols-3 h-10 bg-muted/30 rounded-xl p-1">
-                    <TabsTrigger value="todos" className="rounded-lg font-bold text-xs uppercase">Todos</TabsTrigger>
-                    <TabsTrigger value="natura" className="rounded-lg font-bold text-xs uppercase">Natura</TabsTrigger>
-                    <TabsTrigger value="avon" className="rounded-lg font-bold text-xs uppercase">Avon</TabsTrigger>
+                  <TabsList className="grid grid-cols-4 h-10 bg-muted/30 rounded-xl p-1">
+                    <TabsTrigger value="todos" className="rounded-lg font-bold text-[10px] uppercase px-1">Todos</TabsTrigger>
+                    <TabsTrigger value="natura" className="rounded-lg font-bold text-[10px] uppercase px-1">Natura</TabsTrigger>
+                    <TabsTrigger value="avon" className="rounded-lg font-bold text-[10px] uppercase px-1">Avon</TabsTrigger>
+                    <TabsTrigger value="casaestilo" className="rounded-lg font-bold text-[10px] uppercase px-1">Casa / Estilo</TabsTrigger>
                   </TabsList>
                 </Tabs>
             </div>

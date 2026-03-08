@@ -152,10 +152,11 @@ export default function ProductsPage() {
             />
           </div>
           <Tabs defaultValue="todos" className="w-full md:w-auto" onValueChange={setActiveTab}>
-            <TabsList className="h-12 p-1.5 bg-card shadow-sm border border-primary/30 rounded-2xl w-full">
-              <TabsTrigger value="todos" className="flex-1 rounded-xl font-bold">Todos</TabsTrigger>
-              <TabsTrigger value="natura" className="flex-1 rounded-xl font-bold">Natura</TabsTrigger>
-              <TabsTrigger value="avon" className="flex-1 rounded-xl font-bold">Avon</TabsTrigger>
+            <TabsList className="h-12 p-1.5 bg-card shadow-sm border border-primary/30 rounded-2xl w-full overflow-x-auto scrollbar-hide">
+              <TabsTrigger value="todos" className="flex-1 rounded-xl font-bold px-2">Todos</TabsTrigger>
+              <TabsTrigger value="natura" className="flex-1 rounded-xl font-bold px-2">Natura</TabsTrigger>
+              <TabsTrigger value="avon" className="flex-1 rounded-xl font-bold px-2">Avon</TabsTrigger>
+              <TabsTrigger value="casaestilo" className="flex-1 rounded-xl font-bold px-2">Casa / Estilo</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -174,7 +175,7 @@ export default function ProductsPage() {
                 <Card key={product.id} className="group overflow-hidden rounded-[2.5rem] border-primary/20 shadow-sm hover:border-primary transition-all">
                   <CardHeader className="bg-primary/5 border-b p-4">
                      <div className="flex justify-between items-center gap-2">
-                        <Badge className={`rounded-lg font-bold py-1 border-none ${product.brand === 'Natura' ? 'bg-[#FF6A13]' : 'bg-[#622D91]'}`}>{product.brand}</Badge>
+                        <Badge className={`rounded-lg font-bold py-1 border-none ${product.brand === 'Natura' ? 'bg-[#FF6A13]' : product.brand === 'Avon' ? 'bg-[#622D91]' : 'bg-emerald-600'}`}>{product.brand}</Badge>
                         <Badge variant="secondary" className="bg-pink-50 text-primary border-none text-[10px] truncate">{product.category || "Geral"}</Badge>
                      </div>
                   </CardHeader>
@@ -315,6 +316,7 @@ export default function ProductsPage() {
                     <SelectContent className="rounded-xl">
                       <SelectItem value="Natura">Natura</SelectItem>
                       <SelectItem value="Avon">Avon</SelectItem>
+                      <SelectItem value="CasaEstilo">Casa / Estilo</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
