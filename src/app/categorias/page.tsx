@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -267,7 +268,7 @@ export default function CategoriesPage() {
                 type="single" 
                 collapsible 
                 value={accordionValue} 
-                onValueChange={setAccordionValue} 
+                onValueChange={(val) => setAccordionValue(val)} 
                 className="w-full"
               >
                 <AccordionItem value="suggestions" className="border-none">
