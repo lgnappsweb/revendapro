@@ -12,7 +12,11 @@ import {
   ChevronRight, 
   MoreVertical,
   Loader2,
-  PackageSearch
+  PackageSearch,
+  DollarSign,
+  Info,
+  Layers,
+  ShoppingBag
 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -39,6 +43,7 @@ import { collection, serverTimestamp, addDoc } from "firebase/firestore"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 import { useToast } from "@/hooks/use-toast"
+import { Separator } from "@/components/ui/separator"
 
 const PRODUCT_CATEGORIES = [
   "Perfumaria",
@@ -60,6 +65,7 @@ export default function ProductsPage() {
   const [activeTab, setActiveTab] = useState("todos")
   const [searchTerm, setSearchTerm] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [selectedProduct, setSelectedProduct] = useState<any>(null)
   const db = useFirestore()
   const { toast } = useToast()
 
@@ -110,7 +116,7 @@ export default function ProductsPage() {
       ...formData,
       price: parseCurrencyToNumber(formData.price),
       cost: formData.cost ? parseCurrencyToNumber(formData.cost) : 0,
-      image: "", // We are no longer using images
+      image: "", 
       createdAt: serverTimestamp()
     }
 
@@ -169,17 +175,17 @@ export default function ProductsPage() {
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px] w-[95vw] rounded-2xl border-primary max-h-[90vh] flex flex-col p-0 overflow-hidden">
-              <div className="p-8 pb-4 border-b">
+              <div className="p-8 pb-4 border-b bg-white">
                 <DialogHeader>
-                  <DialogTitle className="text-4xl font-black text-primary text-center uppercase tracking-tight">Cadastrar Produto</DialogTitle>
-                  <DialogDescription className="font-bold text-muted-foreground text-center text-xl mt-1">
+                  <DialogTitle className="text-3xl font-black text-primary text-center uppercase tracking-tight">Cadastrar Produto</DialogTitle>
+                  <DialogDescription className="font-bold text-muted-foreground text-center text-lg mt-1">
                     Adicione um novo item ao seu catálogo de revenda.
                   </DialogDescription>
                 </DialogHeader>
               </div>
               
               <div className="flex-1 overflow-y-auto px-6 py-6 bg-[#FDFBFB]">
-                <div className="grid gap-6 pb-2">
+                <div className="grid gap-6 pb-24">
                   <div className="grid gap-2">
                     <Label htmlFor="name" className="font-bold text-muted-foreground text-base">Nome do Produto</Label>
                     <Input 
@@ -285,8 +291,8 @@ export default function ProductsPage() {
           <Tabs defaultValue="todos" className="w-full md:w-auto" onValueChange={setActiveTab}>
             <TabsList className="h-12 p-1.5 bg-white shadow-sm border border-primary/30 rounded-2xl w-full">
               <TabsTrigger value="todos" className="rounded-xl font-bold data-[state=active]:bg-primary data-[state=active]:text-white transition-all">Todos</TabsTrigger>
-              <TabsTrigger value="natura" className="rounded-xl font-bold data-[state=active]:bg-[#FF6A13] data-[state=active]:text-white transition-all">Natura</TabsTrigger>
-              <TabsTrigger value="avon" className="rounded-xl font-bold data-[state=active]:bg-[#622D91] data-[state=active]:text-white transition-all">Avon</TabsTrigger>
+              <TabsTrigger value="Natura" className="rounded-xl font-bold data-[state=active]:bg-[#FF6A13] data-[state=active]:text-white transition-all">Natura</TabsTrigger>
+              <TabsTrigger value="Avon" className="rounded-xl font-bold data-[state=active]:bg-[#622D91] data-[state=active]:text-white transition-all">Avon</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -345,13 +351,17 @@ export default function ProductsPage() {
                       <div className="text-right">
                          <span className="text-xs font-bold text-muted-foreground block mb-0.5">Rentabilidade</span>
                          <Badge variant="outline" className="rounded-lg font-bold border-emerald-200 bg-emerald-50 text-emerald-700">
-                           {product.cost ? Math.round(((Number(product.price) - Number(product.cost)) / Number(product.price)) * 100) : 100}%
+                           {product.cost && product.price ? Math.round(((Number(product.price) - Number(product.cost)) / Number(product.price)) * 100) : 100}%
                          </Badge>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2 mt-2">
-                      <Button variant="secondary" className="flex-1 rounded-xl font-bold bg-secondary/50 hover:bg-primary hover:text-white transition-all">
+                      <Button 
+                        variant="secondary" 
+                        onClick={() => setSelectedProduct(product)}
+                        className="flex-1 rounded-xl font-bold bg-secondary/50 hover:bg-primary hover:text-white transition-all"
+                      >
                         Detalhes <ChevronRight className="ml-1 h-4 w-4" />
                       </Button>
                       <Button variant="ghost" size="icon" className="rounded-full h-10 w-10 shrink-0">
@@ -365,6 +375,97 @@ export default function ProductsPage() {
           </div>
         )}
       </div>
+
+      <Dialog open={!!selectedProduct} onOpenChange={(open) => !open && setSelectedProduct(null)}>
+        <DialogContent className="sm:max-w-[600px] w-[95vw] rounded-3xl border-primary overflow-hidden p-0 flex flex-col max-h-[90vh]">
+          {selectedProduct && (
+            <>
+              <div className="p-8 border-b bg-white">
+                <DialogHeader className="space-y-4">
+                  <div className="flex justify-center">
+                     <Badge className={`rounded-xl px-4 py-1.5 font-black text-sm border-none shadow-md ${
+                        selectedProduct.brand === 'Natura' ? 'bg-[#FF6A13] text-white' : 'bg-[#622D91] text-white'
+                      }`}>
+                        {selectedProduct.brand.toUpperCase()}
+                      </Badge>
+                  </div>
+                  <DialogTitle className="text-3xl md:text-4xl font-black text-center text-primary leading-tight">
+                    {selectedProduct.name}
+                  </DialogTitle>
+                  <div className="flex items-center justify-center gap-3">
+                    <Badge variant="secondary" className="bg-pink-100 text-primary font-bold border-none rounded-lg px-3 py-1">
+                      {selectedProduct.category}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground font-bold uppercase tracking-widest border-l pl-3 border-primary/20">
+                      REF: {selectedProduct.code || "S/ COD"}
+                    </span>
+                  </div>
+                </DialogHeader>
+              </div>
+
+              <div className="flex-1 overflow-y-auto bg-[#FDFBFB] p-8 space-y-8">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-white p-5 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-1">
+                    <div className="flex items-center gap-2 text-primary">
+                      <ShoppingBag className="h-4 w-4" />
+                      <span className="text-[10px] font-black uppercase tracking-wider">Preço Revista</span>
+                    </div>
+                    <span className="text-2xl font-black text-foreground">
+                      R$ {Number(selectedProduct.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                  <div className="bg-white p-5 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-1">
+                    <div className="flex items-center gap-2 text-emerald-600">
+                      <DollarSign className="h-4 w-4" />
+                      <span className="text-[10px] font-black uppercase tracking-wider">Preço Custo</span>
+                    </div>
+                    <span className="text-2xl font-black text-emerald-600">
+                      R$ {Number(selectedProduct.cost).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="bg-primary/5 p-6 rounded-2xl border border-primary/20 flex items-center justify-between">
+                   <div className="flex items-center gap-3">
+                     <div className="bg-primary text-white p-3 rounded-xl shadow-lg">
+                        <Layers className="h-6 w-6" />
+                     </div>
+                     <div className="flex flex-col">
+                        <span className="text-sm font-bold text-primary">Margem de Lucro</span>
+                        <span className="text-xs text-muted-foreground font-medium">Lucro real por unidade</span>
+                     </div>
+                   </div>
+                   <div className="text-right">
+                      <span className="text-3xl font-black text-primary">
+                         {selectedProduct.cost && selectedProduct.price ? Math.round(((Number(selectedProduct.price) - Number(selectedProduct.cost)) / Number(selectedProduct.price)) * 100) : 100}%
+                      </span>
+                   </div>
+                </div>
+
+                <div className="space-y-4">
+                   <div className="flex items-center gap-2 text-muted-foreground">
+                      <Info className="h-5 w-5" />
+                      <h4 className="font-bold text-lg">Descrição do Produto</h4>
+                   </div>
+                   <Separator className="bg-primary/10" />
+                   <p className="text-muted-foreground leading-relaxed text-base font-medium whitespace-pre-wrap">
+                      {selectedProduct.description || "Este produto ainda não possui uma descrição detalhada cadastrada."}
+                   </p>
+                </div>
+              </div>
+
+              <div className="p-6 bg-white border-t">
+                 <Button 
+                   onClick={() => setSelectedProduct(null)} 
+                   className="w-full h-14 rounded-2xl font-bold text-lg primary-gradient shadow-xl"
+                 >
+                   Fechar Detalhes
+                 </Button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </LayoutWrapper>
   )
 }
