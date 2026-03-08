@@ -63,7 +63,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
         <main className="p-4 md:p-6 lg:p-8 flex justify-center pb-24 md:pb-8">
           <div className="w-full max-w-7xl relative">
             {pathname !== "/" && (
-              <div className="md:h-16 mb-6">
+              <div className="h-24 md:h-16 mb-6">
                 <Button
                   variant="outline"
                   size="sm"
