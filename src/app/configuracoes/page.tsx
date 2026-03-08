@@ -74,12 +74,6 @@ export default function SettingsPage() {
     } finally { setIsSaving(false) }
   }
 
-  const getPreviewColor = () => {
-    if (themeId === "custom") return customColor
-    const theme = COLOR_THEMES.find(t => t.id === themeId)
-    return theme ? theme.hex : COLOR_THEMES[0].hex
-  }
-
   if (isLoading) return <div className="flex h-screen items-center justify-center"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>
 
   return (
@@ -96,28 +90,40 @@ export default function SettingsPage() {
 
         <div className="grid gap-8 lg:grid-cols-2 px-1 pb-20">
           <div className="space-y-8">
-            <Card className="rounded-[2.5rem] border-primary/20 overflow-hidden">
+            {/* CARD 1: GERAL */}
+            <Card className="rounded-[2.5rem] border-primary/20 overflow-hidden shadow-sm">
               <CardHeader className="bg-primary/5 border-b px-8 py-6">
                 <CardTitle className="text-xl font-black text-primary flex items-center gap-2 uppercase tracking-tight">
                   <Type className="h-6 w-6" /> Geral
                 </CardTitle>
+                <CardDescription className="font-medium">Identidade do seu sistema.</CardDescription>
               </CardHeader>
               <CardContent className="p-8">
                   <Label className="font-bold text-muted-foreground ml-1">Nome do Aplicativo</Label>
-                  <Input value={appName} onChange={(e) => setAppName(e.target.value)} className="h-12 rounded-xl border-primary/30 text-lg font-medium bg-card mt-2" />
+                  <Input 
+                    value={appName} 
+                    onChange={(e) => setAppName(e.target.value)} 
+                    className="h-12 rounded-xl border-primary/30 text-lg font-medium bg-card mt-2 focus-visible:ring-primary/20" 
+                  />
               </CardContent>
             </Card>
 
-            <Card className="rounded-[2.5rem] border-primary/20 overflow-hidden">
+            {/* CARD 2: TEMA */}
+            <Card className="rounded-[2.5rem] border-primary/20 overflow-hidden shadow-sm">
               <CardHeader className="bg-primary/5 border-b px-8 py-6">
                 <CardTitle className="text-xl font-black text-primary flex items-center gap-2 uppercase tracking-tight">
                   <Palette className="h-6 w-6" /> Cor Principal
                 </CardTitle>
+                <CardDescription className="font-medium">Escolha a cor principal da sua marca.</CardDescription>
               </CardHeader>
               <CardContent className="p-8 space-y-8">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {COLOR_THEMES.map((theme) => (
-                    <button key={theme.id} onClick={() => setThemeId(theme.id)} className={`flex flex-col items-center gap-2 p-3 rounded-2xl border-2 transition-all ${themeId === theme.id ? "border-primary bg-primary/5 shadow-md" : "border-transparent bg-muted/20 hover:border-primary/30"}`}>
+                    <button 
+                      key={theme.id} 
+                      onClick={() => setThemeId(theme.id)} 
+                      className={`flex flex-col items-center gap-2 p-3 rounded-2xl border-2 transition-all ${themeId === theme.id ? "border-primary bg-primary/5 shadow-md scale-105" : "border-transparent bg-muted/20 hover:border-primary/30"}`}
+                    >
                       <div className={`h-8 w-8 rounded-full shadow-inner ${theme.preview}`} />
                       <span className={`font-bold text-[10px] uppercase tracking-wider ${themeId === theme.id ? "text-primary" : "text-muted-foreground"}`}>{theme.name}</span>
                     </button>
@@ -128,13 +134,51 @@ export default function SettingsPage() {
           </div>
 
           <div className="space-y-8">
-            <Card className="rounded-[2.5rem] border-primary/20 overflow-hidden">
+            {/* CARD 3: INTERFACE */}
+            <Card className="rounded-[2.5rem] border-primary/20 overflow-hidden shadow-sm">
               <CardHeader className="bg-primary/5 border-b px-8 py-6">
-                 <CardTitle className="text-xl font-black text-primary flex items-center gap-2 uppercase tracking-tight">Salvar</CardTitle>
+                <CardTitle className="text-xl font-black text-primary flex items-center gap-2 uppercase tracking-tight">
+                  <Layout className="h-6 w-6" /> Interface
+                </CardTitle>
+                <CardDescription className="font-medium">Configurações de exibição.</CardDescription>
+              </CardHeader>
+              <CardContent className="p-8 space-y-6">
+                <div className="flex items-center justify-between p-4 bg-muted/20 rounded-2xl border border-transparent hover:border-primary/10 transition-all">
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2 text-primary font-bold">
+                      <Moon className="h-5 w-5" />
+                      <span>Modo Escuro</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground font-medium">Melhora o conforto visual em ambientes escuros.</span>
+                  </div>
+                  <Switch 
+                    checked={darkMode} 
+                    onCheckedChange={setDarkMode}
+                    className="data-[state=checked]:bg-primary"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* CARD 4: BOTÃO SALVAR */}
+            <Card className="rounded-[2.5rem] border-primary/20 overflow-hidden shadow-sm">
+              <CardHeader className="bg-primary/5 border-b px-8 py-6 text-center">
+                 <CardTitle className="text-xl font-black text-primary uppercase tracking-tight">Ações</CardTitle>
               </CardHeader>
               <CardContent className="p-8">
-                <Button onClick={handleSave} disabled={isSaving} className="w-full h-16 rounded-2xl font-black text-xl primary-gradient shadow-xl">
-                  {isSaving ? <Loader2 className="h-6 w-6 animate-spin" /> : "Aplicar Alterações"}
+                <Button 
+                  onClick={handleSave} 
+                  disabled={isSaving} 
+                  className="w-full h-16 rounded-2xl font-black text-xl primary-gradient shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3"
+                >
+                  {isSaving ? (
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                  ) : (
+                    <>
+                      <Save className="h-6 w-6" />
+                      SALVAR ALTERAÇÕES
+                    </>
+                  )}
                 </Button>
               </CardContent>
             </Card>
