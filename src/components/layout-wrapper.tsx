@@ -6,8 +6,9 @@ import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase"
 import { doc } from "firebase/firestore"
 import { AppSidebar } from "./app-sidebar"
 import { MobileBottomNav } from "./mobile-bottom-nav"
-import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
-import { Loader2 } from "lucide-react"
+import { SidebarInset } from "@/components/ui/sidebar"
+import { Loader2, ArrowLeft } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading } = useUser()
@@ -61,6 +62,17 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       <SidebarInset className="bg-transparent">
         <main className="p-4 md:p-6 lg:p-8 flex justify-center pb-24 md:pb-8">
           <div className="w-full max-w-7xl">
+            {pathname !== "/" && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push("/")}
+                className="mb-6 rounded-xl border-primary text-primary hover:bg-primary/5 font-bold h-10 px-4"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Voltar ao Início
+              </Button>
+            )}
             {children}
           </div>
         </main>
