@@ -24,7 +24,11 @@ import {
   Loader2, 
   PackageSearch,
   ChevronRight,
-  Eye
+  Eye,
+  CreditCard,
+  Banknote,
+  Smartphone,
+  AlertTriangle
 } from "lucide-react"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
 import { collection, query, orderBy } from "firebase/firestore"
@@ -35,6 +39,7 @@ import {
   DialogTitle 
 } from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 export default function OrdersPage() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -52,6 +57,16 @@ export default function OrdersPage() {
     order.id.toLowerCase().includes(searchTerm.toLowerCase())
   ) || []
 
+  const getPaymentIcon = (method: string) => {
+    switch (method?.toLowerCase()) {
+      case 'pix': return <Smartphone className="h-3 w-3 text-emerald-500" />;
+      case 'dinheiro': return <Banknote className="h-3 w-3 text-emerald-500" />;
+      case 'cartao': return <CreditCard className="h-3 w-3 text-blue-500" />;
+      case 'fiado': return <AlertTriangle className="h-3 w-3 text-amber-500" />;
+      default: return <CreditCard className="h-3 w-3" />;
+    }
+  }
+
   return (
     <LayoutWrapper>
       <div className="flex flex-col gap-8">
@@ -59,7 +74,7 @@ export default function OrdersPage() {
           <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter text-primary text-center whitespace-nowrap overflow-hidden text-ellipsis w-full px-2">
             Meus Pedidos
           </h1>
-          <p className="text-muted-foreground font-medium text-lg">Histórico completo de todas as vendas realizadas.</p>
+          <p className="text-muted-foreground font-medium text-lg text-center">Histórico completo de todas as vendas realizadas.</p>
         </div>
 
         <div className="relative max-w-2xl mx-auto w-full">
@@ -125,7 +140,7 @@ export default function OrdersPage() {
                           onClick={() => setSelectedOrder(order)}
                           className="rounded-xl font-bold bg-secondary/50 hover:bg-primary hover:text-white transition-all"
                         >
-                          Ver Itens
+                          Ver Detalhes
                         </Button>
                       </div>
                     </CardContent>
@@ -133,54 +148,76 @@ export default function OrdersPage() {
                 ))}
               </div>
 
-              {/* Desktop Table */}
+              {/* Desktop Table - Optimized for Organization */}
               <div className="hidden md:block rounded-3xl border border-primary/20 bg-white shadow-sm overflow-hidden">
                 <Table>
                   <TableHeader className="bg-muted/30">
                     <TableRow className="hover:bg-transparent border-none h-14">
-                      <TableHead className="px-6 font-black text-muted-foreground uppercase tracking-widest text-xs">Pedido</TableHead>
-                      <TableHead className="font-black text-muted-foreground uppercase tracking-widest text-xs">Cliente</TableHead>
-                      <TableHead className="font-black text-muted-foreground uppercase tracking-widest text-xs">Data</TableHead>
-                      <TableHead className="font-black text-muted-foreground uppercase tracking-widest text-xs text-right">Total</TableHead>
-                      <TableHead className="font-black text-muted-foreground uppercase tracking-widest text-xs">Status</TableHead>
+                      <TableHead className="px-6 font-black text-muted-foreground uppercase tracking-widest text-xs">Informações do Pedido</TableHead>
+                      <TableHead className="font-black text-muted-foreground uppercase tracking-widest text-xs text-center">Data</TableHead>
+                      <TableHead className="font-black text-muted-foreground uppercase tracking-widest text-xs text-center">Status</TableHead>
+                      <TableHead className="font-black text-muted-foreground uppercase tracking-widest text-xs text-right">Valor Final</TableHead>
                       <TableHead className="px-6 text-right font-black text-muted-foreground uppercase tracking-widest text-xs">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredOrders.map((order) => (
-                      <TableRow key={order.id} className="group hover:bg-secondary/10 transition-colors border-b last:border-0 border-primary/5 h-20">
+                      <TableRow key={order.id} className="group hover:bg-secondary/10 transition-colors border-b last:border-0 border-primary/5 h-24">
                         <TableCell className="px-6">
-                          <span className="font-black text-xs text-muted-foreground">#{order.id.slice(-6).toUpperCase()}</span>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col">
-                            <span className="font-bold text-foreground group-hover:text-primary transition-colors">{order.clientName}</span>
-                            <span className="text-[10px] text-muted-foreground font-medium uppercase">{order.paymentMethod}</span>
+                          <div className="flex flex-col gap-1.5">
+                            <span className="font-black text-[10px] text-muted-foreground uppercase tracking-widest">#{order.id.slice(-6).toUpperCase()}</span>
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-10 w-10 border-2 border-primary/10">
+                                <AvatarFallback className="bg-secondary text-primary font-bold">
+                                  {order.clientName.substring(0, 2).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex flex-col">
+                                <span className="font-bold text-foreground group-hover:text-primary transition-colors text-base">{order.clientName}</span>
+                                <span className="text-xs text-muted-foreground font-semibold flex items-center gap-1.5 uppercase tracking-tight">
+                                  {getPaymentIcon(order.paymentMethod)} {order.paymentMethod}
+                                </span>
+                              </div>
+                            </div>
                           </div>
                         </TableCell>
-                        <TableCell className="font-semibold text-muted-foreground">
-                          {order.createdAt ? new Date(order.createdAt.seconds * 1000).toLocaleDateString('pt-BR') : 'Hoje'}
+                        <TableCell className="text-center">
+                          <div className="flex flex-col items-center">
+                            <span className="font-bold text-muted-foreground text-sm">
+                              {order.createdAt ? new Date(order.createdAt.seconds * 1000).toLocaleDateString('pt-BR') : 'Hoje'}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter opacity-70">Data da Venda</span>
+                          </div>
                         </TableCell>
-                        <TableCell className="text-right">
-                          <span className="font-black text-primary">R$ {order.finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                        </TableCell>
-                        <TableCell>
+                        <TableCell className="text-center">
                           <Badge 
-                            className={`rounded-lg font-bold ${
+                            className={`rounded-lg font-bold px-3 py-1 border-none ${
                               order.paymentStatus === "Pago" 
                               ? "bg-emerald-100 text-emerald-700" 
                               : "bg-amber-100 text-amber-700"
                             }`}
                           >
-                            {order.paymentStatus}
+                            {order.paymentStatus.toUpperCase()}
                           </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex flex-col items-end">
+                            <span className="font-black text-primary text-xl tracking-tight">
+                              R$ {order.finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                            </span>
+                            {order.discount > 0 && (
+                              <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
+                                Com Desconto
+                              </span>
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell className="px-6 text-right">
                           <Button 
                             variant="secondary" 
                             size="sm" 
                             onClick={() => setSelectedOrder(order)}
-                            className="rounded-xl font-bold bg-secondary/50 hover:bg-primary hover:text-white transition-all h-9"
+                            className="rounded-xl font-bold bg-secondary/50 hover:bg-primary hover:text-white transition-all h-10 px-4"
                           >
                             Detalhes <ChevronRight className="ml-1 h-4 w-4" />
                           </Button>
@@ -222,7 +259,7 @@ export default function OrdersPage() {
                 <div className="flex flex-col gap-4">
                   <div className="bg-white p-5 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-1">
                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Cliente</span>
-                    <span className="text-lg font-bold text-foreground break-words">{selectedOrder.clientName}</span>
+                    <span className="text-xl font-bold text-foreground break-words">{selectedOrder.clientName}</span>
                   </div>
                   <div className="bg-white p-5 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-1">
                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Pagamento</span>
@@ -237,7 +274,7 @@ export default function OrdersPage() {
                   <Separator className="bg-primary/10" />
                   <div className="space-y-3">
                     {selectedOrder.items?.map((item: any, idx: number) => (
-                      <div key={idx} className="flex justify-between items-center p-3 bg-white rounded-xl border border-primary/5">
+                      <div key={idx} className="flex justify-between items-center p-4 bg-white rounded-xl border border-primary/5">
                         <div className="flex flex-col">
                           <span className="font-bold text-sm">{item.productName}</span>
                           <span className="text-xs text-muted-foreground">{item.quantity}un x R$ {item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
