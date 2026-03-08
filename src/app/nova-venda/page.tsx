@@ -43,6 +43,16 @@ import {
   DialogTitle, 
   DialogTrigger 
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
@@ -61,6 +71,7 @@ export default function NewSalePage() {
   const [dialogActiveTab, setDialogActiveTab] = useState("todos")
   const [isProductPickerOpen, setIsProductPickerOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [itemToRemove, setItemToRemove] = useState<CartItem | null>(null)
   
   const { toast } = useToast()
   const router = useRouter()
@@ -105,8 +116,15 @@ export default function NewSalePage() {
     }))
   }
 
-  const handleRemoveItem = (id: string) => {
-    setItems(items.filter(i => i.id !== id))
+  const handleConfirmRemove = () => {
+    if (itemToRemove) {
+      setItems(items.filter(i => i.id !== itemToRemove.id))
+      setItemToRemove(null)
+      toast({
+        title: "Item removido",
+        description: "O produto foi removido do carrinho."
+      })
+    }
   }
 
   const handleFinalize = async () => {
@@ -312,7 +330,7 @@ export default function NewSalePage() {
                             <Button 
                               variant="ghost" 
                               size="icon" 
-                              onClick={() => handleRemoveItem(item.id)}
+                              onClick={() => setItemToRemove(item)}
                               className="h-8 w-8 text-rose-500 hover:bg-rose-50 hover:text-rose-600 rounded-lg shrink-0"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -451,6 +469,23 @@ export default function NewSalePage() {
           </div>
         </div>
       </div>
+
+      <AlertDialog open={!!itemToRemove} onOpenChange={(open) => !open && setItemToRemove(null)}>
+        <AlertDialogContent className="rounded-3xl border-primary">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-2xl font-black text-primary">Remover do Carrinho?</AlertDialogTitle>
+            <AlertDialogDescription className="font-medium text-lg">
+              Deseja remover <b className="text-foreground">{itemToRemove?.name}</b> do seu pedido?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl font-bold">Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmRemove} className="rounded-xl font-bold bg-rose-600 hover:bg-rose-700">
+              Confirmar Remoção
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </LayoutWrapper>
   )
 }
