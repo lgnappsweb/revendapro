@@ -11,13 +11,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Sparkles, Loader2, ArrowRight } from "lucide-react"
+import { Sparkles, Loader2, ArrowRight, Eye, EyeOff } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 export default function RegisterPage() {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   
   const auth = useAuth()
@@ -69,8 +70,8 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-[#F6F0F2]">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center space-y-2 flex flex-col items-center">
-          <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl primary-gradient text-white shadow-lg mb-4">
-            <Sparkles className="h-10 w-10" />
+          <div className="inline-flex h-20 w-20 items-center justify-center rounded-3xl primary-gradient text-white shadow-xl mb-4">
+            <Sparkles className="h-12 w-12" />
           </div>
           <h1 className="text-5xl font-black tracking-tighter text-primary">RevendaPro</h1>
           <p className="text-muted-foreground font-medium">Sua jornada de sucesso começa aqui.</p>
@@ -110,15 +111,24 @@ export default function RegisterPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password" className="font-bold text-muted-foreground">Crie uma Senha</Label>
-                <Input 
-                  id="password" 
-                  type="password" 
-                  required 
-                  placeholder="Mínimo 6 caracteres"
-                  className="h-12 rounded-xl bg-muted/30 border-none shadow-none focus-visible:ring-primary/20"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+                <div className="relative">
+                  <Input 
+                    id="password" 
+                    type={showPassword ? "text" : "password"}
+                    required 
+                    placeholder="Mínimo 6 caracteres"
+                    className="h-12 rounded-xl bg-muted/30 border-none shadow-none focus-visible:ring-primary/20 pr-10"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
               </div>
               <Button 
                 type="submit" 
