@@ -31,7 +31,8 @@ import {
   Tag,
   Zap,
   Minus,
-  Percent
+  Percent,
+  TrendingUp
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
@@ -58,7 +59,6 @@ import {
 } from "@/components/ui/alert-dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Switch } from "@/components/ui/switch"
 
 interface CartItem {
   id: string
@@ -96,6 +96,10 @@ export default function NewSalePage() {
   }, 0)
 
   const total = Math.max(0, subtotal - discount)
+  
+  // Cálculo do Custo Total e Lucro (Valor da Revendedora)
+  const totalCost = items.reduce((acc, item) => acc + (item.costPrice * item.qty), 0)
+  const profit = Math.max(0, total - totalCost)
 
   const handleAddProductToCart = (product: any) => {
     const existingItem = items.find(i => i.id === product.id)
@@ -171,11 +175,10 @@ export default function NewSalePage() {
         createdAt: serverTimestamp()
       }
       await addDoc(collection(db, "orders"), saleData)
-      toast({ title: "Venda Registrada com sucesso!" })
+      toast({ title: "Venda Registrada!" })
       router.push('/pedidos')
     } catch (error) { 
-      console.error(error)
-      toast({ title: "Erro ao salvar venda", variant: "destructive" }) 
+      toast({ title: "Erro ao salvar", variant: "destructive" }) 
     }
     finally { setIsSubmitting(false) }
   }
@@ -198,7 +201,6 @@ export default function NewSalePage() {
 
         <div className="grid gap-6 lg:grid-cols-5 px-1">
           <div className="lg:col-span-3 space-y-6">
-            {/* Card de Cliente e Busca */}
             <Card className="shadow-sm rounded-[2.5rem] overflow-hidden border-primary/20">
               <CardHeader className="bg-primary/5 border-b px-8 py-6">
                 <CardTitle className="text-xl font-black text-primary flex items-center gap-2 uppercase tracking-tight">
@@ -281,7 +283,6 @@ export default function NewSalePage() {
               </CardContent>
             </Card>
 
-            {/* Card de Pagamento */}
             <Card className="shadow-sm rounded-[2.5rem] overflow-hidden border-primary/20">
               <CardHeader className="bg-primary/5 border-b px-8 py-6">
                 <CardTitle className="text-xl font-black text-primary flex items-center gap-2 uppercase tracking-tight">
@@ -311,19 +312,21 @@ export default function NewSalePage() {
           </div>
 
           <div className="lg:col-span-2 space-y-6">
-            {/* Card de Resumo e Finalização */}
             <Card className="shadow-lg rounded-[2.5rem] overflow-hidden primary-gradient text-white border-none sticky top-24">
               <CardHeader className="p-8 pb-4">
                 <CardTitle className="text-xl font-black uppercase tracking-tight">Resumo do Pedido</CardTitle>
               </CardHeader>
               <CardContent className="p-8 pt-0 space-y-6">
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <div className="flex justify-between items-center opacity-80 font-bold">
-                    <span>Subtotal</span>
+                    <span className="text-sm">Subtotal</span>
                     <span>R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                   </div>
+                  
                   <div className="flex items-center justify-between gap-4">
-                    <span className="opacity-80 font-bold">Desconto</span>
+                    <div className="flex flex-col">
+                      <span className="opacity-80 font-bold text-sm">Desconto</span>
+                    </div>
                     <div className="relative w-32">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 font-black text-sm text-primary">R$</span>
                       <Input 
@@ -334,12 +337,22 @@ export default function NewSalePage() {
                       />
                     </div>
                   </div>
+
+                  <Separator className="bg-white/20" />
+
+                  <div className="bg-white/10 p-4 rounded-2xl border border-white/10 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                       <TrendingUp className="h-4 w-4 text-emerald-300" />
+                       <span className="text-[10px] font-black uppercase tracking-widest text-emerald-100">Lucro Consultora</span>
+                    </div>
+                    <span className="font-black text-emerald-300 text-lg">
+                      + R$ {profit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </span>
+                  </div>
                 </div>
 
-                <Separator className="bg-white/20" />
-
-                <div className="space-y-1">
-                  <span className="text-[10px] font-black uppercase tracking-widest opacity-80">Total Final</span>
+                <div className="space-y-1 mt-6">
+                  <span className="text-[10px] font-black uppercase tracking-widest opacity-80">Total Final (Cliente)</span>
                   <div className="text-5xl font-black tracking-tighter">R$ {total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
                 </div>
 
@@ -356,7 +369,6 @@ export default function NewSalePage() {
         </div>
       </div>
       
-      {/* Dialog de Seleção de Produtos */}
       <Dialog open={isProductPickerOpen} onOpenChange={setIsProductPickerOpen}>
          <DialogContent className="sm:max-w-[550px] w-[95vw] rounded-[2rem] p-0 overflow-hidden border-primary">
             <div className="p-6 bg-card border-b flex flex-col gap-4">
@@ -405,7 +417,6 @@ export default function NewSalePage() {
          </DialogContent>
       </Dialog>
 
-      {/* Alerta de Remoção de Item */}
       <AlertDialog open={!!itemToRemove} onOpenChange={(open) => !open && setItemToRemove(null)}>
         <AlertDialogContent className="rounded-3xl border-primary">
           <AlertDialogHeader>
