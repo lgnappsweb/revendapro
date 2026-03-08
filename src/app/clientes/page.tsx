@@ -46,6 +46,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
 import { collection, addDoc, serverTimestamp, deleteDoc, doc } from "firebase/firestore"
+import { errorEmitter } from "@/firebase/error-emitter"
+import { FirestorePermissionError } from "@/firebase/errors"
 
 export default function ClientsPage() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -85,7 +87,7 @@ export default function ClientsPage() {
     setFormData({ ...formData, phone: formatted });
   };
 
-  const handleSaveClient = async (e: React.FormEvent) => {
+  const handleSaveClient = (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData.name || !formData.phone) {
       toast({
@@ -97,37 +99,46 @@ export default function ClientsPage() {
     }
 
     setIsAddingClient(true)
-    try {
-      await addDoc(clientsRef, {
-        ...formData,
-        createdAt: serverTimestamp()
-      })
-      
-      toast({
-        title: "Cliente Cadastrado",
-        description: `${formData.name} foi adicionado à sua lista.`
-      })
-      
-      setFormData({ name: "", phone: "", city: "", neighborhood: "", notes: "" })
-      setIsDialogOpen(false)
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Não foi possível salvar o cliente.",
-        variant: "destructive"
-      })
-    } finally {
-      setIsAddingClient(false)
+    const newClient = {
+      ...formData,
+      createdAt: serverTimestamp()
     }
+
+    addDoc(clientsRef, newClient)
+      .then(() => {
+        toast({
+          title: "Cliente Cadastrado",
+          description: `${formData.name} foi adicionado à sua lista.`
+        })
+        setFormData({ name: "", phone: "", city: "", neighborhood: "", notes: "" })
+        setIsDialogOpen(false)
+      })
+      .catch(async (error) => {
+        const permissionError = new FirestorePermissionError({
+          path: clientsRef.path,
+          operation: 'create',
+          requestResourceData: newClient,
+        })
+        errorEmitter.emit('permission-error', permissionError)
+      })
+      .finally(() => {
+        setIsAddingClient(false)
+      })
   }
 
-  const handleDeleteClient = async (id: string) => {
-    try {
-      await deleteDoc(doc(db, "clients", id))
-      toast({ title: "Cliente removido" })
-    } catch (error) {
-      toast({ title: "Erro ao remover", variant: "destructive" })
-    }
+  const handleDeleteClient = (id: string) => {
+    const clientDocRef = doc(db, "clients", id)
+    deleteDoc(clientDocRef)
+      .then(() => {
+        toast({ title: "Cliente removido" })
+      })
+      .catch(async (error) => {
+        const permissionError = new FirestorePermissionError({
+          path: clientDocRef.path,
+          operation: 'delete',
+        })
+        errorEmitter.emit('permission-error', permissionError)
+      })
   }
 
   const filteredClients = clients?.filter(c => 
@@ -254,22 +265,24 @@ export default function ClientsPage() {
                   <Card key={client.id} className="rounded-3xl border-primary/20 shadow-sm overflow-hidden bg-white">
                     <CardContent className="p-5">
                       <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-12 w-12 border-2 border-primary/10">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <Avatar className="h-12 w-12 border-2 border-primary/10 shrink-0">
                             <AvatarFallback className="bg-secondary text-primary font-black text-lg">
                               {client.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
-                          <div className="flex flex-col">
-                            <span className="font-bold text-lg text-foreground leading-tight">{client.name}</span>
-                            <span className="text-sm text-muted-foreground font-medium flex items-center gap-1 mt-1">
-                              <Phone className="h-3.5 w-3.5 text-primary" /> {client.phone}
+                          <div className="flex flex-col min-w-0">
+                            <span className="font-bold text-lg text-foreground leading-tight truncate">
+                              {client.name}
+                            </span>
+                            <span className="text-sm text-muted-foreground font-medium flex items-center gap-1 mt-1 truncate">
+                              <Phone className="h-3.5 w-3.5 text-primary shrink-0" /> {client.phone}
                             </span>
                           </div>
                         </div>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="rounded-full h-10 w-10">
+                            <Button variant="ghost" size="icon" className="rounded-full h-10 w-10 shrink-0">
                               <MoreVertical className="h-5 w-5" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -288,13 +301,13 @@ export default function ClientsPage() {
                       </div>
 
                       <div className="mt-4 grid grid-cols-2 gap-2 border-t pt-4 border-primary/5">
-                        <div className="flex flex-col gap-0.5">
+                        <div className="flex flex-col gap-0.5 min-w-0">
                           <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Localização</span>
                           <span className="text-sm font-semibold truncate flex items-center gap-1">
-                            <MapPin className="h-3 w-3 text-primary" /> {client.neighborhood || "N/A"}
+                            <MapPin className="h-3 w-3 text-primary shrink-0" /> {client.neighborhood || "N/A"}
                           </span>
                         </div>
-                        <div className="flex flex-col gap-0.5 text-right">
+                        <div className="flex flex-col gap-0.5 text-right min-w-0">
                           <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Cidade</span>
                           <span className="text-sm font-semibold truncate">{client.city || "N/A"}</span>
                         </div>
@@ -333,14 +346,14 @@ export default function ClientsPage() {
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex flex-col">
-                              <span className="font-bold text-foreground group-hover:text-primary transition-colors">{client.name}</span>
+                              <span className="font-bold text-foreground group-hover:text-primary transition-colors truncate max-w-[200px]">{client.name}</span>
                               <span className="text-xs text-muted-foreground font-medium mt-0.5">{client.phone}</span>
                             </div>
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-col">
-                            <span className="font-bold text-sm">{client.city || "Não inf."}</span>
+                            <span className="font-bold text-sm truncate max-w-[150px]">{client.city || "Não inf."}</span>
                             <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Cidade</span>
                           </div>
                         </TableCell>
