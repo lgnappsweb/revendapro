@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
 import { 
   Select, 
   SelectContent, 
@@ -32,7 +33,8 @@ import {
   Zap,
   Minus,
   Percent,
-  TrendingUp
+  TrendingUp,
+  ChevronRight
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
@@ -79,6 +81,7 @@ export default function NewSalePage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [itemToRemove, setItemToRemove] = useState<CartItem | null>(null)
   const [discount, setDiscount] = useState(0)
+  const [showProfit, setShowProfit] = useState(true)
   
   const { toast } = useToast()
   const router = useRouter()
@@ -340,15 +343,29 @@ export default function NewSalePage() {
 
                   <Separator className="bg-white/20" />
 
-                  <div className="bg-white/10 p-4 rounded-2xl border border-white/10 flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-4 mb-2">
                     <div className="flex items-center gap-2">
                        <TrendingUp className="h-4 w-4 text-emerald-300" />
                        <span className="text-[10px] font-black uppercase tracking-widest text-emerald-100">Lucro Consultora</span>
                     </div>
-                    <span className="font-black text-emerald-300 text-lg">
-                      + R$ {profit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                    </span>
+                    <Switch 
+                      checked={showProfit} 
+                      onCheckedChange={setShowProfit}
+                      className="data-[state=checked]:bg-emerald-500"
+                    />
                   </div>
+
+                  {showProfit && (
+                    <div className="bg-white/10 p-4 rounded-2xl border border-white/10 flex items-center justify-between animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="flex items-center gap-2">
+                         <Zap className="h-4 w-4 text-emerald-300" />
+                         <span className="text-[10px] font-black uppercase tracking-widest text-emerald-100">Ganhos Reais</span>
+                      </div>
+                      <span className="font-black text-emerald-300 text-lg">
+                        + R$ {profit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-1 mt-6">

@@ -301,6 +301,12 @@ export default function Dashboard() {
 
             {totalPending > 0 ? (
               <Card className="bg-rose-500/10 rounded-[2.5rem] shadow-sm border-l-4 border-rose-500 overflow-hidden">
+                <CardHeader className="bg-rose-500/5 border-b px-8 py-6">
+                  <CardTitle className="text-lg text-rose-500 font-black flex items-center gap-2 uppercase tracking-tight">
+                    <AlertCircle className="h-5 w-5" />
+                    Alertas
+                  </CardTitle>
+                </CardHeader>
                 <CardContent className="p-8 flex items-start gap-4">
                   <div className="p-3 bg-rose-500/20 rounded-xl shrink-0">
                     <AlertCircle className="h-6 w-6 text-rose-500" />
@@ -308,7 +314,7 @@ export default function Dashboard() {
                   <div className="space-y-1 min-w-0">
                     <h4 className="font-black text-rose-500 uppercase text-xs tracking-tight">Pagamentos Pendentes</h4>
                     <p className="text-[10px] text-muted-foreground leading-tight font-bold">
-                      Existem R$ {totalPending.toLocaleString('pt-BR')} em aberto.
+                      Existem R$ {totalPending.toLocaleString('pt-BR')} em aberto no seu financeiro.
                     </p>
                     <Button variant="link" className="p-0 h-auto text-rose-500 font-black uppercase text-[10px] underline decoration-2" asChild>
                       <Link href="/financeiro">Ver Detalhes</Link>
@@ -318,6 +324,12 @@ export default function Dashboard() {
               </Card>
             ) : (
               <Card className="bg-emerald-500/10 rounded-[2.5rem] shadow-sm border-l-4 border-emerald-500 overflow-hidden">
+                <CardHeader className="bg-emerald-500/5 border-b px-8 py-6">
+                  <CardTitle className="text-lg text-emerald-500 font-black flex items-center gap-2 uppercase tracking-tight">
+                    <CheckCircle2 className="h-5 w-5" />
+                    Status
+                  </CardTitle>
+                </CardHeader>
                 <CardContent className="p-8 flex items-start gap-4">
                   <div className="p-3 bg-emerald-500/20 rounded-xl shrink-0">
                     <CheckCircle2 className="h-6 w-6 text-emerald-500" />

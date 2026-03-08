@@ -56,16 +56,6 @@ export default function OrdersPage() {
     order.id.toLowerCase().includes(searchTerm.toLowerCase())
   ) || []
 
-  const getPaymentIcon = (method: string) => {
-    switch (method?.toLowerCase()) {
-      case 'pix': return <Smartphone className="h-3 w-3 text-emerald-500" />;
-      case 'dinheiro': return <Banknote className="h-3 w-3 text-emerald-500" />;
-      case 'cartao': return <CreditCard className="h-3 w-3 text-blue-500" />;
-      case 'fiado': return <AlertTriangle className="h-3 w-3 text-amber-500" />;
-      default: return <CreditCard className="h-3 w-3" />;
-    }
-  }
-
   return (
     <LayoutWrapper>
       <div className="flex flex-col gap-8 w-full max-w-full overflow-x-hidden">
@@ -93,6 +83,11 @@ export default function OrdersPage() {
             <div className="flex justify-center py-20"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>
           ) : filteredOrders.length === 0 ? (
             <Card className="rounded-[2.5rem] border-primary/20 overflow-hidden shadow-sm">
+              <CardHeader className="bg-primary/5 border-b px-8 py-6">
+                <CardTitle className="text-xl font-black text-primary flex items-center gap-2 uppercase tracking-tight">
+                   <Receipt className="h-6 w-6" /> Pedidos
+                </CardTitle>
+              </CardHeader>
                <CardContent className="flex flex-col items-center justify-center py-20 text-center">
                 <PackageSearch className="h-16 w-16 text-primary/20 mb-4" />
                 <p className="text-muted-foreground font-medium">Nenhum pedido encontrado.</p>
