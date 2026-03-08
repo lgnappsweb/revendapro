@@ -171,14 +171,14 @@ export default function ProductsPage() {
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px] w-[95vw] rounded-2xl border-primary max-h-[90vh] flex flex-col p-0 overflow-hidden">
-              <div className="p-6 pb-2 border-b">
+              <div className="p-8 pb-4 border-b">
                 <DialogHeader>
-                  <DialogTitle className="text-2xl font-bold text-primary text-center">Cadastrar Produto</DialogTitle>
-                  <DialogDescription className="font-medium text-muted-foreground text-center">Adicione um novo item ao seu catálogo de revenda.</DialogDescription>
+                  <DialogTitle className="text-3xl font-bold text-primary text-center">Cadastrar Produto</DialogTitle>
+                  <DialogDescription className="font-semibold text-muted-foreground text-center text-base">Adicione um novo item ao seu catálogo de revenda.</DialogDescription>
                 </DialogHeader>
               </div>
               
-              <div className="flex-1 overflow-y-auto px-6 py-4">
+              <div className="flex-1 overflow-y-auto px-6 py-6">
                 <div className="grid gap-6">
                   <div className="grid gap-2">
                     <Label htmlFor="name" className="font-bold text-muted-foreground text-base">Nome do Produto</Label>
@@ -261,7 +261,7 @@ export default function ProductsPage() {
                     />
                   </div>
                   
-                  <div className="pt-2 pb-6">
+                  <div className="pt-4 pb-10">
                     <Button onClick={handleSaveProduct} className="w-full rounded-xl font-bold h-14 text-lg primary-gradient shadow-lg">
                       Salvar Produto
                     </Button>
