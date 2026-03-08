@@ -138,27 +138,27 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-background transition-colors duration-500 overflow-x-hidden">
+    <div className="flex h-screen bg-background transition-colors duration-500 overflow-hidden">
       <div className="hidden md:block shrink-0">
         <AppSidebar />
       </div>
-      <SidebarInset className="bg-transparent flex-1 w-full overflow-x-hidden">
-        <main className="flex flex-col min-h-screen w-full pb-24 md:pb-0">
-          <div className="flex-1 w-full relative border-l-2 border-primary/20 dark:border-primary/40 bg-card dark:bg-card flex flex-col min-h-full">
-            {pathname !== "/" && (
-              <header className="sticky top-0 z-30 w-full p-4 sm:p-8 md:p-12 py-4 sm:py-6 md:py-8 bg-card/80 backdrop-blur-md border-b border-primary/10 flex items-center">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => router.push("/")}
-                  className="rounded-xl border-primary text-primary bg-card hover:bg-primary/5 font-bold h-10 px-4 shadow-sm transition-all active:scale-95 shrink-0"
-                >
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Voltar ao Início
-                </Button>
-              </header>
-            )}
-            <div className={cn("flex-1 w-full p-4 sm:p-8 md:p-12", pathname === "/" ? "" : "pt-6 sm:pt-10 md:pt-12")}>
+      <SidebarInset className="bg-transparent flex-1 w-full overflow-hidden flex flex-col">
+        {pathname !== "/" && (
+          <header className="sticky top-0 z-[100] w-full p-4 sm:px-8 bg-card/95 backdrop-blur-md border-b border-primary/10 flex items-center h-20 shrink-0 shadow-sm">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push("/")}
+              className="rounded-xl border-primary text-primary bg-card hover:bg-primary/5 font-bold h-12 px-6 shadow-md transition-all active:scale-95 shrink-0 text-base"
+            >
+              <ArrowLeft className="mr-2 h-5 w-5" />
+              Voltar ao Início
+            </Button>
+          </header>
+        )}
+        <main className="flex-1 overflow-y-auto w-full pb-24 md:pb-0 scroll-smooth">
+          <div className="w-full relative border-l-2 border-primary/20 dark:border-primary/40 bg-card dark:bg-card min-h-full">
+            <div className={cn("w-full p-4 sm:p-8 md:p-12", pathname === "/" ? "pt-12" : "pt-6")}>
               {children}
             </div>
           </div>
