@@ -10,17 +10,15 @@ import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { 
   Palette, 
-  Smartphone, 
   Moon, 
-  Sun, 
-  Check, 
   Save, 
   Loader2,
   Brush,
   Type,
   Pipette,
   Layout,
-  Eye
+  Eye,
+  Sparkles
 } from "lucide-react"
 import { useFirestore, useDoc, useMemoFirebase } from "@/firebase"
 import { doc, setDoc, serverTimestamp } from "firebase/firestore"
@@ -85,19 +83,18 @@ export default function SettingsPage() {
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-primary uppercase text-center">
               Configurações
             </h1>
-            <p className="text-muted-foreground font-medium text-lg">Personalize sua ferramenta.</p>
+            <p className="text-muted-foreground font-medium text-lg">Personalize sua ferramenta de trabalho.</p>
           </div>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-2 px-1 pb-20">
           <div className="space-y-8">
-            {/* CARD 1: GERAL */}
             <Card className="rounded-[2.5rem] border-primary/20 overflow-hidden shadow-sm">
               <CardHeader className="bg-primary/5 border-b px-8 py-6">
                 <CardTitle className="text-xl font-black text-primary flex items-center gap-2 uppercase tracking-tight">
                   <Type className="h-6 w-6" /> Geral
                 </CardTitle>
-                <CardDescription className="font-medium">Identidade do seu sistema.</CardDescription>
+                <CardDescription className="font-medium">Identidade do seu sistema de gestão.</CardDescription>
               </CardHeader>
               <CardContent className="p-8">
                   <Label className="font-bold text-muted-foreground ml-1">Nome do Aplicativo</Label>
@@ -109,13 +106,12 @@ export default function SettingsPage() {
               </CardContent>
             </Card>
 
-            {/* CARD 2: TEMA */}
             <Card className="rounded-[2.5rem] border-primary/20 overflow-hidden shadow-sm">
               <CardHeader className="bg-primary/5 border-b px-8 py-6">
                 <CardTitle className="text-xl font-black text-primary flex items-center gap-2 uppercase tracking-tight">
                   <Palette className="h-6 w-6" /> Cor Principal
                 </CardTitle>
-                <CardDescription className="font-medium">Escolha a cor principal da sua marca.</CardDescription>
+                <CardDescription className="font-medium">Escolha a cor principal da sua marca pessoal.</CardDescription>
               </CardHeader>
               <CardContent className="p-8 space-y-8">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -164,13 +160,12 @@ export default function SettingsPage() {
           </div>
 
           <div className="space-y-8">
-            {/* CARD 3: INTERFACE */}
             <Card className="rounded-[2.5rem] border-primary/20 overflow-hidden shadow-sm">
               <CardHeader className="bg-primary/5 border-b px-8 py-6">
                 <CardTitle className="text-xl font-black text-primary flex items-center gap-2 uppercase tracking-tight">
                   <Layout className="h-6 w-6" /> Interface
                 </CardTitle>
-                <CardDescription className="font-medium">Configurações de exibição.</CardDescription>
+                <CardDescription className="font-medium">Configurações de exibição do aplicativo.</CardDescription>
               </CardHeader>
               <CardContent className="p-8 space-y-6">
                 <div className="flex items-center justify-between p-4 bg-muted/20 rounded-2xl border border-transparent hover:border-primary/10 transition-all">
@@ -207,39 +202,52 @@ export default function SettingsPage() {
               </CardContent>
             </Card>
 
-            {/* CARD 4: PREVIA */}
             <Card className="rounded-[2.5rem] border-primary/20 overflow-hidden shadow-sm">
               <CardHeader className="bg-primary/5 border-b px-8 py-6">
                 <CardTitle className="text-xl font-black text-primary flex items-center gap-2 uppercase tracking-tight">
                   <Eye className="h-6 w-6" /> Prévia do App
                 </CardTitle>
+                <CardDescription className="font-medium">Veja como seu aplicativo ficará no celular.</CardDescription>
               </CardHeader>
-              <CardContent className="p-8">
-                <div className="rounded-2xl border-4 border-muted p-4 bg-muted/10">
-                  <div className="flex flex-col gap-4">
-                    <div className="flex items-center gap-2">
-                       <div className="h-6 w-6 rounded-md bg-primary" />
-                       <div className="h-4 w-24 bg-muted rounded-md" />
+              <CardContent className="p-8 flex justify-center">
+                <div className="relative mx-auto border-gray-800 dark:border-gray-800 bg-gray-800 border-[14px] rounded-[2.5rem] h-[500px] w-[250px] shadow-xl overflow-hidden">
+                  <div className="w-[100px] h-[18px] bg-gray-800 top-0 left-1/2 -translate-x-1/2 absolute rounded-b-xl z-20"></div>
+                  <div className="h-[46px] w-[3px] bg-gray-800 absolute -left-[17px] top-[72px] rounded-l-lg"></div>
+                  <div className="h-[46px] w-[3px] bg-gray-800 absolute -left-[17px] top-[124px] rounded-l-lg"></div>
+                  <div className="h-[64px] w-[3px] bg-gray-800 absolute -right-[17px] top-[94px] rounded-r-lg"></div>
+                  
+                  <div className="rounded-[2rem] overflow-hidden w-full h-full bg-background p-4 flex flex-col gap-4">
+                    <div className="flex items-center gap-2 mt-4">
+                       <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+                          <Sparkles className="h-4 w-4 text-white" />
+                       </div>
+                       <div className="h-3 w-20 bg-muted rounded-full" />
                     </div>
+                    
+                    <div className="h-24 bg-primary/10 rounded-2xl border border-primary/20 flex flex-col p-3 gap-2">
+                       <div className="h-2 w-10 bg-primary/30 rounded-full" />
+                       <div className="h-5 w-24 bg-primary rounded-lg" />
+                    </div>
+                    
                     <div className="grid grid-cols-2 gap-2">
-                       <div className="h-20 bg-primary/10 rounded-xl border border-primary/20 flex flex-col p-2 gap-1">
-                          <div className="h-2 w-8 bg-primary/30 rounded" />
-                          <div className="h-4 w-12 bg-primary rounded" />
+                       <div className="h-16 bg-muted/30 rounded-2xl border border-muted flex flex-col p-3 gap-1">
+                          <div className="h-1.5 w-6 bg-muted rounded-full" />
+                          <div className="h-3 w-10 bg-muted rounded-md" />
                        </div>
-                       <div className="h-20 bg-muted/30 rounded-xl border border-muted flex flex-col p-2 gap-1">
-                          <div className="h-2 w-8 bg-muted rounded" />
-                          <div className="h-4 w-12 bg-muted rounded" />
+                       <div className="h-16 bg-muted/30 rounded-2xl border border-muted flex flex-col p-3 gap-1">
+                          <div className="h-1.5 w-6 bg-muted rounded-full" />
+                          <div className="h-3 w-10 bg-muted rounded-md" />
                        </div>
                     </div>
-                    <div className="h-10 bg-primary rounded-xl flex items-center justify-center">
-                       <div className="h-2 w-20 bg-white/30 rounded" />
+                    
+                    <div className="mt-auto h-12 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
+                       <div className="h-2 w-24 bg-white/40 rounded-full" />
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* CARD 5: SALVAR */}
             <Card className="rounded-[2.5rem] border-primary/20 overflow-hidden shadow-sm">
               <CardHeader className="bg-primary/5 border-b px-8 py-6 text-center">
                  <CardTitle className="text-xl font-black text-primary uppercase tracking-tight">Ações</CardTitle>
