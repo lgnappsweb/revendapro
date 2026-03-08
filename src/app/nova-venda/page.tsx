@@ -28,7 +28,8 @@ import {
   CheckCircle2,
   Package,
   Loader2,
-  X
+  Tag,
+  Zap
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
@@ -55,11 +56,14 @@ import {
 } from "@/components/ui/alert-dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Switch } from "@/components/ui/switch"
 
 interface CartItem {
   id: string
   name: string
-  price: number
+  magazinePrice: number
+  costPrice: number
+  useCost: boolean
   qty: number
 }
 
@@ -83,7 +87,11 @@ export default function NewSalePage() {
   const { data: dbProducts, isLoading: loadingProducts } = useCollection(productsRef)
   const { data: dbClients, isLoading: loadingClients } = useCollection(clientsRef)
 
-  const subtotal = items.reduce((acc, item) => acc + (item.price * item.qty), 0)
+  const subtotal = items.reduce((acc, item) => {
+    const price = item.useCost ? item.costPrice : item.magazinePrice
+    return acc + (price * item.qty)
+  }, 0)
+
   const [discount, setDiscount] = useState(0)
   const total = subtotal - discount
 
@@ -95,7 +103,9 @@ export default function NewSalePage() {
       setItems([...items, { 
         id: product.id, 
         name: product.name, 
-        price: Number(product.price), 
+        magazinePrice: Number(product.price || 0), 
+        costPrice: Number(product.cost || 0),
+        useCost: false,
         qty: 1 
       }])
     }
@@ -103,6 +113,20 @@ export default function NewSalePage() {
     toast({
       title: "Produto adicionado",
       description: `${product.name} no carrinho.`
+    })
+  }
+
+  const toggleItemPriceMode = (id: string) => {
+    setItems(items.map(item => 
+      item.id === id ? { ...item, useCost: !item.useCost } : item
+    ))
+  }
+
+  const toggleAllToCost = (useCost: boolean) => {
+    setItems(items.map(item => ({ ...item, useCost })))
+    toast({
+      title: useCost ? "Preço de Custo Aplicado" : "Preço de Revista Aplicado",
+      description: `Todos os itens foram atualizados.`
     })
   }
 
@@ -152,8 +176,9 @@ export default function NewSalePage() {
           productId: item.id,
           productName: item.name,
           quantity: item.qty,
-          unitPrice: item.price,
-          subtotal: item.price * item.qty
+          unitPrice: item.useCost ? item.costPrice : item.magazinePrice,
+          subtotal: (item.useCost ? item.costPrice : item.magazinePrice) * item.qty,
+          isResellerPrice: item.useCost
         })),
         total: subtotal,
         discount,
@@ -309,24 +334,17 @@ export default function NewSalePage() {
                   ) : (
                     <div className="space-y-3">
                       {items.map((item) => (
-                        <div key={item.id} className="flex items-center gap-3 p-3 bg-white rounded-xl shadow-sm border border-primary/10 animate-in fade-in slide-in-from-left-4">
-                          <div className="flex-1">
-                            <h4 className="font-bold text-sm text-foreground">{item.name}</h4>
-                            <span className="text-xs text-muted-foreground font-medium">R$ {item.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} / un</span>
-                          </div>
+                        <div key={item.id} className="flex flex-col p-4 bg-white rounded-xl shadow-sm border border-primary/10 animate-in fade-in slide-in-from-left-4 gap-3">
                           <div className="flex items-center gap-3">
-                            <div className="flex items-center border rounded-lg bg-muted/30 h-8">
-                              <button 
-                                onClick={() => updateQty(item.id, -1)}
-                                className="px-3 text-muted-foreground hover:text-primary font-bold h-full"
-                              >-</button>
-                              <span className="px-2 font-bold text-sm min-w-[24px] text-center">{item.qty}</span>
-                              <button 
-                                onClick={() => updateQty(item.id, 1)}
-                                className="px-3 text-muted-foreground hover:text-primary font-bold h-full"
-                              >+</button>
+                            <div className="flex-1">
+                              <h4 className="font-bold text-sm text-foreground">{item.name}</h4>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Badge variant="outline" className={`rounded-md text-[9px] font-black uppercase px-1.5 py-0.5 ${item.useCost ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-primary/5 text-primary border-primary/10'}`}>
+                                  {item.useCost ? 'Preço Custo' : 'Preço Revista'}
+                                </Badge>
+                                <span className="text-xs text-muted-foreground font-medium">R$ {(item.useCost ? item.costPrice : item.magazinePrice).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} / un</span>
+                              </div>
                             </div>
-                            <span className="font-black text-sm w-20 text-right text-primary">R$ {(item.price * item.qty).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                             <Button 
                               variant="ghost" 
                               size="icon" 
@@ -335,6 +353,33 @@ export default function NewSalePage() {
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
+                          </div>
+                          
+                          <div className="flex items-center justify-between pt-2 border-t border-dashed">
+                            <div className="flex items-center gap-2">
+                               <Button 
+                                 variant="outline" 
+                                 size="sm" 
+                                 onClick={() => toggleItemPriceMode(item.id)}
+                                 className={`h-8 rounded-lg font-bold text-[10px] px-2 uppercase ${item.useCost ? 'border-emerald-200 text-emerald-600 bg-emerald-50' : 'border-primary/20 text-primary'}`}
+                               >
+                                 <Tag className="mr-1 h-3 w-3" /> {item.useCost ? 'Usar Revista' : 'Usar Custo'}
+                               </Button>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <div className="flex items-center border rounded-lg bg-muted/30 h-8">
+                                <button 
+                                  onClick={() => updateQty(item.id, -1)}
+                                  className="px-3 text-muted-foreground hover:text-primary font-bold h-full"
+                                >-</button>
+                                <span className="px-2 font-bold text-sm min-w-[24px] text-center">{item.qty}</span>
+                                <button 
+                                  onClick={() => updateQty(item.id, 1)}
+                                  className="px-3 text-muted-foreground hover:text-primary font-bold h-full"
+                                >+</button>
+                              </div>
+                              <span className="font-black text-sm w-20 text-right text-primary">R$ {((item.useCost ? item.costPrice : item.magazinePrice) * item.qty).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -408,6 +453,19 @@ export default function NewSalePage() {
                   <span>Subtotal</span>
                   <span>R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                 </div>
+
+                <div className="flex justify-between items-center text-white/80 font-bold py-1">
+                  <div className="flex flex-col">
+                    <span className="flex items-center gap-1.5">Preço de Custo <Zap className="h-3 w-3 fill-yellow-400 text-yellow-400" /></span>
+                    <span className="text-[10px] opacity-70 font-black uppercase tracking-widest">Usar valor da revendedora</span>
+                  </div>
+                  <Switch 
+                    checked={items.length > 0 && items.every(i => i.useCost)}
+                    onCheckedChange={toggleAllToCost}
+                    className="data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-white/20"
+                  />
+                </div>
+
                 <div className="flex justify-between items-center text-white/80 font-bold">
                   <span>Desconto</span>
                   <div className="flex items-center gap-2">
