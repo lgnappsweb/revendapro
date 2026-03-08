@@ -102,18 +102,18 @@ const recentOrders = [
 export default function Dashboard() {
   return (
     <LayoutWrapper>
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">Olá, Bem-vinda! 👋</h1>
-            <p className="text-muted-foreground font-medium">Aqui está o resumo da sua revenda hoje.</p>
+      <div className="flex flex-col gap-10 pt-4">
+        <div className="flex flex-col gap-8 items-center text-center">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-5xl md:text-6xl font-black tracking-tighter text-primary">RevendaPro</h1>
+            <p className="text-muted-foreground font-medium text-lg">Aqui está o resumo da sua revenda hoje.</p>
           </div>
           
           <div className="relative w-full max-w-2xl">
             <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
             <Input 
               placeholder="Pesquisar pedidos, clientes ou metas..." 
-              className="h-12 pl-10 rounded-2xl border-none shadow-sm bg-white"
+              className="h-14 pl-12 rounded-2xl border-none shadow-sm bg-white text-base"
             />
           </div>
         </div>
