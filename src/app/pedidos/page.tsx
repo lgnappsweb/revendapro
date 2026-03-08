@@ -32,23 +32,48 @@ import {
   Calendar,
   Clock,
   User,
-  Info
+  Info,
+  Trash2,
+  Eye
 } from "lucide-react"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
-import { collection, query, orderBy } from "firebase/firestore"
+import { collection, query, orderBy, doc, deleteDoc } from "firebase/firestore"
 import { 
   Dialog, 
   DialogContent, 
   DialogHeader, 
   DialogTitle 
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { useToast } from "@/hooks/use-toast"
+import { errorEmitter } from "@/firebase/error-emitter"
+import { FirestorePermissionError } from "@/firebase/errors"
 
 export default function OrdersPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedOrder, setSelectedOrder] = useState<any>(null)
+  const [orderToDelete, setOrderToDelete] = useState<any>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+  
   const db = useFirestore()
+  const { toast } = useToast()
 
   const ordersRef = useMemoFirebase(() => 
     query(collection(db, "orders"), orderBy("createdAt", "desc")), 
@@ -60,6 +85,25 @@ export default function OrdersPage() {
     order.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     order.id.toLowerCase().includes(searchTerm.toLowerCase())
   ) || []
+
+  const handleDeleteOrder = async () => {
+    if (!orderToDelete) return
+    setIsDeleting(true)
+    
+    const docRef = doc(db, "orders", orderToDelete.id)
+    try {
+      await deleteDoc(docRef)
+      toast({ title: "Pedido removido com sucesso" })
+      setOrderToDelete(null)
+    } catch (error: any) {
+      errorEmitter.emit('permission-error', new FirestorePermissionError({
+        path: docRef.path,
+        operation: 'delete'
+      }))
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   const getMethodIcon = (method: string) => {
     switch (method?.toLowerCase()) {
@@ -125,9 +169,26 @@ export default function OrdersPage() {
                             <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">#{order.id.slice(-6).toUpperCase()}</span>
                             <span className="font-bold text-lg text-foreground block break-words">{order.clientName}</span>
                           </div>
-                          <Badge className={`rounded-lg font-bold px-2 py-0.5 shrink-0 ${order.paymentStatus === "Pago" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
-                            {order.paymentStatus}
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            <Badge className={`rounded-lg font-bold px-2 py-0.5 shrink-0 ${order.paymentStatus === "Pago" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
+                              {order.paymentStatus}
+                            </Badge>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="rounded-xl">
+                                <DropdownMenuItem className="font-bold gap-2" onSelect={() => setSelectedOrder(order)}>
+                                  <Eye className="h-4 w-4 text-blue-500" /> Detalhes
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="font-bold gap-2 text-rose-600" onSelect={() => setOrderToDelete(order)}>
+                                  <Trash2 className="h-4 w-4" /> Excluir
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
                         </div>
                         <div className="flex items-center justify-between border-t pt-3">
                           <span className="text-lg font-black text-primary">R$ {order.finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
@@ -175,7 +236,24 @@ export default function OrdersPage() {
                             <span className="font-black text-primary text-xl tracking-tight">R$ {order.finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                           </TableCell>
                           <TableCell className="px-8 text-right">
-                            <Button variant="secondary" size="sm" onClick={() => setSelectedOrder(order)} className="rounded-xl font-bold bg-secondary/50 h-10 px-4">Detalhes <ChevronRight className="ml-1 h-4 w-4" /></Button>
+                            <div className="flex items-center justify-end gap-2">
+                              <Button variant="secondary" size="sm" onClick={() => setSelectedOrder(order)} className="rounded-xl font-bold bg-secondary/50 h-10 px-4">Detalhes <ChevronRight className="ml-1 h-4 w-4" /></Button>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full">
+                                    <MoreVertical className="h-5 w-5" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="rounded-xl">
+                                  <DropdownMenuItem className="font-bold gap-2" onSelect={() => setSelectedOrder(order)}>
+                                    <Eye className="h-4 w-4 text-blue-500" /> Visualizar
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="font-bold gap-2 text-rose-600" onSelect={() => setOrderToDelete(order)}>
+                                    <Trash2 className="h-4 w-4" /> Excluir
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -289,6 +367,27 @@ export default function OrdersPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!orderToDelete} onOpenChange={(o) => !o && setOrderToDelete(null)}>
+        <AlertDialogContent className="rounded-3xl border-primary">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-2xl font-black text-primary uppercase">Excluir Pedido?</AlertDialogTitle>
+            <AlertDialogDescription className="text-lg font-medium text-muted-foreground">
+              Tem certeza que deseja remover o pedido de <b className="text-foreground">{orderToDelete?.clientName}</b>? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl font-bold">Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteOrder} 
+              disabled={isDeleting}
+              className="rounded-xl font-bold bg-rose-600 hover:bg-rose-700"
+            >
+              {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirmar Exclusão"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </LayoutWrapper>
   )
 }
