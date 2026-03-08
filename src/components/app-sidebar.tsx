@@ -13,7 +13,6 @@ import {
   Package,
   ShoppingCart,
   Receipt,
-  BarChart3,
   LogOut,
   Sparkles,
   PlusCircle,
@@ -39,7 +38,6 @@ const mainNav = [
   { title: "Produtos", href: "/produtos", icon: Package },
   { title: "Pedidos", href: "/pedidos", icon: ShoppingCart },
   { title: "Financeiro", href: "/financeiro", icon: Receipt },
-  { title: "Relatórios", href: "/relatorios", icon: BarChart3 },
   { title: "Configurações", href: "/configuracoes", icon: Settings },
 ]
 
