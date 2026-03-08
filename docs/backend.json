@@ -2,246 +2,114 @@
 {
   "entities": {
     "User": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "User",
+      "description": "Perfil do administrador do sistema.",
       "type": "object",
-      "description": "Represents an administrator user account.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier (matches Firebase Auth UID)."
-        },
-        "name": {
-          "type": "string",
-          "description": "The full name of the user."
-        },
-        "email": {
-          "type": "string",
-          "description": "The email address of the user.",
-          "format": "email"
-        },
-        "role": {
-          "type": "string",
-          "description": "User role, defaults to 'admin'.",
-          "enum": ["admin"]
-        },
-        "createdAt": {
-          "type": "string",
-          "description": "Timestamp of account creation.",
-          "format": "date-time"
-        }
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["admin"] },
+        "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "name", "email", "role", "createdAt"]
     },
     "Client": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Client",
+      "description": "Dados dos clientes da revendedora.",
       "type": "object",
-      "description": "Represents a customer of the reseller.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Client."
-        },
-        "name": {
-          "type": "string",
-          "description": "Client full name."
-        },
-        "phone": {
-          "type": "string",
-          "description": "WhatsApp contact number."
-        },
-        "address": {
-          "type": "string",
-          "description": "Street address."
-        },
-        "neighborhood": {
-          "type": "string",
-          "description": "Neighborhood."
-        },
-        "city": {
-          "type": "string",
-          "description": "City."
-        },
-        "notes": {
-          "type": "string",
-          "description": "Additional observations."
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time"
-        }
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "address": { "type": "string" },
+        "neighborhood": { "type": "string" },
+        "city": { "type": "string" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "name", "phone", "createdAt"]
     },
     "Product": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Product",
+      "description": "Catálogo de produtos (Avon, Natura, etc).",
       "type": "object",
-      "description": "Represents a beauty product in the catalog.",
       "properties": {
-        "id": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "brand": {
-          "type": "string",
-          "description": "Brand (Avon, Natura, etc.)"
-        },
-        "category": {
-          "type": "string"
-        },
-        "price": {
-          "type": "number",
-          "description": "Selling price."
-        },
-        "cost": {
-          "type": "number",
-          "description": "Cost price."
-        },
-        "code": {
-          "type": "string",
-          "description": "Product code."
-        },
-        "description": {
-          "type": "string"
-        },
-        "image": {
-          "type": "string",
-          "format": "uri"
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time"
-        }
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "brand": { "type": "string" },
+        "category": { "type": "string" },
+        "price": { "type": "number" },
+        "cost": { "type": "number" },
+        "code": { "type": "string" },
+        "description": { "type": "string" },
+        "image": { "type": "string", "format": "uri" },
+        "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["id", "name", "brand", "category", "price", "createdAt"]
+      "required": ["id", "name", "price", "createdAt"]
     },
     "Order": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Order",
+      "description": "Registro de vendas.",
       "type": "object",
-      "description": "Represents a sales transaction.",
       "properties": {
-        "id": {
-          "type": "string"
-        },
-        "clientId": {
-          "type": "string"
-        },
-        "clientName": {
-          "type": "string"
-        },
-        "total": {
-          "type": "number"
-        },
-        "discount": {
-          "type": "number"
-        },
-        "finalTotal": {
-          "type": "number"
-        },
-        "paymentMethod": {
-          "type": "string",
-          "enum": ["Dinheiro", "Pix", "Cartão", "Transferência", "Fiado / Prazo"]
-        },
-        "paymentStatus": {
-          "type": "string",
-          "enum": ["Pago", "Pendente", "Atrasado"]
-        },
-        "dueDate": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "notes": {
-          "type": "string"
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time"
-        }
+        "id": { "type": "string" },
+        "clientId": { "type": "string" },
+        "clientName": { "type": "string" },
+        "total": { "type": "number" },
+        "discount": { "type": "number" },
+        "finalTotal": { "type": "number" },
+        "paymentMethod": { "type": "string" },
+        "paymentStatus": { "type": "string" },
+        "dueDate": { "type": "string", "format": "date-time" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["id", "clientId", "clientName", "total", "finalTotal", "paymentMethod", "paymentStatus", "createdAt"]
+      "required": ["id", "clientId", "clientName", "total", "finalTotal", "createdAt"]
     },
     "OrderItem": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "OrderItem",
+      "description": "Itens individuais de um pedido.",
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string"
-        },
-        "orderId": {
-          "type": "string"
-        },
-        "productId": {
-          "type": "string"
-        },
-        "productName": {
-          "type": "string"
-        },
-        "quantity": {
-          "type": "number"
-        },
-        "unitPrice": {
-          "type": "number"
-        },
-        "subtotal": {
-          "type": "number"
-        }
+        "id": { "type": "string" },
+        "orderId": { "type": "string" },
+        "productId": { "type": "string" },
+        "productName": { "type": "string" },
+        "quantity": { "type": "number" },
+        "unitPrice": { "type": "number" },
+        "subtotal": { "type": "number" }
       },
-      "required": ["id", "orderId", "productId", "productName", "quantity", "unitPrice", "subtotal"]
+      "required": ["id", "orderId", "productId", "quantity", "unitPrice", "subtotal"]
     }
   },
   "auth": {
     "providers": ["password"]
   },
   "firestore": {
-    "structure": [
-      {
-        "path": "/users/{userId}",
-        "definition": {
-          "schema": { "$ref": "#/backend/entities/User" },
-          "description": "Stores admin profile information."
-        }
-      },
-      {
-        "path": "/admins/{adminId}",
-        "definition": {
-          "schema": { "$ref": "#/backend/entities/User" },
-          "description": "Presence signifies admin role."
-        }
-      },
-      {
-        "path": "/clients/{clientId}",
-        "definition": {
-          "schema": { "$ref": "#/backend/entities/Client" },
-          "description": "Customer records."
-        }
-      },
-      {
-        "path": "/products/{productId}",
-        "definition": {
-          "schema": { "$ref": "#/backend/entities/Product" },
-          "description": "Product catalog."
-        }
-      },
-      {
-        "path": "/orders/{orderId}",
-        "definition": {
-          "schema": { "$ref": "#/backend/entities/Order" },
-          "description": "Sales orders."
-        }
-      },
-      {
-        "path": "/order_items/{orderItemId}",
-        "definition": {
-          "schema": { "$ref": "#/backend/entities/OrderItem" },
-          "description": "Individual items in orders."
-        }
-      }
-    ]
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Dados de perfil do administrador."
+    },
+    "/admins/{adminId}": {
+      "schema": "User",
+      "description": "Coleção para controle de permissões admin."
+    },
+    "/clients/{clientId}": {
+      "schema": "Client",
+      "description": "Registro de clientes."
+    },
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Catálogo de produtos."
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Registro de pedidos."
+    },
+    "/order_items/{itemId}": {
+      "schema": "OrderItem",
+      "description": "Itens detalhados das vendas."
+    }
   }
 }

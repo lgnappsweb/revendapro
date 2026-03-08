@@ -1,158 +1,40 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    /**
-     * CORE PHILOSOPHY
-     * This ruleset enforces a strict administrator-only access model for business data, 
-     * while allowing users to manage their own profile information. It utilizes a 
-     * "Database as Authorization Control" (DBAC) pattern to identify admins without 
-     * costly recursive lookups.
-     *
-     * DATA STRUCTURE
-     * - /users/{userId}: Private user profile data.
-     * - /admins/{adminId}: Presence of a document here identifies an authenticated user as an admin.
-     * - /clients, /products, /orders, /order_items: Business-critical collections protected by admin status.
-     *
-     * KEY SECURITY DECISIONS
-     * - Authorization Independence: Admin status is verified by checking the /admins/ collection, 
-     *   allowing rules to be performant and independent of the user's profile document state.
-     * - Strict Path Consistency: For profile and admin data, the document ID must match the 
-     *   authenticated user's UID.
-     * - Prototyping Flexibility: Data types and full schema shapes are not validated to allow 
-     *   for rapid iteration, focusing strictly on "Who" can access "What".
-     */
-
-    // --- HELPER FUNCTIONS ---
-
-    /** @description Checks if the request is from an authenticated user. */
-    function isSignedIn() {
+    function isAuthenticated() {
       return request.auth != null;
     }
-
-    /** @description Checks if the authenticated user's UID matches the provided userId. */
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
-    }
-
-    /** @description Checks if the authenticated user has a record in the admins collection. */
+    
+    // Regra específica para o administrador baseada na existência na coleção admins
     function isAdmin() {
-      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+      return isAuthenticated() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
 
-    /** @description Verifies ownership and document existence for update/delete operations. */
-    function isExistingOwner(userId) {
-      return isOwner(userId) && resource != null;
-    }
-
-    /** @description Verifies admin status and document existence for update/delete operations. */
-    function isExistingAdmin() {
-      return isAdmin() && resource != null;
-    }
-
-    // --- RULES ---
-
-    /**
-     * @description Rules for the user profile collection. Users can only manage their own profile.
-     * @path /users/{userId}
-     * @allow (create) if auth.uid == 'user_123' and document ID is 'user_123'
-     * @deny (read) if auth.uid == 'user_abc' and trying to read /users/user_xyz
-     * @principle Ownership: Restricts access to a user's own data tree.
-     */
     match /users/{userId} {
-      allow get, list: if isOwner(userId);
-      allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
-      allow delete: if isExistingOwner(userId);
+      allow read, write: if isAuthenticated() && request.auth.uid == userId;
     }
-
-    /**
-     * @description A role-indicator collection. Documents are managed externally or manually.
-     * @path /admins/{adminId}
-     * @allow (get) if auth.uid == 'admin_123' to verify their own status.
-     * @deny (write) Any direct client-side write to prevent privilege escalation.
-     * @principle Roles: Uses structural segregation to define global admin roles.
-     */
+    
     match /admins/{adminId} {
-      allow get, list: if isOwner(adminId);
-      allow create, update, delete: if false;
+      allow read: if isAuthenticated() && request.auth.uid == adminId;
+      allow write: if false; // Configurado manualmente ou via backend seguro
     }
 
-    /**
-     * @description Collection for client records. Restricted to authorized administrators.
-     * @path /clients/{clientId}
-     * @allow (create) if user is verified as an admin in the /admins/ collection.
-     * @deny (list) if user is authenticated but does not have an admin record.
-     * @principle Shared Access: Grants full access to all documents within a collection to a specific role.
-     */
     match /clients/{clientId} {
-      allow get, list: if isAdmin();
-      allow create: if isAdmin() && request.resource.data.id == clientId;
-      allow update: if isExistingAdmin() && request.resource.data.id == resource.data.id;
-      allow delete: if isExistingAdmin();
+      allow read, write: if isAdmin();
     }
 
-    /**
-     * @description Collection for product catalog. Restricted to authorized administrators.
-     * @path /products/{productId}
-     * @allow (get) if user is an admin.
-     * @deny (update) if the internal ID field is being modified.
-     * @principle Relational Integrity: Enforces immutability of critical relational fields.
-     */
     match /products/{productId} {
-      allow get, list: if isAdmin();
-      allow create: if isAdmin() && request.resource.data.id == productId;
-      allow update: if isExistingAdmin() && request.resource.data.id == resource.data.id;
-      allow delete: if isExistingAdmin();
+      allow read, write: if isAdmin();
     }
 
-    /**
-     * @description Collection for order summaries. Restricted to authorized administrators.
-     * @path /orders/{orderId}
-     * @allow (list) if user is an admin.
-     * @deny (create) if the request is not from an authenticated admin.
-     * @principle Auditable Logic: Centralizes admin checks in a reusable helper.
-     */
     match /orders/{orderId} {
-      allow get, list: if isAdmin();
-      allow create: if isAdmin() && request.resource.data.id == orderId;
-      allow update: if isExistingAdmin() && request.resource.data.id == resource.data.id;
-      allow delete: if isExistingAdmin();
+      allow read, write: if isAdmin();
     }
 
-    /**
-     * @description Collection for line items within orders. Restricted to authorized administrators.
-     * @path /order_items/{orderItemId}
-     * @allow (create) if user is an admin and provides a consistent ID.
-     * @deny (delete) if the document does not exist.
-     * @principle Robustness: Verifies document existence before state-changing operations.
-     */
-    match /order_items/{orderItemId} {
-      allow get, list: if isAdmin();
-      allow create: if isAdmin() && request.resource.data.id == orderItemId;
-      allow update: if isExistingAdmin() && request.resource.data.id == resource.data.id;
-      allow delete: if isExistingAdmin();
+    match /order_items/{itemId} {
+      allow read, write: if isAdmin();
     }
   }
 }
-
-/**
- * FIREBASE STORAGE RULES (Reference)
- * The IR specified storage rules for product images.
- * 
- * service firebase.storage {
- *   match /b/{bucket}/o {
- *     match /products_images/{allPaths=**} {
- *       // Ideally, this should also check isAdmin() using a cross-service 
- *       // call if possible, but for prototyping:
- *       allow read, write: if request.auth != null;
- *     }
- *   }
- * }
- */
-
-/**
- * DEV NOTE: To initialize the first admin, you must manually create a document 
- * in the 'admins' collection where the Document ID is the user's UID from 
- * Firebase Authentication.
- */
