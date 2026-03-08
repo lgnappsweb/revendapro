@@ -71,7 +71,7 @@ export default function OrdersPage() {
     <LayoutWrapper>
       <div className="flex flex-col gap-8">
         <div className="space-y-2 w-full text-center flex flex-col items-center">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter text-primary text-center whitespace-nowrap overflow-hidden text-ellipsis w-full px-2">
+          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-primary text-center whitespace-nowrap overflow-hidden text-ellipsis w-full px-2">
             Meus Pedidos
           </h1>
           <p className="text-muted-foreground font-medium text-lg text-center">Histórico completo de todas as vendas realizadas.</p>

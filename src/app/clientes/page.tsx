@@ -211,7 +211,7 @@ export default function ClientsPage() {
       <div className="flex flex-col gap-8">
         <div className="flex flex-col gap-6 py-4">
           <div className="space-y-2 w-full text-center flex flex-col items-center">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter text-primary text-center whitespace-nowrap overflow-hidden text-ellipsis w-full px-2">
+            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-primary text-center whitespace-nowrap overflow-hidden text-ellipsis w-full px-2">
               Meus Clientes
             </h1>
             <p className="text-muted-foreground font-medium text-lg text-center">Gerencie sua rede de contatos e vendas.</p>
