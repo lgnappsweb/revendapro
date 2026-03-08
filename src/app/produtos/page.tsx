@@ -28,8 +28,7 @@ import {
   DialogContent, 
   DialogDescription, 
   DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
+  DialogTitle 
 } from "@/components/ui/dialog"
 import {
   DropdownMenu,
@@ -138,8 +137,8 @@ export default function ProductsPage() {
       name: product.name || "",
       brand: product.brand || "Natura",
       category: product.category || "",
-      price: product.price ? product.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : "",
-      cost: product.cost ? product.cost.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : "",
+      price: product.price ? Number(product.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : "",
+      cost: product.cost ? Number(product.cost).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : "",
       code: product.code || "",
       description: product.description || ""
     })
@@ -157,7 +156,7 @@ export default function ProductsPage() {
           description: "O produto foi excluído com sucesso."
         })
       })
-      .catch(async (error) => {
+      .catch(async () => {
         const permissionError = new FirestorePermissionError({
           path: docRef.path,
           operation: 'delete',
@@ -200,7 +199,7 @@ export default function ProductsPage() {
             description: `${formData.name} foi atualizado com sucesso.`
           })
         })
-        .catch(async (error) => {
+        .catch(async () => {
           const permissionError = new FirestorePermissionError({
             path: docRef.path,
             operation: 'update',
@@ -214,7 +213,7 @@ export default function ProductsPage() {
         createdAt: serverTimestamp()
       }
       addDoc(productsRef, newProduct)
-        .catch(async (error) => {
+        .catch(async () => {
           const permissionError = new FirestorePermissionError({
             path: productsRef.path,
             operation: 'create',
@@ -342,7 +341,7 @@ export default function ProductsPage() {
                       className="rounded-xl border-primary/30 h-11 bg-white" 
                     />
                   </div>
-                  <div className="grid gap-2 pb-6">
+                  <div className="grid gap-2">
                     <Label htmlFor="description" className="font-bold text-muted-foreground text-base">Descrição (Opcional)</Label>
                     <Textarea 
                       id="description" 
@@ -458,10 +457,22 @@ export default function ProductsPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="rounded-xl p-2 w-40">
-                          <DropdownMenuItem onClick={() => handleEditProduct(product)} className="rounded-lg font-bold gap-2 cursor-pointer">
+                          <DropdownMenuItem 
+                            onSelect={(e) => {
+                              e.preventDefault();
+                              handleEditProduct(product);
+                            }} 
+                            className="rounded-lg font-bold gap-2 cursor-pointer"
+                          >
                             <Pencil className="h-4 w-4 text-blue-500" /> Editar
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setProductToDelete(product)} className="rounded-lg font-bold gap-2 text-rose-600 cursor-pointer">
+                          <DropdownMenuItem 
+                            onSelect={(e) => {
+                              e.preventDefault();
+                              setProductToDelete(product);
+                            }} 
+                            className="rounded-lg font-bold gap-2 text-rose-600 cursor-pointer"
+                          >
                             <Trash2 className="h-4 w-4" /> Excluir
                           </DropdownMenuItem>
                         </DropdownMenuContent>
