@@ -83,7 +83,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       </div>
       <SidebarInset className="bg-transparent flex-1 w-full overflow-x-hidden">
         <main className="p-2 sm:p-4 md:p-6 lg:p-8 flex justify-center pb-24 md:pb-8 w-full">
-          <div className="w-full max-w-[95vw] md:max-w-6xl relative border-2 border-primary rounded-[2rem] sm:rounded-[3rem] bg-white shadow-sm p-3 sm:p-6 md:p-10 min-h-[calc(100vh-4rem)] flex flex-col gap-6 overflow-hidden">
+          <div className="w-full max-w-[95vw] md:max-w-[1600px] relative border-2 border-primary rounded-[2rem] sm:rounded-[3rem] bg-white shadow-sm p-3 sm:p-6 md:p-10 min-h-[calc(100vh-4rem)] flex flex-col gap-6 overflow-hidden">
             {pathname !== "/" && (
               <div className="flex items-start shrink-0">
                 <Button

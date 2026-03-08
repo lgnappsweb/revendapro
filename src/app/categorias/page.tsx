@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -119,7 +118,6 @@ export default function CategoriesPage() {
     setEditingCategoryId(category.id)
     setFormData({ name: category.name || "" })
     setAccordionValue(undefined)
-    // Pequeno atraso para garantir que o menu feche antes de abrir o diálogo
     setTimeout(() => setIsDialogOpen(true), 150)
   }
 
@@ -196,7 +194,7 @@ export default function CategoriesPage() {
               <p className="text-muted-foreground font-medium">Nenhuma categoria encontrada.</p>
             </div>
           ) : (
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pb-10 w-full">
+            <div className="grid gap-4 grid-cols-1 pb-10 w-full">
               {filteredCategories.map((category) => (
                 <Card key={category.id} className="group overflow-hidden rounded-3xl border-primary/20 bg-white w-full shadow-sm hover:border-primary transition-all">
                   <CardContent className="p-6 flex items-start justify-between gap-4">
@@ -227,7 +225,6 @@ export default function CategoriesPage() {
                             className="font-bold gap-2 text-rose-600 cursor-pointer" 
                             onSelect={(e) => {
                               e.preventDefault();
-                              // Atraso para evitar conflito de foco no fechamento do menu
                               setTimeout(() => setCategoryToDelete(category), 150);
                             }}
                           >
@@ -290,7 +287,7 @@ export default function CategoriesPage() {
                           className="rounded-xl border-primary/20 hover:border-primary hover:bg-primary/5 text-xs font-bold h-10 px-2 justify-start"
                           onClick={() => {
                             setFormData({ ...formData, name: cat });
-                            setAccordionValue(undefined); // Fecha o menu ao clicar
+                            setAccordionValue(undefined); 
                           }}
                         >
                           <Plus className="h-3 w-3 mr-1 shrink-0" />
