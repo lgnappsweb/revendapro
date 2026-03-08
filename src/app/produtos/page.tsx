@@ -21,7 +21,7 @@ import {
   Trash2,
   Sparkles
 } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { 
@@ -89,9 +89,7 @@ export default function ProductsPage() {
     const digits = value.replace(/\D/g, "");
     if (!digits) return "";
     const amount = parseInt(digits, 10) / 100;
-    return amount.toLocaleString("pt-BR", {
-      minimumFractionDigits: 2, maximumFractionDigits: 2,
-    });
+    return amount.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'price' | 'cost') => {
@@ -130,7 +128,7 @@ export default function ProductsPage() {
 
   const handleSaveProduct = () => {
     if (!formData.name || !formData.price || !formData.category) {
-      toast({ title: "Campos obrigatórios (Nome, Preço e Categoria)", variant: "destructive" })
+      toast({ title: "Preencha os campos obrigatórios", variant: "destructive" })
       return
     }
     setIsSaving(true)
@@ -158,13 +156,13 @@ export default function ProductsPage() {
 
   return (
     <LayoutWrapper>
-      <div className="flex flex-col gap-10 pt-12 w-full max-w-full overflow-x-hidden">
-        <div className="flex flex-col gap-8 items-center text-center">
+      <div className="flex flex-col gap-8 w-full max-w-full overflow-x-hidden">
+        <div className="flex flex-col gap-6 items-center text-center">
           <div className="flex flex-col gap-2">
-            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-primary text-center break-words w-full px-2 uppercase">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-primary uppercase text-center">
               Produtos
             </h1>
-            <p className="text-muted-foreground font-medium text-lg text-center">Gestão de estoque e catálogo de produtos.</p>
+            <p className="text-muted-foreground font-medium text-lg">Catálogo e gestão de estoque.</p>
           </div>
           <Button onClick={handleOpenNewProduct} className="w-full max-w-md rounded-2xl font-bold bg-primary hover:bg-primary/90 shadow-lg h-14 text-lg">
             <Plus className="mr-2 h-6 w-6" /> Novo Produto
@@ -176,47 +174,49 @@ export default function ProductsPage() {
             <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
             <Input 
               placeholder="Buscar por nome ou código..." 
-              className="h-12 pl-10 rounded-2xl border border-primary/30 shadow-sm bg-card"
+              className="h-12 pl-10 rounded-2xl border border-primary/30 bg-card"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <Tabs defaultValue="todos" className="w-full md:w-auto" onValueChange={setActiveTab}>
             <TabsList className="h-12 p-1.5 bg-card shadow-sm border border-primary/30 rounded-2xl w-full">
-              <TabsTrigger value="todos" className="flex-1 rounded-xl font-bold transition-all">Todos</TabsTrigger>
-              <TabsTrigger value="natura" className="flex-1 rounded-xl font-bold transition-all">Natura</TabsTrigger>
-              <TabsTrigger value="avon" className="flex-1 rounded-xl font-bold transition-all">Avon</TabsTrigger>
+              <TabsTrigger value="todos" className="flex-1 rounded-xl font-bold">Todos</TabsTrigger>
+              <TabsTrigger value="natura" className="flex-1 rounded-xl font-bold">Natura</TabsTrigger>
+              <TabsTrigger value="avon" className="flex-1 rounded-xl font-bold">Avon</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
 
         <div className="w-full overflow-x-hidden px-1">
           {isLoadingProducts ? (
-            <div className="flex flex-col items-center justify-center py-20"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>
+            <div className="flex justify-center py-20"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>
           ) : filteredProducts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-card rounded-3xl border border-dashed border-primary/30">
+            <div className="flex flex-col items-center justify-center py-20 text-center bg-card rounded-3xl border border-dashed border-primary/30">
               <PackageSearch className="h-16 w-16 text-primary/20 mb-4" />
               <p className="text-muted-foreground font-medium">Nenhum produto encontrado.</p>
             </div>
           ) : (
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pb-10 w-full">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pb-10">
               {filteredProducts.map((product) => (
-                <Card key={product.id} className="group overflow-hidden rounded-3xl border-primary/20 w-full shadow-sm hover:border-primary transition-all">
-                  <CardContent className="p-4 flex flex-col h-full gap-4">
-                    <div className="flex justify-between items-start">
-                      <Badge className={`rounded-lg font-bold py-1 border-none ${product.brand === 'Natura' ? 'bg-[#FF6A13] text-white' : 'bg-[#622D91] text-white'}`}>{product.brand}</Badge>
-                      <Badge variant="secondary" className="bg-pink-50 text-primary font-bold border-none truncate max-w-[100px]">{product.category || "Geral"}</Badge>
-                    </div>
-                    <div className="flex flex-col gap-1 min-w-0">
-                      <h3 className="font-bold text-lg leading-tight truncate group-hover:text-primary transition-colors">{product.name}</h3>
-                      <div className="text-[10px] text-muted-foreground font-bold uppercase truncate">COD: {product.code || "S/ REF"}</div>
+                <Card key={product.id} className="group overflow-hidden rounded-[2rem] border-primary/20 shadow-sm hover:border-primary transition-all">
+                  <CardHeader className="bg-primary/5 border-b p-4">
+                     <div className="flex justify-between items-center gap-2">
+                        <Badge className={`rounded-lg font-bold py-1 border-none ${product.brand === 'Natura' ? 'bg-[#FF6A13]' : 'bg-[#622D91]'}`}>{product.brand}</Badge>
+                        <Badge variant="secondary" className="bg-pink-50 text-primary border-none text-[10px] truncate">{product.category || "Geral"}</Badge>
+                     </div>
+                  </CardHeader>
+                  <CardContent className="p-4 flex flex-col gap-3">
+                    <div className="flex flex-col gap-0.5">
+                      <h3 className="font-bold text-base leading-tight truncate group-hover:text-primary transition-colors">{product.name}</h3>
+                      <div className="text-[10px] text-muted-foreground font-bold uppercase">COD: {product.code || "S/ REF"}</div>
                     </div>
                     <div className="flex items-center justify-between border-t pt-3 border-primary/10">
                       <div className="flex flex-col">
-                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Preço Venda</span>
-                        <span className="text-xl font-black text-foreground">R$ {Number(product.price || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Venda</span>
+                        <span className="text-lg font-black text-foreground">R$ {Number(product.price || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                       </div>
-                      <Button variant="ghost" size="icon" onClick={() => setSelectedProduct(product)} className="rounded-full h-10 w-10 hover:bg-primary/10 group-hover:text-primary"><ChevronRight className="h-6 w-6" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => setSelectedProduct(product)} className="rounded-full h-9 w-9 hover:bg-primary/10 group-hover:text-primary"><ChevronRight className="h-5 w-5" /></Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -240,14 +240,6 @@ export default function ProductsPage() {
                   <DialogTitle className="text-2xl font-black text-center text-primary leading-tight">
                     {selectedProduct.name}
                   </DialogTitle>
-                  <div className="flex items-center justify-center gap-2">
-                    <Badge className={`rounded-lg font-bold ${selectedProduct.brand === 'Natura' ? 'bg-[#FF6A13]' : 'bg-[#622D91]'}`}>
-                      {selectedProduct.brand}
-                    </Badge>
-                    <Badge variant="secondary" className="bg-pink-100 text-primary font-bold">
-                      {selectedProduct.category}
-                    </Badge>
-                  </div>
                 </DialogHeader>
               </div>
 
@@ -262,51 +254,16 @@ export default function ProductsPage() {
                     <span className="text-xl font-black text-emerald-600">R$ {Number(selectedProduct.cost || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                   </div>
                 </div>
-
-                <div className="space-y-4">
-                  <h4 className="font-bold text-muted-foreground flex items-center gap-2">
-                    <Info className="h-4 w-4" /> Informações Técnicas
-                  </h4>
-                  <Separator className="bg-primary/10" />
-                  <div className="grid gap-3">
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-muted-foreground font-medium">Código de Referência:</span>
-                      <span className="font-bold text-foreground">{selectedProduct.code || "Não informado"}</span>
-                    </div>
-                    <div className="flex flex-col gap-2 pt-2">
-                      <span className="text-muted-foreground font-medium text-sm">Descrição:</span>
-                      <div className="bg-card p-4 rounded-xl border border-primary/5 min-h-[80px]">
-                        <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap font-medium">
-                          {selectedProduct.description || "Nenhuma descrição detalhada cadastrada."}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                <div className="bg-card p-4 rounded-xl border border-primary/5 min-h-[80px]">
+                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap font-medium">
+                    {selectedProduct.description || "Sem descrição."}
+                  </p>
                 </div>
               </div>
 
               <div className="p-6 bg-card border-t flex gap-2">
-                 <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="flex-1 h-12 rounded-xl font-bold border-primary text-primary">
-                        Opções
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="rounded-xl w-48">
-                      <DropdownMenuItem className="font-bold gap-2" onSelect={() => handleEditProduct(selectedProduct)}>
-                        <Pencil className="h-4 w-4 text-blue-500" /> Editar Produto
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="font-bold gap-2 text-rose-600" onSelect={() => setProductToDelete(selectedProduct)}>
-                        <Trash2 className="h-4 w-4" /> Excluir Produto
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                 </DropdownMenu>
-                 <Button 
-                   onClick={() => setSelectedProduct(null)} 
-                   className="flex-1 h-12 rounded-xl font-bold primary-gradient shadow-lg"
-                 >
-                   Fechar
-                 </Button>
+                 <Button variant="outline" className="flex-1 h-12 rounded-xl font-bold border-primary text-primary" onClick={() => handleEditProduct(selectedProduct)}>Editar</Button>
+                 <Button onClick={() => setSelectedProduct(null)} className="flex-1 h-12 rounded-xl font-bold primary-gradient shadow-lg">Fechar</Button>
               </div>
             </>
           )}
@@ -326,21 +283,14 @@ export default function ProductsPage() {
           <div className="flex-1 overflow-y-auto px-6 py-6 bg-background">
             <div className="grid gap-6">
               <div className="grid gap-2">
-                <Label className="font-bold text-muted-foreground">Nome do Produto</Label>
-                <Input 
-                  value={formData.name}
-                  onChange={e => setFormData({...formData, name: e.target.value})}
-                  placeholder="Ex: Kaiak Aventura 100ml" 
-                  className="rounded-xl border-primary/30 h-11 bg-card" 
-                />
+                <Label className="font-bold text-muted-foreground">Nome</Label>
+                <Input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="Ex: Kaiak Aventura 100ml" className="rounded-xl border-primary/30 h-11 bg-card" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label className="font-bold text-muted-foreground">Marca</Label>
                   <Select value={formData.brand} onValueChange={v => setFormData({...formData, brand: v})}>
-                    <SelectTrigger className="rounded-xl border-primary/30 h-11 bg-card">
-                      <SelectValue />
-                    </SelectTrigger>
+                    <SelectTrigger className="rounded-xl border-primary/30 h-11 bg-card"><SelectValue /></SelectTrigger>
                     <SelectContent className="rounded-xl">
                       <SelectItem value="Natura">Natura</SelectItem>
                       <SelectItem value="Avon">Avon</SelectItem>
@@ -350,16 +300,9 @@ export default function ProductsPage() {
                 <div className="grid gap-2">
                   <Label className="font-bold text-muted-foreground">Categoria</Label>
                   <Select value={formData.category} onValueChange={v => setFormData({...formData, category: v})}>
-                    <SelectTrigger className="rounded-xl border-primary/30 h-11 bg-card">
-                      <SelectValue placeholder={isLoadingCategories ? "Carregando..." : "Selecione..."} />
-                    </SelectTrigger>
+                    <SelectTrigger className="rounded-xl border-primary/30 h-11 bg-card"><SelectValue placeholder="Selecione..." /></SelectTrigger>
                     <SelectContent className="rounded-xl">
-                      {categories?.map(cat => (
-                        <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
-                      ))}
-                      {(!categories || categories.length === 0) && (
-                        <SelectItem value="none" disabled>Nenhuma categoria cadastrada</SelectItem>
-                      )}
+                      {categories?.map(cat => <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
@@ -367,69 +310,18 @@ export default function ProductsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label className="font-bold text-muted-foreground">Preço Revista</Label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">R$</span>
-                    <Input 
-                      value={formData.price}
-                      onChange={e => handlePriceChange(e, 'price')}
-                      className="rounded-xl border-primary/30 h-11 bg-card pl-10" 
-                    />
-                  </div>
+                  <Input value={formData.price} onChange={e => handlePriceChange(e, 'price')} className="rounded-xl border-primary/30 h-11 bg-card" />
                 </div>
                 <div className="grid gap-2">
                   <Label className="font-bold text-muted-foreground">Preço Custo</Label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">R$</span>
-                    <Input 
-                      value={formData.cost}
-                      onChange={e => handlePriceChange(e, 'cost')}
-                      className="rounded-xl border-primary/30 h-11 bg-card pl-10" 
-                    />
-                  </div>
+                  <Input value={formData.cost} onChange={e => handlePriceChange(e, 'cost')} className="rounded-xl border-primary/30 h-11 bg-card" />
                 </div>
               </div>
-              <div className="grid gap-2">
-                <Label className="font-bold text-muted-foreground">Código / Referência</Label>
-                <Input 
-                  value={formData.code}
-                  onChange={e => setFormData({...formData, code: e.target.value})}
-                  placeholder="Ex: 504030" 
-                  className="rounded-xl border-primary/30 h-11 bg-card" 
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label className="font-bold text-muted-foreground">Descrição</Label>
-                <Textarea 
-                  value={formData.description}
-                  onChange={e => setFormData({...formData, description: e.target.value})}
-                  className="rounded-xl border-primary/30 min-h-[80px] bg-card" 
-                  placeholder="Detalhes sobre o produto..." 
-                />
-              </div>
-              <Button onClick={handleSaveProduct} disabled={isSaving} className="w-full rounded-xl font-bold h-14 text-lg primary-gradient shadow-lg">
-                {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : "Salvar Produto"}
-              </Button>
+              <Button onClick={handleSaveProduct} disabled={isSaving} className="w-full rounded-xl font-bold h-14 text-lg primary-gradient shadow-lg">Salvar</Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
-
-      <AlertDialog open={!!productToDelete} onOpenChange={o => !o && setProductToDelete(null)}>
-        <AlertDialogContent className="rounded-3xl border-primary">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-2xl font-black text-primary">Excluir Produto?</AlertDialogTitle>
-            <AlertDialogDescription className="font-medium text-lg text-muted-foreground">
-              Tem certeza que deseja remover <b className="text-foreground">{productToDelete?.name}</b>?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-xl font-bold">Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm} className="rounded-xl font-bold bg-rose-600 hover:bg-rose-700">
-              Confirmar Exclusão
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </LayoutWrapper>
   )
 }

@@ -53,43 +53,9 @@ import { FirestorePermissionError } from "@/firebase/errors"
 import { useToast } from "@/hooks/use-toast"
 
 const SUGGESTED_CATEGORIES = [
-  "Perfumaria Feminina",
-  "Perfumaria Masculina",
-  "Perfumaria Infantil",
-  "Maquiagem (Rosto)",
-  "Maquiagem (Olhos)",
-  "Maquiagem (Boca)",
-  "Esmaltes e Unhas",
-  "Cuidados com o Rosto",
-  "Hidratação Facial",
-  "Antisinais (Chronos/Renew)",
-  "Cuidados com o Corpo",
-  "Hidratação Corporal",
-  "Óleos Corporais",
-  "Banho e Sabonetes",
-  "Sabonetes em Barra",
-  "Sabonetes Líquidos",
-  "Cabelos (Shampoo/Cond)",
-  "Cabelos (Tratamento)",
-  "Desodorantes",
-  "Proteção Solar",
-  "Infantil (Mamãe e Bebê)",
-  "Linha Masculina / Barba",
-  "Presentes e Kits",
-  "Acessórios e Pincéis",
-  "Necessaires e Bolsas",
-  "Crer para Ver (Papelaria)",
-  "Casa e Estilo",
-  "Suplementos e Bem-estar",
-  "Linha Ekos",
-  "Linha Tododia",
-  "Linha Una",
-  "Linha Faces",
-  "Linha Renew",
-  "Linha Color Trend",
-  "Linha Avon Care",
-  "Cremes para Mãos",
-  "Cuidados para os Pés"
+  "Perfumaria Feminina", "Perfumaria Masculina", "Maquiagem", "Cuidados com o Rosto",
+  "Cuidados com o Corpo", "Cabelos", "Desodorantes", "Proteção Solar", "Infantil",
+  "Linha Masculina", "Presentes e Kits", "Acessórios", "Casa e Estilo"
 ]
 
 export default function CategoriesPage() {
@@ -133,7 +99,7 @@ export default function CategoriesPage() {
 
   const handleSaveCategory = () => {
     if (!formData.name) {
-      toast({ title: "Nome da categoria é obrigatório", variant: "destructive" })
+      toast({ title: "Nome obrigatório", variant: "destructive" })
       return
     }
     setIsSaving(true)
@@ -141,19 +107,9 @@ export default function CategoriesPage() {
 
     if (editingCategoryId) {
       const docRef = doc(db, "categories", editingCategoryId)
-      updateDoc(docRef, categoryData)
-        .then(() => { 
-          toast({ title: "Categoria atualizada!" }); 
-          setIsDialogOpen(false); 
-        })
-        .finally(() => setIsSaving(false))
+      updateDoc(docRef, categoryData).then(() => { toast({ title: "Atualizada!" }); setIsDialogOpen(false); }).finally(() => setIsSaving(false))
     } else {
-      addDoc(collection(db, "categories"), { ...categoryData, createdAt: serverTimestamp() })
-        .then(() => { 
-          toast({ title: "Categoria salva!" }); 
-          setIsDialogOpen(false); 
-        })
-        .finally(() => setIsSaving(false))
+      addDoc(collection(db, "categories"), { ...categoryData, createdAt: serverTimestamp() }).then(() => { toast({ title: "Salva!" }); setIsDialogOpen(false); }).finally(() => setIsSaving(false))
     }
   }
 
@@ -163,13 +119,13 @@ export default function CategoriesPage() {
 
   return (
     <LayoutWrapper>
-      <div className="flex flex-col gap-10 pt-16 w-full max-w-full overflow-x-hidden">
-        <div className="flex flex-col gap-8 items-center text-center">
+      <div className="flex flex-col gap-8 w-full max-w-full overflow-x-hidden">
+        <div className="flex flex-col gap-6 items-center text-center">
           <div className="flex flex-col gap-2">
-            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter text-primary text-center break-words w-full px-2 uppercase">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-primary uppercase text-center">
               Categorias
             </h1>
-            <p className="text-muted-foreground font-medium text-lg text-center">Organize seus produtos por categorias personalizadas.</p>
+            <p className="text-muted-foreground font-medium text-lg">Organize seus produtos por categorias.</p>
           </div>
           <Button onClick={handleOpenNewCategory} className="w-full max-w-md rounded-2xl font-bold bg-primary hover:bg-primary/90 shadow-lg h-14 text-lg">
             <Plus className="mr-2 h-6 w-6" /> Nova Categoria
@@ -180,7 +136,7 @@ export default function CategoriesPage() {
           <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <Input 
             placeholder="Buscar categoria..." 
-            className="h-14 pl-12 rounded-2xl border border-primary/30 shadow-sm bg-card text-base focus-visible:ring-primary/20"
+            className="h-14 pl-12 rounded-2xl border border-primary/30 shadow-sm bg-card"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -188,63 +144,45 @@ export default function CategoriesPage() {
 
         <div className="w-full overflow-x-hidden px-1">
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-20"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>
+            <div className="flex justify-center py-20"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>
           ) : (
             <Card className="rounded-[2.5rem] border-primary/20 overflow-hidden shadow-sm">
               <CardHeader className="bg-primary/5 border-b px-8 py-6">
                 <CardTitle className="text-xl font-black text-primary flex items-center gap-2 uppercase tracking-tight">
                   <Layers className="h-6 w-6" /> Suas Categorias
                 </CardTitle>
-                <CardDescription className="font-medium">Gerencie as categorias para organizar seu estoque.</CardDescription>
+                <CardDescription className="font-medium">Gerencie as categorias de produtos.</CardDescription>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 {filteredCategories.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
                     <Layers className="h-16 w-16 text-primary/20 mb-4" />
                     <p className="text-muted-foreground font-medium">Nenhuma categoria encontrada.</p>
                   </div>
                 ) : (
-                  <div className="grid gap-4 grid-cols-1 pb-10 w-full">
+                  <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                     {filteredCategories.map((category) => (
-                      <Card key={category.id} className="group overflow-hidden rounded-3xl border-primary/20 w-full shadow-sm hover:border-primary transition-all">
-                        <CardContent className="p-6 flex items-start justify-between gap-4">
-                          <div className="flex items-start gap-4 min-w-0 flex-1">
-                            <div className="p-3 bg-primary/5 rounded-2xl text-primary shrink-0">
-                              <Tag className="h-6 w-6" />
-                            </div>
-                            <h3 className="font-bold text-lg leading-tight text-foreground break-words pt-1">{category.name}</h3>
-                          </div>
-                          <div className="shrink-0 pt-1">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="rounded-full h-10 w-10">
-                                  <MoreVertical className="h-5 w-5" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="rounded-xl w-48">
-                                <DropdownMenuItem 
-                                  className="font-bold gap-2 cursor-pointer" 
-                                  onSelect={(e) => {
-                                    e.preventDefault();
-                                    handleEditCategory(category);
-                                  }}
-                                >
-                                  <Pencil className="h-4 w-4 text-blue-500" /> Editar
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  className="font-bold gap-2 text-rose-600 cursor-pointer" 
-                                  onSelect={(e) => {
-                                    e.preventDefault();
-                                    setTimeout(() => setCategoryToDelete(category), 150);
-                                  }}
-                                >
-                                  <Trash2 className="h-4 w-4" /> Excluir
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        </CardContent>
-                      </Card>
+                      <div key={category.id} className="p-4 rounded-2xl border border-primary/10 bg-card flex items-center justify-between group hover:border-primary transition-all">
+                        <div className="flex items-center gap-3">
+                          <Tag className="h-5 w-5 text-primary" />
+                          <span className="font-bold text-foreground truncate">{category.name}</span>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="rounded-xl">
+                            <DropdownMenuItem className="font-bold gap-2" onSelect={() => handleEditCategory(category)}>
+                              <Pencil className="h-4 w-4 text-blue-500" /> Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="font-bold gap-2 text-rose-600" onSelect={() => setCategoryToDelete(category)}>
+                              <Trash2 className="h-4 w-4" /> Excluir
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     ))}
                   </div>
                 )}
@@ -267,45 +205,36 @@ export default function CategoriesPage() {
           <div className="flex-1 overflow-y-auto px-6 py-8 bg-background">
             <div className="grid gap-6">
               <div className="grid gap-2">
-                <Label className="font-bold text-muted-foreground ml-1">Nome da Categoria</Label>
+                <Label className="font-bold text-muted-foreground">Nome da Categoria</Label>
                 <Input 
                   value={formData.name}
                   onChange={e => setFormData({...formData, name: e.target.value})}
                   placeholder="Ex: Perfumaria, Maquiagem..." 
-                  className="rounded-xl border-primary/30 h-12 bg-card text-lg font-medium" 
+                  className="rounded-xl border-primary/30 h-12 bg-card" 
                 />
               </div>
 
-              <Accordion 
-                type="single" 
-                collapsible 
-                value={accordionValue} 
-                onValueChange={(val) => setAccordionValue(val)} 
-                className="w-full"
-              >
+              <Accordion type="single" collapsible value={accordionValue} onValueChange={setAccordionValue} className="w-full">
                 <AccordionItem value="suggestions" className="border-none">
-                  <AccordionTrigger className="hover:no-underline py-2 px-1 rounded-xl hover:bg-primary/5 transition-all group">
+                  <AccordionTrigger className="hover:no-underline py-2 px-1 rounded-xl hover:bg-primary/5 transition-all">
                     <div className="flex items-center gap-2 text-primary font-bold">
                       <Sparkles className="h-4 w-4" />
-                      <span className="text-sm">Sugestões de Categorias</span>
+                      <span className="text-sm">Sugestões</span>
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="pt-2">
-                    <div className="grid grid-cols-2 gap-2 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
+                    <div className="grid grid-cols-2 gap-2">
                       {SUGGESTED_CATEGORIES.map(cat => (
                         <Button 
                           key={cat}
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="rounded-xl border-primary/20 hover:border-primary hover:bg-primary/5 text-xs font-bold h-10 px-2 justify-start"
-                          onClick={() => {
-                            setFormData({ ...formData, name: cat });
-                            setAccordionValue(""); 
-                          }}
+                          className="rounded-xl border-primary/20 text-xs font-bold h-10 px-2 justify-start"
+                          onClick={() => { setFormData({ ...formData, name: cat }); setAccordionValue(""); }}
                         >
-                          <Plus className="h-3 w-3 mr-1 shrink-0" />
-                          <span className="text-left break-words line-clamp-2">{cat}</span>
+                          <Plus className="h-3 w-3 mr-1" />
+                          <span className="truncate">{cat}</span>
                         </Button>
                       ))}
                     </div>
@@ -313,8 +242,8 @@ export default function CategoriesPage() {
                 </AccordionItem>
               </Accordion>
 
-              <Button onClick={handleSaveCategory} disabled={isSaving} className="w-full rounded-xl font-bold h-14 text-lg primary-gradient shadow-lg mt-2">
-                {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : "Salvar Categoria"}
+              <Button onClick={handleSaveCategory} disabled={isSaving} className="w-full rounded-xl font-bold h-14 text-lg primary-gradient shadow-lg">
+                {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : "Salvar"}
               </Button>
             </div>
           </div>
@@ -324,15 +253,15 @@ export default function CategoriesPage() {
       <AlertDialog open={!!categoryToDelete} onOpenChange={o => !o && setCategoryToDelete(null)}>
         <AlertDialogContent className="rounded-3xl border-primary">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-2xl font-black text-primary">Excluir Categoria?</AlertDialogTitle>
-            <AlertDialogDescription className="font-medium text-lg text-muted-foreground">
-              Tem certeza que deseja remover <b className="text-foreground">{categoryToDelete?.name}</b>?
+            <AlertDialogTitle className="text-2xl font-black text-primary">Excluir?</AlertDialogTitle>
+            <AlertDialogDescription className="font-medium text-muted-foreground">
+              Deseja remover <b className="text-foreground">{categoryToDelete?.name}</b>?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="rounded-xl font-bold">Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm} className="rounded-xl font-bold bg-rose-600 hover:bg-rose-700">
-              Confirmar Exclusão
+            <AlertDialogAction onClick={handleDeleteConfirm} className="rounded-xl font-bold bg-rose-600">
+              Confirmar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

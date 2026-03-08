@@ -53,7 +53,6 @@ export default function Dashboard() {
   const totalPending = allOrders?.filter(o => o.paymentStatus === 'Pendente').reduce((acc, o) => acc + (o.finalTotal || 0), 0) || 0
   const clientsCount = clients?.length || 0
 
-  // Cálculo de dados reais para os Mais Vendidos
   const topProducts = useMemo(() => {
     if (!allOrders) return [];
     const stats: Record<string, { name: string; count: number; value: number }> = {};
@@ -115,14 +114,14 @@ export default function Dashboard() {
 
   return (
     <LayoutWrapper>
-      <div className="flex flex-col gap-6 pt-4 w-full max-w-full overflow-x-hidden">
-        <div className="flex flex-col gap-8 items-center text-center">
+      <div className="flex flex-col gap-6 w-full max-w-full overflow-x-hidden">
+        <div className="flex flex-col gap-6 items-center text-center">
           <div className="flex flex-col items-center gap-4">
-            <div className="inline-flex h-20 w-20 items-center justify-center rounded-[2rem] primary-gradient text-white shadow-xl animate-in zoom-in-95 duration-500">
-              <Sparkles className="h-12 w-12" />
+            <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl primary-gradient text-white shadow-xl animate-in zoom-in-95 duration-500">
+              <Sparkles className="h-10 w-10" />
             </div>
             <div className="flex flex-col gap-2">
-              <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tighter text-primary">RevendaPro</h1>
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-primary uppercase text-center">RevendaPro</h1>
               <p className="text-muted-foreground font-bold text-lg">Resumo da sua revenda hoje.</p>
             </div>
           </div>
@@ -152,8 +151,8 @@ export default function Dashboard() {
                     )}
                   </div>
                   <div className="space-y-1">
-                    <p className="text-xs font-black text-muted-foreground uppercase tracking-widest">{stat.title}</p>
-                    <h3 className="text-2xl font-black">{stat.value}</h3>
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{stat.title}</p>
+                    <h3 className="text-xl font-black">{stat.value}</h3>
                     <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-tight">{stat.change}</p>
                   </div>
                 </CardContent>
@@ -273,7 +272,7 @@ export default function Dashboard() {
               <CardContent className="space-y-5 p-8">
                 {topProducts.length === 0 ? (
                   <div className="text-center py-4">
-                    <p className="text-xs text-muted-foreground font-bold uppercase">Aguardando vendas...</p>
+                    <p className="text-[10px] text-muted-foreground font-bold uppercase">Aguardando vendas...</p>
                   </div>
                 ) : (
                   topProducts.map((item, i) => (
@@ -294,7 +293,7 @@ export default function Dashboard() {
                     </div>
                   ))
                 )}
-                <Button variant="outline" className="w-full rounded-2xl border-dashed font-black uppercase text-xs mt-2 hover:bg-primary/5 hover:text-primary hover:border-primary h-12" asChild>
+                <Button variant="outline" className="w-full rounded-2xl border-dashed font-black uppercase text-[10px] mt-2 hover:bg-primary/5 hover:text-primary hover:border-primary h-12" asChild>
                   <Link href="/pedidos">Ver Histórico</Link>
                 </Button>
               </CardContent>
