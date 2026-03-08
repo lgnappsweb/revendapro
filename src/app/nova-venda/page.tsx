@@ -60,7 +60,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Tabs, TabsList, TabsTrigger } from "@/tabs"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 interface CartItem {
   id: string
@@ -248,7 +248,7 @@ export default function NewSalePage() {
                     {items.map(item => (
                       <div key={item.id} className="p-4 bg-card rounded-2xl border border-primary/10 flex flex-col gap-4">
                         <div className="flex justify-between items-start gap-2">
-                          <div className="flex flex-col min-w-0">
+                          <div className="flex flex-col min-w-0 flex-1">
                             <span className="font-bold text-lg truncate leading-tight">{item.name}</span>
                             <div className="flex items-center gap-2 mt-1">
                                <button 
