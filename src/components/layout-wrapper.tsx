@@ -61,17 +61,19 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       </div>
       <SidebarInset className="bg-transparent">
         <main className="p-4 md:p-6 lg:p-8 flex justify-center pb-24 md:pb-8">
-          <div className="w-full max-w-7xl">
+          <div className="w-full max-w-7xl relative">
             {pathname !== "/" && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push("/")}
-                className="mb-6 rounded-xl border-primary text-primary hover:bg-primary/5 font-bold h-10 px-4"
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Voltar ao Início
-              </Button>
+              <div className="md:h-16 mb-6">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => router.push("/")}
+                  className="fixed top-6 left-4 md:left-[18rem] z-50 rounded-xl border-primary text-primary bg-white/80 backdrop-blur-md hover:bg-primary/5 font-bold h-10 px-4 shadow-sm"
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Voltar ao Início
+                </Button>
+              </div>
             )}
             {children}
           </div>
