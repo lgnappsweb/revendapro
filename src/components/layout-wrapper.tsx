@@ -148,7 +148,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       </div>
       <SidebarInset className="relative flex-1 w-full flex flex-col h-svh max-h-svh overflow-hidden bg-transparent max-w-full">
         {pathname !== "/" && (
-          <div className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20 pointer-events-none">
+          <div className="absolute top-8 left-4 sm:top-10 sm:left-6 z-20 pointer-events-none">
             <Button
               variant="outline"
               size="sm"
@@ -163,7 +163,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
 
         <div className="flex-1 overflow-y-auto w-full pb-24 md:pb-0 scroll-smooth max-w-full overflow-x-hidden min-h-0">
           <div className="w-full relative border-l-2 border-primary/20 dark:border-primary/40 bg-card dark:bg-card min-h-full max-w-full overflow-x-hidden">
-            <div className={cn("w-full p-4 sm:p-8 md:p-12 max-w-full overflow-x-hidden pt-24 sm:pt-28")}>
+            <div className={cn("w-full p-4 sm:p-8 md:p-12 max-w-full overflow-x-hidden pt-28 sm:pt-36")}>
               {children}
             </div>
           </div>
